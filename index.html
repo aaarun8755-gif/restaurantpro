@@ -1665,44 +1665,41 @@ setInterval(async function() {
   }, 150);
 })();
 </script>
+
+
 <script id="rpDirectKotBridge">
 (function(){
-  document.addEventListener('click', function(e) {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    const label = (btn.innerText || btn.textContent || '').toLowerCase();
-    if (label.includes('generate bill') || label.includes('punch') || label.includes('kot') || label.includes('place order')) {
-      setTimeout(() => {
-        try {
-          // LocalStorage ki sabhi keys se latest bill/order nikalkar server /api/orders par bhejein
-          let latestItems = [], outlet = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet', table = 'POS-Counter';
-          for (let i = 0; i < localStorage.length; i++) {
-            const val = localStorage.getItem(localStorage.key(i));
-            if (val && val.includes('"items"') && val.includes('"qty"')) {
-              const parsed = JSON.parse(val);
-              const list = Array.isArray(parsed) ? parsed : (parsed.bills || parsed.orders || []);
-              if (Array.isArray(list) && list.length) {
-                const last = list[list.length - 1] || list;
-                if (last && Array.isArray(last.items) && last.items.length) {
-                  latestItems = last.items;
-                  outlet = last.outlet || outlet;
-                  table = last.table || last.tableNo || table;
-                  break;
-                }
-              }
-            }
-          }
-          if (latestItems.length) {
-            fetch('/api/orders', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ outlet, table, orderType: 'Dine-In', customerName: 'POS Guest', items: latestItems, total: 0, paymentMode: 'Cash' })
-            }).catch(()=>{});
-          }
-        } catch(_) {}
-      }, 300);
-    }
-  }, true);
+  window._rpSentHashes = window._rpSentHashes || {};
+  const _origSetItem = localStorage.setItem;
+  localStorage.setItem = function(key, val) {
+    _origSetItem.apply(this, arguments);
+    try {
+      if (!val || typeof val !== 'string' || !val.includes('"items"')) return;
+      const data = JSON.parse(val);
+      const bills = Array.isArray(data) ? data : (data.bills || data.orders || data.kots || []);
+      if (!Array.isArray(bills) || !bills.length) return;
+      // Check both first and last item in case newest is at index 0 or end
+      [bills, bills[bills.length - 1]].forEach(b => {
+        if (!b || !Array.isArray(b.items) || !b.items.length) return;
+        const hash = String(b.id || b.billNo || '') + '_' + b.items.length + '_' + (b.total || 0);
+        if (window._rpSentHashes[hash]) return;
+        window._rpSentHashes[hash] = true;
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            outlet: b.outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
+            table: b.table || b.tableNo || 'POS-Counter',
+            orderType: b.orderType || 'Dine-In',
+            customerName: b.customerName || 'Walk-in',
+            items: b.items,
+            total: b.total || 0,
+            paymentMode: b.paymentMode || 'Cash'
+          })
+        }).catch(()=>{});
+      });
+    } catch(_) {}
+  };
 })();
 </script>
 </body>
