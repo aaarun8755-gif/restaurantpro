@@ -1650,66 +1650,54 @@ setInterval(async function() {
   } catch(_) {}
 }, 1500);
 </script>
+
+
+
+
+
+
+
 <script id="rpMasterLiveFix">
 (function(){
-  // 1. Faltu KDS screen ko turant band karein aur asli /kds.html par bhejein
+  // 1. Faltu KDS popup ko rokein aur QR links ko live Render domain par set karein
   setInterval(() => {
     if (document.body && document.body.innerText.includes('POS bills and generated KOTs appear here for kitchen processing')) {
       window.location.replace('/kds.html');
     }
-    // 2. Scan QR aur Captain ke sabhi link ko current Render URL par fix karein
     document.querySelectorAll('a[href*="scan-qr"], a[href*="captain"], input[value*="trycloudflare"], input[value*="127.0.0.1"]').forEach(el => {
       if (el.tagName === 'A' && el.href) el.href = el.href.replace(/https?:\/\/[^/]+/, window.location.origin);
       if (el.tagName === 'INPUT' && el.value) el.value = el.value.replace(/https?:\/\/[^/]+/, window.location.origin);
     });
-  }, 150);
-})();
-</script>
+  }, 200);
 
-
-
-
-<script id="rpDirectKotBridge">
-(function(){
-  window._rpSentKots = JSON.parse(localStorage.getItem('_rpSentKots') || '{}');
-  function pushToKotServer(items, table, outlet, total, mode) {
-    if (!Array.isArray(items) || !items.length) return;
-    const sig = items.map(i => (i.name||i.itemName) + 'x' + (i.qty||1)).join('|') + '_' + total + '_' + Math.floor(Date.now()/10000);
-    if (window._rpSentKots[sig]) return;
-    window._rpSentKots[sig] = true;
-    localStorage.setItem('_rpSentKots', JSON.stringify(window._rpSentKots));
-    fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        outlet: outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
-        table: table || 'POS-Counter',
-        orderType: 'Dine-In',
-        customerName: 'POS Guest',
-        items: items.map(i => ({ name: i.name || i.itemName || 'Item', qty: Number(i.qty || i.quantity || 1) })),
-        total: Number(total || 0),
-        paymentMode: mode || 'Cash'
-      })
-    }).catch(()=>{});
-  }
-
+  // 2. Jab bhi rpBills mein naya bill aaye, turant POST /api/orders par bhejein taaki KDS par dikhe
+  let lastCount = -1;
   setInterval(() => {
     try {
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        if (!k || k === '_rpSentKots') continue;
-        const raw = localStorage.getItem(k);
-        if (!raw || !raw.includes('"items"')) continue;
-        const parsed = JSON.parse(raw);
-        const arr = Array.isArray(parsed) ? parsed : (parsed.bills || parsed.orders || []);
-        if (!Array.isArray(arr) || !arr.length) continue;
-        const newest = arr;
-        if (newest && Array.isArray(newest.items) && newest.items.length) {
-          pushToKotServer(newest.items, newest.table || newest.tableNo, newest.outlet, newest.total || newest.grandTotal, newest.paymentMode);
+      const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
+      if (!Array.isArray(bills)) return;
+      if (lastCount === -1) { lastCount = bills.length; return; }
+      if (bills.length > lastCount) {
+        lastCount = bills.length;
+        const b = bills;
+        if (b && Array.isArray(b.items) && b.items.length) {
+          fetch('/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              outlet: b.outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
+              table: b.table || b.tableNo || 'POS-Counter',
+              orderType: b.orderType || 'Dine-In',
+              customerName: b.customerName || 'Walk-in',
+              items: b.items.map(i => ({ name: i.name || i.itemName || 'Item', qty: Number(i.qty || i.quantity || 1) })),
+              total: Number(b.total || b.grandTotal || 0),
+              paymentMode: b.paymentMode || 'Cash'
+            })
+          }).catch(()=>{});
         }
       }
     } catch(_) {}
-  }, 1500);
+  }, 800);
 })();
 </script>
 </body>
