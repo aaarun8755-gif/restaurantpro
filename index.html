@@ -1716,5 +1716,35 @@ setInterval(async function() {
   };
 })();
 </script>
+<script id="rpMainDashQrNotify">
+(function(){
+  const bar = document.createElement('div');
+  bar.id = 'mainDashQrBar';
+  bar.style.cssText = 'display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:99999;background:#fef3c7;border:2px solid #f59e0b;box-shadow:0 10px 25px rgba(0,0,0,.15);padding:10px 16px;border-radius:12px;font-family:Inter,Arial,sans-serif;font-size:13px;max-width:92vw';
+  document.body.appendChild(bar);
+  async function pollMainQr() {
+    try {
+      const res = await fetch('/api/orders');
+      if (!res.ok) return;
+      const orders = await res.json();
+      const selOut = localStorage.getItem('rpSelectedOutlet') || '';
+      const pend = orders.filter(o => (o.source === 'QR' || o.status === 'Pending') && o.status !== 'Accepted' && o.status !== 'Completed' && o.status !== 'Cancelled' && (!selOut || selOut === 'Head Office' || o.outlet === selOut));
+      if (!pend.length) { bar.style.display = 'none'; return; }
+      bar.style.display = 'block';
+      bar.innerHTML = '<strong style="color:#92400e">?? New QR Table Order Notification (' + pend.length + '):</strong> ' +
+        pend.map(o => '<span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #fcd34d;padding:4px 10px;border-radius:8px;margin:3px"><b>' + (o.tableName||'Table') + '</b> (' + (o.outlet||'') + ' ? ?' + (o.total||0) + ') <button onclick="approveMainQr(\'' + o.id + '\')" style="background:#0f766e;color:#fff;border:0;border-radius:6px;padding:4px 9px;cursor:pointer;font-weight:700">? Approve ? KDS &amp; Sale</button></span>').join('');
+    } catch(_) {}
+  }
+  window.approveMainQr = async function(id) {
+    const r = await fetch('/api/orders/' + id + '/approve-qr', { method: 'POST' });
+    if (r.ok) {
+      const data = await r.json(); const o = data.order;
+      if (o) { const bills = JSON.parse(localStorage.getItem('rpBills') || '[]'); bills.unshift({ billNo: 'QR-' + Date.now(), date: new Date().toISOString(), outlet: o.outlet, table: o.tableName, items: o.items, total: o.total, paymentMode: o.paymentMode || 'Cash', status: 'Paid' }); localStorage.setItem('rpBills', JSON.stringify(bills)); }
+      pollMainQr(); alert('? QR Order Approved! Sent to KDS & Added to Sales.');
+    }
+  };
+  setInterval(pollMainQr, 3000);
+})();
+</script>
 </body>
 </html>
