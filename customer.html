@@ -29,8 +29,10 @@ input,select,textarea{width:100%;padding:9px 11px;border:1px solid var(--line);b
   </div>
   <div class="card" id="menuList">Loading menu...</div>
   <div class="card">
-    <label style="font-size:12.5px;font-weight:700">Your Name (Optional)</label>
-    <input id="custName" placeholder="Enter your name">
+    <label style="font-size:12.5px;font-weight:700">Customer Name <span style="color:#dc2626">*</span></label>
+    <input id="custName" required placeholder="Enter your full name (Required)">
+    <label style="font-size:12.5px;font-weight:700;display:block;margin-top:10px">Mobile Number <span style="color:#dc2626">*</span></label>
+    <input id="custPhone" type="tel" maxlength="10" required placeholder="Enter 10-digit mobile number (Required)">
     <label style="font-size:12.5px;font-weight:700;display:block;margin-top:10px">Special Cooking Instructions</label>
     <textarea id="custNote" rows="2" placeholder="e.g. Less spicy, no onion..."></textarea>
     <label style="font-size:12.5px;font-weight:700;display:block;margin-top:10px">Payment Option</label>
@@ -78,11 +80,13 @@ function upd(id, d) { cart[id] = Math.max(0, (cart[id]||0) + d); if(!cart[id]) d
 async function placeOrder() {
   const items = Object.keys(cart).map(id => { const m = menu.find(x=>String(x.id)===String(id)); return m ? { itemId: m.id, name: m.name, qty: cart[id], price: m.price } : null; }).filter(Boolean);
   if (!items.length) return alert('Kripya pehle koi item add karein.');
+  if (!custName.value.trim()) return alert('Kripya apna Naam (Customer Name) bharein.');
+  if (!/^[0-9]{10}$/.test(custPhone.value.trim())) return alert('Kripya 10-digit Mobile Number bharein.');
   const total = items.reduce((s,i)=>s + i.price*i.qty, 0) * 1.05;
   const res = await fetch('/api/orders', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ source: 'QR', tableId, tableName, outlet: outletName, customerName: custName.value || ('Table ' + tableName), customerNote: custNote.value, paymentMode: payMode.value, items, total: Number(total.toFixed(2)) })
+    body: JSON.stringify({ source: 'QR', tableId, tableName, outlet: outletName, customerName: custName.value.trim(), customerPhone: custPhone.value.trim(), customerNote: custNote.value, paymentMode: payMode.value, items, total: Number(total.toFixed(2)) })
   });
   if (res.ok) { cart = {}; renderMenu(); alert('? Order Received! Sent to POS Counter for Approval.'); }
   else alert('Order failed, please try again.');

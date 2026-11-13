@@ -168,6 +168,16 @@ app.patch('/api/orders/:id', (req, res) => {
     res.json({ ok: true, order: o });
   });
   
+
+  app.post('/api/orders/:id/reject-qr', (req, res) => {
+    const o = db.orders.find(x => x.id === req.params.id);
+    if (!o) return res.status(404).json({ error: 'Order not found' });
+    o.status = 'Cancelled';
+    persist();
+    io.emit('orders:changed', o);
+    res.json({ ok: true });
+  });
+  
 app.get('/api/kot', (req, res) => res.json(byOutlet(db.kot, String(req.query.outlet || '').trim())));
 app.patch('/api/kot/:id', (req, res) => {
   const k = db.kot.find(x => x.id === req.params.id); if (!k) return res.status(404).end();
