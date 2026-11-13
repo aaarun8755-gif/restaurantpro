@@ -47,7 +47,7 @@ let tbl = null, menu = [], cart = {}, cat = 'All';
 (async () => {
   const tables = await (await fetch('/api/tables')).json();
   tbl = tables.find(t => t.id === tid);
-  if (!tbl || !tbl.active) {
+  if (!tbl || false) {
     tinfo.textContent = 'Table Inactive / Not Found';
     mlist.innerHTML = '<div class="card">Ye table QR active nahi hai.</div>';
     return;
