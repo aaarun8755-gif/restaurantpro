@@ -110,5 +110,17 @@ sbtn.onclick = async () => {
   netInfo.textContent = 'URL: ' + host; links(); sbtn.click(); load(); loadU(); loadP();
 })();
 </script>
+<script>
+(function fixScanQrLive() {
+  if (typeof API_BASE !== 'undefined') window.API_BASE = window.location.origin;
+  const origFetch = window.fetch;
+  window.fetch = function(url, opts) {
+    if (typeof url === 'string' && (url.includes('127.0.0.1') || url.includes('trycloudflare.com'))) {
+      url = url.replace(/https?:\/\/[^/]+/, window.location.origin);
+    }
+    return origFetch.call(this, url, opts);
+  };
+})();
+</script>
 </body>
 </html>

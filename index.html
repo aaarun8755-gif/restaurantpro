@@ -1623,7 +1623,8 @@ document.addEventListener('click', function(e) {
   }
 }, true);
 
-setInterval(function() {
+let lastSnap = '';
+setInterval(async function() {
   const hideItems = ['Live Orders', 'Online Orders', 'Kitchen (KOT)'];
   document.querySelectorAll('aside a, aside button, aside li, nav a, nav button, nav li, div').forEach(el => {
     const txt = (el.innerText || el.textContent || '').trim();
@@ -1634,6 +1635,20 @@ setInterval(function() {
   const isMainDash = document.body.innerText.includes('Sales performance') && document.body.innerText.includes('Quick actions');
   const rCard = document.getElementById('rpMainRatingCard');
   if (rCard) rCard.style.display = isMainDash ? 'block' : 'none';
-}, 300);
-</script>
 
+  document.querySelectorAll('a[href*="scan-qr"], input[value*="trycloudflare"], input[value*="127.0.0.1"]').forEach(el => {
+    if (el.tagName === 'A' && el.href) el.href = el.href.replace(/https?:\/\/[^/]+/, window.location.origin);
+    if (el.tagName === 'INPUT' && el.value) el.value = el.value.replace(/https?:\/\/[^/]+/, window.location.origin);
+  });
+
+  try {
+    const raw = localStorage.getItem('rpState') || localStorage.getItem('restaurantProState') || '';
+    if (raw && raw !== lastSnap) {
+      lastSnap = raw;
+      await fetch('/api/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: raw }).catch(()=>{});
+    }
+  } catch(_) {}
+}, 1500);
+</script>
+</body>
+</html>
