@@ -117,7 +117,7 @@ app.post('/api/orders', (req, res) => {
   const b = req.body || {};
   const isDirect = ['Waiter', 'Captain', 'Manager', 'POS'].includes(b.source);
   const table = b.tableId ? db.tables.find(t => t.id === b.tableId) : null;
-  if (!isDirect && (!table || !table.active)) return res.status(400).json({ error: 'Table inactive' });
+  if (!isDirect && !table) return res.status(400).json({ error: 'Table inactive' });
   const items = (b.items || []).map(i => ({ itemId: String(i.itemId), name: String(i.name), qty: Math.max(1, Number(i.qty) || 1), price: Number(i.price) || 0 }));
   if (!items.length) return res.status(400).json({ error: 'Empty cart' });
   const subtotal = items.reduce((s, i) => s + i.qty * i.price, 0);
