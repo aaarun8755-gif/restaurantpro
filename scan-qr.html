@@ -82,7 +82,7 @@ function qStr() { return '?outlet=' + encodeURIComponent(outlet.value); }
 async function loadAll() {
   const tables = await (await fetch('/api/tables' + qStr())).json();
   qgrid.innerHTML = tables.map(t => {
-    const custUrl = `${ORIGIN}/customer.html?table=${encodeURIComponent(t.name)}&outlet=${encodeURIComponent(t.outlet)}`;
+    const custUrl = `${ORIGIN}/customer.html?tableId=${encodeURIComponent(t.id)}&table=${encodeURIComponent(t.name)}&outlet=${encodeURIComponent(t.outlet)}`;
     const qrImg = `/api/qr-image?text=${encodeURIComponent(custUrl)}`;
     return `<div class="qcard">
       <strong style="font-size:15px">${t.name}</strong><br><small style="color:var(--muted)">${t.outlet}</small>

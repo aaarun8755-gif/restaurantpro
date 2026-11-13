@@ -1659,8 +1659,11 @@ setInterval(async function() {
 
 
 
+
+
 <script id="rpMasterLiveFix">
 (function(){
+  // A. Faltu KDS popup ko rokein aur QR/Captain links ko live Render domain par rakhein
   setInterval(() => {
     if (document.body && document.body.innerText.includes('POS bills and generated KOTs appear here for kitchen processing')) {
       window.location.replace('/kds.html');
@@ -1671,33 +1674,46 @@ setInterval(async function() {
     });
   }, 200);
 
-  let lastCount = -1;
-  setInterval(() => {
-    try {
-      const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
-      if (!Array.isArray(bills)) return;
-      if (lastCount === -1) { lastCount = bills.length; return; }
-      if (bills.length > lastCount) {
-        lastCount = bills.length;
-        const b = bills.at(0);
-        if (b && Array.isArray(b.items) && b.items.length) {
-          fetch('/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              outlet: b.outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
-              table: b.table || b.tableNo || 'POS-Counter',
-              orderType: b.orderType || 'Dine-In',
-              customerName: b.customerName || 'Walk-in',
-              items: b.items.map(i => ({ name: i.name || i.itemName || 'Item', qty: Number(i.qty || i.quantity || 1) })),
-              total: Number(b.total || b.grandTotal || 0),
-              paymentMode: b.paymentMode || 'Cash'
-            })
-          }).catch(()=>{});
-        }
-      }
-    } catch(_) {}
-  }, 600);
+  // B. Har rpBills update (chahe kisi bhi outlet prefix ke saath ho) ko source:'POS' ke saath /api/orders par bhejein
+  window._rpSentBillNos = JSON.parse(localStorage.getItem('_rpSentBillNos') || '{}');
+  function forwardBillsArray(arr) {
+    if (!Array.isArray(arr) || !arr.length) return;
+    [arr[0], arr[arr.length - 1]].forEach(b => {
+      if (!b || !Array.isArray(b.items) || !b.items.length) return;
+      const keyId = String(b.billNo || b.id || b.createdAt || '') + '_' + b.items.length + '_' + (b.total || b.grandTotal || 0);
+      if (!keyId || window._rpSentBillNos[keyId]) return;
+      window._rpSentBillNos[keyId] = true;
+      localStorage.setItem('_rpSentBillNos', JSON.stringify(window._rpSentBillNos));
+
+      fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'POS',
+          outlet: b.outlet || localStorage.getItem('rpSelectedOutlet') || 'RestaurantPro - Uttar Pradesh',
+          tableName: b.table || b.tableNo || 'POS Counter',
+          orderType: b.orderType || 'Dine-In',
+          customerName: b.customerName || 'Walk-in',
+          items: b.items.map(i => ({
+            itemId: String(i.id || i.itemId || i.name || 'item'),
+            name: String(i.name || i.itemName || 'Item'),
+            qty: Math.max(1, Number(i.qty || i.quantity || 1)),
+            price: Number(i.price || i.rate || 0)
+          })),
+          total: Number(b.total || b.grandTotal || b.amount || 0),
+          paymentMode: b.paymentMode || 'Cash'
+        })
+      }).catch(()=>{});
+    });
+  }
+
+  const origSet = Storage.prototype.setItem;
+  Storage.prototype.setItem = function(k, v) {
+    origSet.apply(this, arguments);
+    if (String(k).includes('rpBills') && v) {
+      try { forwardBillsArray(JSON.parse(v)); } catch(_) {}
+    }
+  };
 })();
 </script>
 </body>
