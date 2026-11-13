@@ -131,5 +131,17 @@ sbtn.onclick = async () => {
   };
 })();
 </script>
+<script id="rpScanLiveOrigin">
+  setInterval(() => {
+    document.querySelectorAll('a[href*="customer.html"], input[value*="customer.html"]').forEach(el => {
+      if (el.tagName === 'A' && el.href && !el.href.startsWith(window.location.origin)) {
+        el.href = el.href.replace(/https?:\/\/[^/]+/, window.location.origin);
+      }
+      if (el.tagName === 'INPUT' && el.value && !el.value.startsWith(window.location.origin)) {
+        el.value = el.value.replace(/https?:\/\/[^/]+/, window.location.origin);
+      }
+    });
+  }, 500);
+  </script>
 </body>
 </html>

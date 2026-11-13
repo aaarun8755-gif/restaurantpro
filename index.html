@@ -1667,38 +1667,44 @@ setInterval(async function() {
 </script>
 
 
+
 <script id="rpDirectKotBridge">
 (function(){
-  window._rpSentHashes = window._rpSentHashes || {};
+  window._rpSentHashes = JSON.parse(localStorage.getItem('_rpSentHashes') || '{}');
+  function sendBillToKot(b) {
+    if (!b || !Array.isArray(b.items) || !b.items.length) return;
+    const hash = String(b.billNo || b.id || '') + '_' + b.items.length + '_' + (b.total || b.grandTotal || 0);
+    if (!hash || window._rpSentHashes[hash]) return;
+    window._rpSentHashes[hash] = true;
+    localStorage.setItem('_rpSentHashes', JSON.stringify(window._rpSentHashes));
+
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        outlet: b.outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
+        table: b.table || b.tableNo || 'POS-Counter',
+        orderType: b.orderType || 'Dine-In',
+        customerName: b.customerName || 'Walk-in',
+        items: b.items.map(it => ({ name: it.name || it.itemName || 'Item', qty: Number(it.qty || it.quantity || 1) })),
+        total: Number(b.total || b.grandTotal || 0),
+        paymentMode: b.paymentMode || 'Cash'
+      })
+    }).catch(()=>{});
+  }
+
   const _origSetItem = localStorage.setItem;
   localStorage.setItem = function(key, val) {
     _origSetItem.apply(this, arguments);
-    try {
-      if (!val || typeof val !== 'string' || !val.includes('"items"')) return;
-      const data = JSON.parse(val);
-      const bills = Array.isArray(data) ? data : (data.bills || data.orders || data.kots || []);
-      if (!Array.isArray(bills) || !bills.length) return;
-      // Check both first and last item in case newest is at index 0 or end
-      [bills, bills[bills.length - 1]].forEach(b => {
-        if (!b || !Array.isArray(b.items) || !b.items.length) return;
-        const hash = String(b.id || b.billNo || '') + '_' + b.items.length + '_' + (b.total || 0);
-        if (window._rpSentHashes[hash]) return;
-        window._rpSentHashes[hash] = true;
-        fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            outlet: b.outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
-            table: b.table || b.tableNo || 'POS-Counter',
-            orderType: b.orderType || 'Dine-In',
-            customerName: b.customerName || 'Walk-in',
-            items: b.items,
-            total: b.total || 0,
-            paymentMode: b.paymentMode || 'Cash'
-          })
-        }).catch(()=>{});
-      });
-    } catch(_) {}
+    if (key === 'rpBills' && val) {
+      try {
+        const list = JSON.parse(val);
+        if (Array.isArray(list) && list.length) {
+          sendBillToKot(list.at(0));
+          sendBillToKot(list.at(-1));
+        }
+      } catch(_) {}
+    }
   };
 })();
 </script>
