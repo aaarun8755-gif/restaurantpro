@@ -1650,5 +1650,20 @@ setInterval(async function() {
   } catch(_) {}
 }, 1500);
 </script>
+<script id="rpMasterLiveFix">
+(function(){
+  // 1. Faltu KDS screen ko turant band karein aur asli /kds.html par bhejein
+  setInterval(() => {
+    if (document.body && document.body.innerText.includes('POS bills and generated KOTs appear here for kitchen processing')) {
+      window.location.replace('/kds.html');
+    }
+    // 2. Scan QR aur Captain ke sabhi link ko current Render URL par fix karein
+    document.querySelectorAll('a[href*="scan-qr"], a[href*="captain"], input[value*="trycloudflare"], input[value*="127.0.0.1"]').forEach(el => {
+      if (el.tagName === 'A' && el.href) el.href = el.href.replace(/https?:\/\/[^/]+/, window.location.origin);
+      if (el.tagName === 'INPUT' && el.value) el.value = el.value.replace(/https?:\/\/[^/]+/, window.location.origin);
+    });
+  }, 150);
+})();
+</script>
 </body>
 </html>
