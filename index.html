@@ -1668,16 +1668,16 @@ setInterval(async function() {
 
 
 
+
 <script id="rpDirectKotBridge">
 (function(){
   window._rpSentHashes = JSON.parse(localStorage.getItem('_rpSentHashes') || '{}');
-  function sendBillToKot(b) {
+  function postBill(b) {
     if (!b || !Array.isArray(b.items) || !b.items.length) return;
-    const hash = String(b.billNo || b.id || '') + '_' + b.items.length + '_' + (b.total || b.grandTotal || 0);
-    if (!hash || window._rpSentHashes[hash]) return;
-    window._rpSentHashes[hash] = true;
+    const h = String(b.billNo || b.id || Date.now()) + '_' + b.items.length + '_' + (b.total || b.grandTotal || 0);
+    if (window._rpSentHashes[h]) return;
+    window._rpSentHashes[h] = true;
     localStorage.setItem('_rpSentHashes', JSON.stringify(window._rpSentHashes));
-
     fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1686,26 +1686,29 @@ setInterval(async function() {
         table: b.table || b.tableNo || 'POS-Counter',
         orderType: b.orderType || 'Dine-In',
         customerName: b.customerName || 'Walk-in',
-        items: b.items.map(it => ({ name: it.name || it.itemName || 'Item', qty: Number(it.qty || it.quantity || 1) })),
+        items: b.items.map(i => ({ name: i.name || i.itemName || 'Item', qty: Number(i.qty || i.quantity || 1) })),
         total: Number(b.total || b.grandTotal || 0),
         paymentMode: b.paymentMode || 'Cash'
       })
     }).catch(()=>{});
   }
 
-  const _origSetItem = localStorage.setItem;
-  localStorage.setItem = function(key, val) {
-    _origSetItem.apply(this, arguments);
-    if (key === 'rpBills' && val) {
-      try {
-        const list = JSON.parse(val);
-        if (Array.isArray(list) && list.length) {
-          sendBillToKot(list.at(0));
-          sendBillToKot(list.at(-1));
-        }
-      } catch(_) {}
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const t = (btn.innerText || btn.textContent || '').toLowerCase();
+    if (t.includes('generate') || t.includes('punch') || t.includes('kot') || t.includes('settle')) {
+      setTimeout(() => {
+        try {
+          const list = JSON.parse(localStorage.getItem('rpBills') || '[]');
+          if (Array.isArray(list) && list.length) {
+            postBill(list.at(0));
+            postBill(list.at(-1));
+          }
+        } catch(_) {}
+      }, 250);
     }
-  };
+  }, true);
 })();
 </script>
 </body>

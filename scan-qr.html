@@ -143,5 +143,18 @@ sbtn.onclick = async () => {
     });
   }, 500);
   </script>
+<script id="rpFixQrFinal">
+  setInterval(() => {
+    document.querySelectorAll('a, input').forEach(el => {
+      if (el.tagName === 'A' && el.href && el.href.includes('customer.html') && !el.href.startsWith(window.location.origin)) {
+        el.href = window.location.origin + '/customer.html' + (el.search || '');
+      }
+      if (el.tagName === 'INPUT' && el.value && el.value.includes('customer.html') && !el.value.startsWith(window.location.origin)) {
+        const q = el.value.split('?');
+        el.value = window.location.origin + '/customer.html' + (q ? '?' + q : '');
+      }
+    });
+  }, 300);
+  </script>
 </body>
 </html>
