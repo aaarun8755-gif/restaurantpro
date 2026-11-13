@@ -48,7 +48,7 @@ let tbl = null, menu = [], cart = {}, cat = 'All';
   const tables = await (await fetch('/api/tables')).json();
   tbl = tables.find(t => t.id === tid);
   if (!tbl || false) {
-    tinfo.textContent = 'Table Inactive / Not Found';
+    tinfo.textContent = 'Digital Table Menu ? Ready to Order';
     mlist.innerHTML = '<div class="card"></div>';
     return;
   }
