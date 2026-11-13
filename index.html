@@ -1657,9 +1657,10 @@ setInterval(async function() {
 
 
 
+
+
 <script id="rpMasterLiveFix">
 (function(){
-  // 1. Faltu KDS popup ko rokein aur QR links ko live Render domain par set karein
   setInterval(() => {
     if (document.body && document.body.innerText.includes('POS bills and generated KOTs appear here for kitchen processing')) {
       window.location.replace('/kds.html');
@@ -1670,7 +1671,6 @@ setInterval(async function() {
     });
   }, 200);
 
-  // 2. Jab bhi rpBills mein naya bill aaye, turant POST /api/orders par bhejein taaki KDS par dikhe
   let lastCount = -1;
   setInterval(() => {
     try {
@@ -1679,7 +1679,7 @@ setInterval(async function() {
       if (lastCount === -1) { lastCount = bills.length; return; }
       if (bills.length > lastCount) {
         lastCount = bills.length;
-        const b = bills;
+        const b = bills.at(0);
         if (b && Array.isArray(b.items) && b.items.length) {
           fetch('/api/orders', {
             method: 'POST',
@@ -1697,7 +1697,7 @@ setInterval(async function() {
         }
       }
     } catch(_) {}
-  }, 800);
+  }, 600);
 })();
 </script>
 </body>
