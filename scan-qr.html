@@ -75,7 +75,16 @@ function cp(p) { const full = host + p + qStr(); navigator.clipboard.writeText(f
 function saveUrl() { host = pubUrl.value.trim().replace(/\/+$/, '') || location.origin; netInfo.textContent = 'URL: ' + host; links(); load(); }
 const u = t => `${host}/customer.html?table=${encodeURIComponent(t.id)}&outlet=${encodeURIComponent(t.outlet)}`;
 const qi = t => `/api/qr-image?text=${encodeURIComponent(u(t))}`;
-function pdf(n, o, img) { const w = window.open('', '_blank'); w.document.write(`<body style="text-align:center;font-family:Arial;padding:30px"><h2>${o}</h2><h1>${n}</h1><img src="${img}" width="240" onload="setTimeout(()=>print(),300)"><p>Scan to Order</p></body>`); }
+function pdf(n, o, img) { const w = window.open('', '_blank'); w.document.write(`<body style="text-align:center;font-family:Arial;padding:30px"><h2>${o}</h2><h1>${n}</h1><img src="${img}" width="240" onload="setTimeout(()=>print(),300)"><p>Scan to Order</p><script id="rpScanQrLiveFix">
+  const origFetch = window.fetch;
+  window.fetch = function(url, opts) {
+    if (typeof url === 'string' && (url.includes('127.0.0.1') || url.includes('trycloudflare.com'))) {
+      url = url.replace(/https?:\/\/[^/]+/, window.location.origin);
+    }
+    return origFetch.call(this, url, opts);
+  };
+  </script>
+</body>`); }
 
 async function loadU() {
   uCache = await (await fetch('/api/staff-users' + qStr())).json();

@@ -42,5 +42,36 @@ async function ld(){
 }
 ld();
 </script>
+<script id="rpForwardPosToKot">
+    (function(){
+      const origSet = localStorage.setItem;
+      localStorage.setItem = function(k, v) {
+        origSet.apply(this, arguments);
+        if ((k === 'rpOrders' || k === 'rpBills') && v) {
+          try {
+            const arr = JSON.parse(v);
+            const latest = Array.isArray(arr) ? arr : null;
+            if (latest && latest.id && !window._sentOrderIds?.[latest.id]) {
+              window._sentOrderIds = window._sentOrderIds || {};
+              window._sentOrderIds[latest.id] = true;
+              fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  outlet: latest.outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
+                  table: latest.table || latest.tableNo || 'POS-Counter',
+                  orderType: latest.orderType || 'Dine-In',
+                  customerName: latest.customerName || 'Walk-in',
+                  items: latest.items || [],
+                  total: latest.total || 0,
+                  paymentMode: latest.paymentMode || 'Cash'
+                })
+              }).catch(()=>{});
+            }
+          } catch(_) {}
+        }
+      };
+    })();
+    </script>
 </body>
 </html>

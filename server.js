@@ -26,7 +26,7 @@ try {
 const persist = () => fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
 const byOutlet = (arr, out) => (out && out !== 'Head Office') ? arr.filter(x => x.outlet === out) : arr;
 
-app.get('/api/network-info', (_req, res) => {
+app.get('/api/network-info', (req, res) => { const proto = req.headers['x-forwarded-proto'] || req.protocol; const host = req.headers['x-forwarded-host'] || req.get('host'); if (host && !host.includes('127.0.0.1') && !host.includes('localhost')) return res.json({ publicUrl: proto + '://' + host, localIp: host, port: '' });
   let tunnelUrl = '', ip = '127.0.0.1';
   const nets = os.networkInterfaces();
   for (const n of Object.keys(nets)) for (const net of nets[n]) if (net.family === 'IPv4' && !net.internal) ip = net.address;
