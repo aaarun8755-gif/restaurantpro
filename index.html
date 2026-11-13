@@ -1671,44 +1671,45 @@ setInterval(async function() {
 
 <script id="rpDirectKotBridge">
 (function(){
-  window._rpSentHashes = JSON.parse(localStorage.getItem('_rpSentHashes') || '{}');
-  function postBill(b) {
-    if (!b || !Array.isArray(b.items) || !b.items.length) return;
-    const h = String(b.billNo || b.id || Date.now()) + '_' + b.items.length + '_' + (b.total || b.grandTotal || 0);
-    if (window._rpSentHashes[h]) return;
-    window._rpSentHashes[h] = true;
-    localStorage.setItem('_rpSentHashes', JSON.stringify(window._rpSentHashes));
+  window._rpSentKots = JSON.parse(localStorage.getItem('_rpSentKots') || '{}');
+  function pushToKotServer(items, table, outlet, total, mode) {
+    if (!Array.isArray(items) || !items.length) return;
+    const sig = items.map(i => (i.name||i.itemName) + 'x' + (i.qty||1)).join('|') + '_' + total + '_' + Math.floor(Date.now()/10000);
+    if (window._rpSentKots[sig]) return;
+    window._rpSentKots[sig] = true;
+    localStorage.setItem('_rpSentKots', JSON.stringify(window._rpSentKots));
     fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        outlet: b.outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
-        table: b.table || b.tableNo || 'POS-Counter',
-        orderType: b.orderType || 'Dine-In',
-        customerName: b.customerName || 'Walk-in',
-        items: b.items.map(i => ({ name: i.name || i.itemName || 'Item', qty: Number(i.qty || i.quantity || 1) })),
-        total: Number(b.total || b.grandTotal || 0),
-        paymentMode: b.paymentMode || 'Cash'
+        outlet: outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
+        table: table || 'POS-Counter',
+        orderType: 'Dine-In',
+        customerName: 'POS Guest',
+        items: items.map(i => ({ name: i.name || i.itemName || 'Item', qty: Number(i.qty || i.quantity || 1) })),
+        total: Number(total || 0),
+        paymentMode: mode || 'Cash'
       })
     }).catch(()=>{});
   }
 
-  document.addEventListener('click', function(e) {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    const t = (btn.innerText || btn.textContent || '').toLowerCase();
-    if (t.includes('generate') || t.includes('punch') || t.includes('kot') || t.includes('settle')) {
-      setTimeout(() => {
-        try {
-          const list = JSON.parse(localStorage.getItem('rpBills') || '[]');
-          if (Array.isArray(list) && list.length) {
-            postBill(list.at(0));
-            postBill(list.at(-1));
-          }
-        } catch(_) {}
-      }, 250);
-    }
-  }, true);
+  setInterval(() => {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || k === '_rpSentKots') continue;
+        const raw = localStorage.getItem(k);
+        if (!raw || !raw.includes('"items"')) continue;
+        const parsed = JSON.parse(raw);
+        const arr = Array.isArray(parsed) ? parsed : (parsed.bills || parsed.orders || []);
+        if (!Array.isArray(arr) || !arr.length) continue;
+        const newest = arr;
+        if (newest && Array.isArray(newest.items) && newest.items.length) {
+          pushToKotServer(newest.items, newest.table || newest.tableNo, newest.outlet, newest.total || newest.grandTotal, newest.paymentMode);
+        }
+      }
+    } catch(_) {}
+  }, 1500);
 })();
 </script>
 </body>
