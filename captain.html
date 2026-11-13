@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f766e"><link rel="manifest" href="/manifest.json">
+<title>RestaurantPro | Captain App</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6f4;color:#173b34;padding-bottom:80px}
+header{background:#115e59;color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.wrap{max-width:700px;margin:auto;padding:14px}.card{background:#fff;border:1px solid #dce6e1;border-radius:12px;padding:15px;margin-bottom:12px}
+input,textarea{width:100%;padding:10px;border:1px solid #dce6e1;border-radius:8px;box-sizing:border-box;margin:5px 0 10px}
+.btn{border:0;border-radius:8px;padding:10px 15px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer}
+.btn.light{background:#fff;color:#0f766e;border:1px solid #dce6e1}.btn:disabled{opacity:.5}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.tcard{border:2px solid #dce6e1;border-radius:12px;padding:15px 8px;text-align:center;cursor:pointer;font-weight:700}
+.item{background:#fff;border:1px solid #dce6e1;border-radius:10px;padding:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #dce6e1;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <div><strong>✦ RestaurantPro App</strong><br><small id="hsub">Captain / Waiter / Manager</small></div>
+  <div><button id="ibtn" class="btn light hidden" style="padding:5px 9px;font-size:12px">📲 Install</button> <button id="lout" class="btn light hidden" style="padding:5px 9px;font-size:12px" onclick="localStorage.removeItem('rpCap');location.reload()">Logout</button></div>
+</header>
+<div class="wrap" id="vLogin">
+  <div class="card" style="max-width:400px;margin:25px auto">
+    <h2 style="margin-top:0">Captain Login</h2>
+    <form id="lf"><input id="lp" type="tel" required placeholder="Mobile Number"><input id="lpw" type="password" required placeholder="Password"><button class="btn" style="width:100%">Login →</button></form>
+    <p id="lerr" style="color:#b42318;font-weight:700"></p>
+  </div>
+</div>
+<div class="wrap hidden" id="vTbl">
+  <div class="card"><h3 style="margin-top:0">Click Table to Punch Order</h3><div id="tbox" class="tgrid"></div></div>
+  <div class="card"><h3 style="margin-top:0">Live Kitchen Status</h3><div id="lbox"></div></div>
+</div>
+<div class="wrap hidden" id="vMenu">
+  <div class="card" style="display:flex;justify-content:space-between;align-items:center"><strong id="ttitle"></strong><button class="btn light" onclick="vMenu.classList.add('hidden');obar.classList.add('hidden');vTbl.classList.remove('hidden')">← Tables</button></div>
+  <div id="mbox"></div>
+  <div class="card"><textarea id="note" rows="2" placeholder="Note..."></textarea></div>
+</div>
+<div class="bar hidden" id="obar"><div><small>Total (+5% GST)</small><br><strong id="gtot">₹0.00</strong></div><button class="btn" id="pbtn" disabled>Send to KDS →</button></div>
+<script>
+const socket = io();
+let usr = JSON.parse(localStorage.getItem('rpCap') || 'null'), tbls = [], menu = [], curT = null, cart = {}, dp = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); dp = e; ibtn.classList.remove('hidden'); });
+ibtn.onclick = async () => { if(dp){ dp.prompt(); dp = null; } else alert('Browser menu se "Add to Home Screen" karein'); };
+
+lf.onsubmit = async e => {
+  e.preventDefault();
+  const r = await fetch('/api/staff-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:lp.value,password:lpw.value})});
+  const d = await r.json(); if(!r.ok){ lerr.textContent = d.error; return; }
+  usr = d; localStorage.setItem('rpCap', JSON.stringify(usr)); start();
+};
+
+async function start() {
+  vLogin.classList.add('hidden'); vTbl.classList.remove('hidden'); lout.classList.remove('hidden');
+  hsub.textContent = `${usr.role} (${usr.phone}) · ${usr.outlet}`;
+  tbls = (await (await fetch('/api/tables?outlet='+encodeURIComponent(usr.outlet))).json()).filter(t=>t.active);
+  menu = (await (await fetch('/api/menu?outlet='+encodeURIComponent(usr.outlet))).json()).filter(m=>m.available!==false);
+  tbox.innerHTML = tbls.map(t => `<div class="tcard" onclick="openM('${t.id}')">🍽️<br>${t.name}</div>`).join('');
+  live();
+}
+function openM(id) {
+  curT = tbls.find(t=>t.id===id); cart = {}; ttitle.textContent = curT.name + ' Menu';
+  vTbl.classList.add('hidden'); vMenu.classList.remove('hidden'); obar.classList.remove('hidden'); drawM(); calc();
+}
+function drawM() {
+  mbox.innerHTML = menu.map(m => `<div class="item"><div><strong>${m.name}</strong><br><b style="color:#0f766e">₹${m.price}</b></div><div><button class="btn light" onclick="upd('${m.id}',-1)">−</button> <b>${cart[m.id]||0}</b> <button class="btn" onclick="upd('${m.id}',1)">+</button></div></div>`).join('');
+}
+function upd(id, d) { cart[id] = Math.max(0, (cart[id]||0)+d); if(!cart[id]) delete cart[id]; drawM(); calc(); }
+function calc() {
+  let s = 0, c = 0; for(const [id,q] of Object.entries(cart)){ const it=menu.find(m=>String(m.id)===String(id)); if(it){ s+=it.price*q; c+=q; } }
+  gtot.textContent = '₹' + (s*1.05).toFixed(2); pbtn.disabled = c === 0;
+}
+pbtn.onclick = async () => {
+  pbtn.disabled = true;
+  const items = Object.entries(cart).map(([id,qty]) => { const it=menu.find(m=>String(m.id)===String(id)); return {itemId:id,name:it.name,qty,price:it.price}; });
+  await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:usr.role,waiterPhone:usr.phone,outlet:usr.outlet,tableId:curT.id,tableName:curT.name,items,customerNote:note.value})});
+  alert('✅ Order Direct KDS & Dashboard par chala gaya!');
+  vMenu.classList.add('hidden'); obar.classList.add('hidden'); vTbl.classList.remove('hidden'); live();
+};
+async function live() {
+  if(!usr) return;
+  const list = await (await fetch('/api/orders?outlet='+encodeURIComponent(usr.outlet))).json();
+  lbox.innerHTML = list.slice(0,8).map(o => `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee"><span><b>${o.tableName}</b> (${o.kotNo||o.orderNo})</span><b>${o.status}</b></div>`).join('');
+}
+socket.on('orders:changed', live); socket.on('kot:changed', live);
+if(usr) start();
+</script>
+</body>
+</html>

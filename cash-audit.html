@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Daily Cash & Audit Sheet</title>
+<style>
+:root{--bg:#f4f7f6;--card:#fff;--ink:#132a25;--muted:#5c726d;--line:#cbd5e1;--teal:#0f766e;--dark:#115e59;--soft:#eef6f4}
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:20}
+.wrap{max-width:1180px;margin:auto;padding:18px}
+.sheet{background:#fff;border:1px solid #cbd5e1;border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.03);margin-bottom:20px}
+.stitle{background:#e6f4f1;border-bottom:1px solid #cbd5e1;padding:11px;text-align:center;font-weight:800;font-size:15px;color:#115e59}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{border:1px solid #dbe5e2;padding:7px 10px;text-align:left}
+.sec{background:#334155;color:#fff;font-weight:700;font-size:12px}
+.subsec{background:#f1f5f9;font-weight:700;color:#1e293b}
+.totrow{background:#e2ece9;font-weight:800;color:#132a25}
+.locked{background:#f8fafc;font-weight:700;color:#334155}
+input{width:100%;padding:6px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12.5px;background:#fff}
+input[readonly]{background:#f1f5f9;color:#132a25;font-weight:700;border-color:#e2e8f0}
+.btn{border:0;border-radius:7px;padding:7px 13px;background:var(--teal);color:#fff;font-weight:600;cursor:pointer;text-decoration:none;font-size:12px;display:inline-block}
+.btn.light{background:#fff;color:var(--teal);border:1px solid var(--line)}.btn.d{background:#fee2e2;color:#b91c1c}
+.btn.sm{padding:4px 9px;font-size:11px}
+.badge{padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
+.badge.pend{background:#fef3c7;color:#92400e}.badge.short{background:#fee2e2;color:#b91c1c}
+</style>
+</head>
+<body>
+<header>
+  <div><strong style="font-size:17px;color:var(--dark)">✦ Daily Cash &amp; Audit Sheet</strong><br><small id="roleSub" style="color:var(--muted)"></small></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <button class="btn light" onclick="exportAuditExcel()">⬇ Excel</button>
+    <button class="btn light" onclick="window.print()">🖨 PDF</button>
+    <a href="/index.html" class="btn light">← Dashboard</a>
+  </div>
+</header>
+<div class="wrap">
+  <!-- HEAD OFFICE MASTER VIEW (EXACT 6 COLUMNS) -->
+  <div id="hoPanel" style="display:none" class="sheet">
+    <div class="stitle">HEAD OFFICE MASTER — ALL OUTLETS CASH AUDIT SUMMARY (HO Mail: aaarun8755@gmail.com)</div>
+    <div style="padding:12px;overflow-x:auto">
+      <table>
+        <thead>
+          <tr class="subsec">
+            <th>1. Outlet Name</th>
+            <th>2. Unit Manager Name</th>
+            <th>3. Update By</th>
+            <th>4. Date</th>
+            <th>5. Given Outlet Imprest</th>
+            <th>6. Cash Short / Excess</th>
+          </tr>
+        </thead>
+        <tbody id="hoBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- OUTLET DAILY CASH AUDIT SHEET -->
+  <div class="sheet" id="outletSheet">
+    <div class="stitle">DAILY CASH &amp; EXPENSES AUDIT SHEET — RESTAURANT PRO PVT. LTD.</div>
+    <table>
+      <tr><td style="width:28%;background:#eef6f4;font-weight:700">Outlet Name :</td><td style="background:#eef6f4"><input id="fOutlet" readonly></td></tr>
+      <tr><td style="background:#eef6f4;font-weight:700">Outlet Mail ID :</td><td style="background:#eef6f4"><input id="fMail" readonly></td></tr>
+      <tr><td style="background:#eef6f4;font-weight:700">Head Office Mail :</td><td style="background:#eef6f4"><input value="aaarun8755@gmail.com" readonly></td></tr>
+      <tr><td style="background:#eef6f4;font-weight:700">Unit Manager Name :</td><td style="background:#eef6f4"><input id="fMgr" placeholder="Enter Unit Manager Name"></td></tr>
+      <tr><td style="background:#eef6f4;font-weight:700">Date :</td><td style="background:#eef6f4"><input type="date" id="fDate"></td></tr>
+      <tr><td style="background:#eef6f4;font-weight:700">Update By :</td><td style="background:#eef6f4"><input id="fBy" placeholder="Enter Person Name Updating Sheet"></td></tr>
+    </table>
+
+    <table>
+      <tr class="sec"><td style="width:12%">A.</td><td style="width:33%">PARTICULARS</td><td style="width:20%">AMOUNT (₹)</td><td style="width:15%">TOTAL (₹)</td><td style="width:20%">Auto Formula Info</td></tr>
+      <tr><td></td><td><b>Previous Hold Amount</b> (Locked)</td><td><input id="aHold" type="number" readonly></td><td class="locked" id="aHoldTot">0.00</td><td><small id="holdNote" style="color:#475569">Auto: Cash Sales − Expenses − Deposit</small></td></tr>
+
+      <tr class="sec"><td>B.</td><td colspan="4">Cash Deposit in Bank</td></tr>
+      <tr class="subsec"><td>Deposit Date</td><td>Bank Name</td><td>Deposit Amount (₹)</td><td>TOTAL (₹)</td><td></td></tr>
+      <tr><td><input type="date" id="bDate"></td><td><input id="bBank" placeholder="e.g. HDFC / ICICI Bank"></td><td><input type="number" id="bAmt" value="0" oninput="calc()"></td><td class="locked" id="bTot">0.00</td><td></td></tr>
+
+      <tr class="sec"><td>C.</td><td colspan="3">Cash Imprest Given in Outlet (Head Office Approval Required)</td><td>Approval Status</td></tr>
+      <tr><td></td><td>Outlet Imprest Amount</td><td><input type="number" id="cImprest" value="0" oninput="onImprestEdit()"></td><td class="locked" id="cTot">0.00</td><td id="impBadge"><span class="badge pend">Pending HO Approval</span></td></tr>
+      <tr class="totrow"><td></td><td colspan="2">Cash Accounts Total (A + Approved C)</td><td id="acTotal">0.00</td><td></td></tr>
+    </table>
+
+    <table>
+      <tr class="sec"><td colspan="5">D. Cashier Galla, Customer Udhaar &amp; Employee Advance</td></tr>
+      <tr class="subsec"><td style="width:12%">D (1)</td><td colspan="3">Cashier Imprest (Galla Cash)</td><td style="width:20%;text-align:right"><button type="button" class="btn sm" onclick="addRow('d1')">+ Add Cashier</button></td></tr>
+      <tr class="subsec"><td>S.No.</td><td>Cashier Name</td><td>Amount (₹)</td><td>Total</td><td>Remove</td></tr>
+      <tbody id="d1Body"></tbody>
+      <tr class="totrow"><td></td><td colspan="2">Total Cashier Imprest</td><td id="d1Tot">0.00</td><td></td></tr>
+
+      <tr class="subsec"><td>D (2)</td><td colspan="3">Bill Raise in Cash but Payment Not Received (Customer Udhaar)</td><td style="text-align:right"><button type="button" class="btn sm" onclick="addRow('d2')">+ Add Customer</button></td></tr>
+      <tr class="subsec"><td>Date</td><td>Customer Name</td><td>Amount (₹)</td><td>Total</td><td>Remove</td></tr>
+      <tbody id="d2Body"></tbody>
+      <tr class="totrow"><td></td><td colspan="2">Total Customer Pending</td><td id="d2Tot">0.00</td><td></td></tr>
+
+      <tr class="subsec"><td>D (3)</td><td colspan="3">Advance Given to Employee</td><td style="text-align:right"><button type="button" class="btn sm" onclick="addRow('d3')">+ Add Employee</button></td></tr>
+      <tr class="subsec"><td>Date</td><td>Employee Name</td><td>Amount (₹)</td><td>Where Voucher Is</td><td>Remove</td></tr>
+      <tbody id="d3Body"></tbody>
+      <tr class="totrow"><td></td><td colspan="2">Total Advance Given to Employee</td><td id="d3Tot">0.00</td><td></td></tr>
+
+      <tr class="totrow" style="background:#cbd5e1"><td>D = (D1+D2+D3)</td><td colspan="2">Total Deductions (Cashier + Udhaar + Advance)</td><td id="dGrand">0.00</td><td></td></tr>
+    </table>
+
+    <table>
+      <tr class="sec"><td style="width:12%">E.</td><td colspan="4">Cash In Hand (Physical Denomination Count)</td></tr>
+      <tr class="subsec"><td>S.No.</td><td>Notes / Coins (₹)</td><td>No. of Notes</td><td>Amount (₹)</td><td></td></tr>
+      <tbody id="noteBody"></tbody>
+      <tr class="totrow"><td></td><td colspan="2">Total Cash In Hand</td><td id="eTot">0.00</td><td></td></tr>
+      <tr style="background:#eef6f4;font-weight:800;font-size:14px">
+        <td colspan="2" style="padding:11px">FINAL AUDIT RESULT (LOCKED): Short / Excess Amount</td>
+        <td id="diffStatus" style="padding:11px">Exact Tally</td>
+        <td id="diffAmt" style="padding:11px;font-size:16px">0.00</td>
+        <td style="padding:11px;text-align:right"><button type="button" class="btn" onclick="submitAudit()">Save &amp; Mail to HO ✓</button></td>
+      </tr>
+    </table>
+  </div>
+</div>
+<script>
+const selOutlet = localStorage.getItem('rpSelectedOutlet') || 'Head Office';
+const isHO = selOutlet === 'Head Office';
+const cleanOutletName = selOutlet.replace(/^RestaurantPro\s*-\s*/i, '').trim();
+const slug = cleanOutletName.toLowerCase().replace(/[^a-z0-9]/g, '') || 'outlet';
+const NOTES = '500,200,100,50,20,10,5,2,1'.split(',').map(Number);
+
+let impStore = JSON.parse(localStorage.getItem('rpOutletImprest') || '{}');
+let savedImp = impStore[selOutlet] || { amount: 0, approved: false, lastRequested: 0 };
+
+let d1List = [{ name: 'Cashier 1', amt: 5000 }];
+let d2List = [{ date: new Date().toISOString().slice(0,10), name: '', amt: 0 }];
+let d3List = [{ date: new Date().toISOString().slice(0,10), name: '', amt: 0, loc: 'Outlet' }];
+let noteCounts = { 500:0, 200:0, 100:0, 50:0, 20:0, 10:0, 5:0, 2:0, 1:0 };
+let imprestApproved = savedImp.approved;
+
+fOutlet.value = selOutlet;
+fMail.value = `${slug}@restaurantpro.com`;
+fDate.value = new Date().toISOString().slice(0,10);
+cImprest.value = savedImp.lastRequested || savedImp.amount || 0;
+roleSub.textContent = isHO ? '● Head Office Master Control (All Outlets Audit & Imprest Approval)' : `● Outlet Mode: ${selOutlet} (${slug}@restaurantpro.com)`;
+
+if (isHO) { hoPanel.style.display = 'block'; outletSheet.style.display = 'none'; }
+const saveBtn = document.querySelector('button[onclick="submitAudit()"]');
+if (saveBtn) saveBtn.textContent = 'Save Audit Sheet ✓';
+
+function updateImpBadge() {
+  const cur = Number(cImprest.value) || 0;
+  if (cur === 0) {
+    imprestApproved = true;
+    impBadge.innerHTML = '<span class="badge">No Imprest</span>';
+  } else if (savedImp.approved && cur === Number(savedImp.amount)) {
+    imprestApproved = true;
+    impBadge.innerHTML = '<span class="badge">✓ Approved by HO</span>';
+  } else {
+    imprestApproved = isHO ? true : false;
+    impBadge.innerHTML = imprestApproved ? '<span class="badge">✓ Approved by HO</span>' : '<span class="badge pend">⏳ Pending HO Imprest Approval</span>';
+  }
+}
+
+async function initHoldFromSales() {
+  let cashSales = 0, cashExp = 0;
+  try {
+    const res = await fetch('/api/dashboard');
+    if (res.ok) {
+      const db = await res.json();
+      (db.bills || []).forEach(b => {
+        const bOut = (b.outlet || '').toLowerCase();
+        if ((bOut === selOutlet.toLowerCase() || bOut.includes(cleanOutletName.toLowerCase())) && String(b.paymentMode||'Cash').toLowerCase()==='cash') cashSales += Number(b.total||0);
+      });
+      (db.expenses || []).forEach(e => {
+        const eOut = (e.outlet || '').toLowerCase();
+        if (eOut === selOutlet.toLowerCase() || eOut.includes(cleanOutletName.toLowerCase())) cashExp += Number(e.amount||0);
+      });
+    }
+  } catch(_) {}
+  const prevSaved = JSON.parse(localStorage.getItem('rpCashAudits') || '[]').filter(x => x.outlet === selOutlet);
+  const lastDeposit = prevSaved.length ? Number(prevSaved.deposit || 0) : 0;
+  aHold.value = Math.max(0, cashSales - cashExp - lastDeposit);
+  holdNote.textContent = `${cleanOutletName} Cash Sales ₹${cashSales} − Exp ₹${cashExp} − Deposit ₹${lastDeposit}`;
+  updateImpBadge();
+  renderDynamic();
+}
+function addRow(type) {
+  const today = fDate.value || new Date().toISOString().slice(0,10);
+  if (type === 'd1') d1List.push({ name: '', amt: 0 });
+  if (type === 'd2') d2List.push({ date: today, name: '', amt: 0 });
+  if (type === 'd3') d3List.push({ date: today, name: '', amt: 0, loc: 'Outlet' });
+  renderDynamic();
+}
+
+function onImprestEdit() { updateImpBadge(); calc(); }
+
+function renderDynamic() {
+  d1Body.innerHTML = d1List.map((r,i) => `<tr><td>${i+1}</td><td><input value="${r.name}" placeholder="Cashier Name" oninput="d1List[${i}].name=this.value"></td><td><input type="number" value="${r.amt}" oninput="d1List[${i}].amt=Number(this.value)||0;calc()"></td><td></td><td><button type="button" class="btn d sm" onclick="d1List.splice(${i},1);renderDynamic()">✕</button></td></tr>`).join('');
+  d2Body.innerHTML = d2List.map((r,i) => `<tr><td><input type="date" value="${r.date}" oninput="d2List[${i}].date=this.value"></td><td><input value="${r.name}" placeholder="Customer Name" oninput="d2List[${i}].name=this.value"></td><td><input type="number" value="${r.amt}" oninput="d2List[${i}].amt=Number(this.value)||0;calc()"></td><td></td><td><button type="button" class="btn d sm" onclick="d2List.splice(${i},1);renderDynamic()">✕</button></td></tr>`).join('');
+  d3Body.innerHTML = d3List.map((r,i) => `<tr><td><input type="date" value="${r.date}" oninput="d3List[${i}].date=this.value"></td><td><input value="${r.name}" placeholder="Employee Name" oninput="d3List[${i}].name=this.value"></td><td><input type="number" value="${r.amt}" oninput="d3List[${i}].amt=Number(this.value)||0;calc()"></td><td><input value="${r.loc}" oninput="d3List[${i}].loc=this.value"></td><td><button type="button" class="btn d sm" onclick="d3List.splice(${i},1);renderDynamic()">✕</button></td></tr>`).join('');
+  noteBody.innerHTML = NOTES.map((n,i) => `<tr><td>${i+1}</td><td><b>₹ ${n}</b></td><td><input type="number" min="0" value="${noteCounts[n]}" oninput="noteCounts[${n}]=Number(this.value)||0;calc()"></td><td id="nAmt_${n}">0.00</td><td></td></tr>`).join('');
+  calc();
+}
+
+function calc() {
+  const hold = Number(aHold.value) || 0, dep = Number(bAmt.value) || 0, imp = Number(cImprest.value) || 0;
+  const effectiveImp = imprestApproved ? imp : (Number(savedImp.amount) || 0);
+  aHoldTot.textContent = hold.toFixed(2); bTot.textContent = dep.toFixed(2); cTot.textContent = imp.toFixed(2);
+  acTotal.textContent = (hold + effectiveImp).toFixed(2);
+
+  const s1 = d1List.reduce((a,b) => a + (Number(b.amt)||0), 0);
+  const s2 = d2List.reduce((a,b) => a + (Number(b.amt)||0), 0);
+  const s3 = d3List.reduce((a,b) => a + (Number(b.amt)||0), 0);
+  d1Tot.textContent = s1.toFixed(2); d2Tot.textContent = s2.toFixed(2); d3Tot.textContent = s3.toFixed(2);
+  dGrand.textContent = (s1 + s2 + s3).toFixed(2);
+
+  let cashHand = 0;
+  NOTES.forEach(n => { const v = n * (Number(noteCounts[n])||0); cashHand += v; const el = document.getElementById('nAmt_'+n); if(el) el.textContent = v.toFixed(2); });
+  eTot.textContent = cashHand.toFixed(2);
+
+  const diff = (hold + effectiveImp) - (s1 + s2 + s3 + cashHand);
+  diffAmt.textContent = Math.abs(diff).toFixed(2);
+  if (diff > 0) { diffStatus.innerHTML = '<span style="color:#b91c1c">⚠ CASH SHORTAGE</span>'; diffAmt.style.color = '#b91c1c'; }
+  else if (diff < 0) { diffStatus.innerHTML = '<span style="color:#1d4ed8">➕ CASH EXCESS</span>'; diffAmt.style.color = '#1d4ed8'; }
+  else { diffStatus.innerHTML = '<span style="color:#15803d">✅ EXACT TALLY</span>'; diffAmt.style.color = '#15803d'; }
+}
+
+function submitAudit() {
+  if (!fMgr.value.trim() || !fBy.value.trim()) return alert('Kripya Unit Manager Name aur Update By dono bharein.');
+  const curImp = Number(cImprest.value) || 0;
+  const needsApproval = curImp > 0 && (!savedImp.approved || curImp !== Number(savedImp.amount));
+  impStore[selOutlet] = needsApproval ? { amount: savedImp.amount || 0, approved: false, lastRequested: curImp } : { amount: curImp, approved: true, lastRequested: curImp };
+  localStorage.setItem('rpOutletImprest', JSON.stringify(impStore));
+
+  const list = JSON.parse(localStorage.getItem('rpCashAudits') || '[]');
+  list.unshift({
+    id: 'aud-' + Date.now(), date: fDate.value, outlet: fOutlet.value, mail: fMail.value,
+    unitManager: fMgr.value.trim(), updatedBy: fBy.value.trim(),
+    hold: Number(aHold.value)||0, deposit: Number(bAmt.value)||0, imprest: curImp,
+    imprestApproved: !needsApproval, cashInHand: Number(eTot.textContent)||0,
+    diffText: diffStatus.innerText, diffAmt: Number(diffAmt.textContent)||0, time: new Date().toLocaleTimeString()
+  });
+  localStorage.setItem('rpCashAudits', JSON.stringify(list));
+  alert(needsApproval ? '✓ Cash Audit Sheet Save ho gayi hai! (Naya/Edited Imprest Head Office Approval ke liye bhej diya gaya hai)' : '✓ Cash Audit Sheet Save ho gayi hai!');
+}
+
+function approveImprest(id) {
+  const list = JSON.parse(localStorage.getItem('rpCashAudits') || '[]');
+  const item = list.find(x => x.id === id);
+  if (item) {
+    item.imprestApproved = true; localStorage.setItem('rpCashAudits', JSON.stringify(list));
+    impStore[item.outlet] = { amount: Number(item.imprest)||0, approved: true, lastRequested: Number(item.imprest)||0 };
+    localStorage.setItem('rpOutletImprest', JSON.stringify(impStore)); renderHO();
+  }
+}
+
+function renderHO() {
+  const list = JSON.parse(localStorage.getItem('rpCashAudits') || '[]');
+  hoBody.innerHTML = list.map(r => `<tr>
+    <td><b>${r.outlet}</b><br><small style="color:#5c726d">${r.mail}</small></td>
+    <td><b>${r.unitManager || '-'}</b></td><td>${r.updatedBy}</td><td>${r.date}<br><small>${r.time}</small></td>
+    <td><b>₹${r.imprest}</b> ${r.imprestApproved ? '<span class="badge">✓ Approved</span>' : `<span class="badge pend">Pending Imprest</span> <button class="btn sm" onclick="approveImprest('${r.id}')">Approve</button>`}</td>
+    <td><span class="badge ${r.diffText.includes('SHORTAGE')?'short':''}">${r.diffText} (₹${r.diffAmt})</span></td>
+  </tr>`).join('') || '<tr><td colspan="6">Abhi kisi outlet ne Cash Audit submit nahi kiya hai.</td></tr>';
+}
+
+function exportAuditExcel() {
+  const list = JSON.parse(localStorage.getItem('rpCashAudits') || '[]');
+  const rows = [['1. Outlet Name','2. Unit Manager','3. Update By','4. Date','5. Given Outlet Imprest','Approval','6. Cash Short/Excess','Amount'], ...list.map(r=>[r.outlet,r.unitManager,r.updatedBy,r.date,r.imprest,r.imprestApproved?'Approved':'Pending',r.diffText,r.diffAmt])];
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = 'RestaurantPro_Cash_Audit_Master.csv'; a.click();
+}
+
+initHoldFromSales();
+renderHO();
+</script>
+</body>
+</html>
+

@@ -1,0 +1,1647 @@
+{
+  "tables": [
+    {
+      "id": "2083b162-89c8-4734-8fbe-88830b57a8c7",
+      "name": "1",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "type": "Dine In",
+      "active": true,
+      "createdAt": "2026-11-11T18:45:47.625Z"
+    },
+    {
+      "id": "09ede94b-76aa-46ce-8d8c-00633909cfee",
+      "name": "2",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "type": "Dine In",
+      "active": false,
+      "createdAt": "2026-11-11T19:10:51.285Z"
+    },
+    {
+      "id": "c2a336b9-9a8c-44a8-ad4c-38d0c69ab90b",
+      "name": "3",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "type": "Dine In",
+      "active": true,
+      "createdAt": "2026-11-11T19:11:33.098Z"
+    },
+    {
+      "id": "bbd5d987-0154-4ede-a1fb-0c92f5fd5e6a",
+      "name": "4",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "type": "Dine In",
+      "active": true,
+      "createdAt": "2026-11-11T19:13:03.413Z"
+    },
+    {
+      "id": "03388178-b8ef-4f9c-bf5a-fc1f2794b020",
+      "name": "5",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "type": "Dine In",
+      "active": true,
+      "createdAt": "2026-11-11T19:19:46.400Z"
+    },
+    {
+      "id": "53e415b7-a76c-4fa5-bcaa-4efaa3332d26",
+      "name": "7",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "type": "Dine In",
+      "active": true,
+      "createdAt": "2026-11-11T19:22:42.139Z"
+    },
+    {
+      "id": "a2dc08ce-edda-4c9e-90f0-6d838088c404",
+      "name": "1",
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "type": "Dine In",
+      "active": true,
+      "createdAt": "2026-11-11T19:39:09.369Z"
+    }
+  ],
+  "menu": [
+    {
+      "id": "1",
+      "name": "Veg Burger",
+      "category": "Fast Food",
+      "price": 99,
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "2",
+      "name": "Margherita Pizza",
+      "category": "Pizza",
+      "price": 199,
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "3",
+      "name": "Masala Dosa",
+      "category": "Indian",
+      "price": 129,
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "4",
+      "name": "Cold Coffee",
+      "category": "Drinks",
+      "price": 119,
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "1",
+      "name": "Veg Burger",
+      "category": "Fast Food",
+      "price": 99,
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "2",
+      "name": "Margherita Pizza",
+      "category": "Pizza",
+      "price": 199,
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "3",
+      "name": "Masala Dosa",
+      "category": "Indian",
+      "price": 129,
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "4",
+      "name": "Cold Coffee",
+      "category": "Drinks",
+      "price": 119,
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "1",
+      "name": "Veg Burger",
+      "category": "Fast Food",
+      "price": 99,
+      "outlet": "Head Office",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "2",
+      "name": "Margherita Pizza",
+      "category": "Pizza",
+      "price": 199,
+      "outlet": "Head Office",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "3",
+      "name": "Masala Dosa",
+      "category": "Indian",
+      "price": 129,
+      "outlet": "Head Office",
+      "activeAllAreas": true,
+      "available": true
+    },
+    {
+      "id": "4",
+      "name": "Cold Coffee",
+      "category": "Drinks",
+      "price": 119,
+      "outlet": "Head Office",
+      "activeAllAreas": true,
+      "available": true
+    }
+  ],
+  "orders": [
+    {
+      "id": "b95f21e4-4616-4b28-8c3b-d0be4afcfe5a",
+      "orderNo": "QR-7895550",
+      "source": "QR",
+      "waiterName": "",
+      "type": "Dine In",
+      "tableId": "03388178-b8ef-4f9c-bf5a-fc1f2794b020",
+      "tableName": "5",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "items": [
+        {
+          "itemId": "1",
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 99
+        },
+        {
+          "itemId": "2",
+          "name": "Margherita Pizza",
+          "qty": 7,
+          "price": 199
+        },
+        {
+          "itemId": "3",
+          "name": "Masala Dosa",
+          "qty": 1,
+          "price": 129
+        },
+        {
+          "itemId": "4",
+          "name": "Cold Coffee",
+          "qty": 2,
+          "price": 119
+        }
+      ],
+      "subtotal": 1859,
+      "gst": 92.95,
+      "total": 1951.95,
+      "paymentMethod": "Cash",
+      "paymentStatus": "Pending",
+      "status": "Accepted",
+      "createdAt": "2026-11-13T16:38:15.550Z",
+      "customerNote": "",
+      "kotNo": "KOT-930561",
+      "billNo": "RP-87930561"
+    },
+    {
+      "id": "9051ce02-7d1d-45fa-9278-25afbe79a47a",
+      "orderNo": "ORD-6546645",
+      "source": "Captain",
+      "waiterName": "Captain (8755925082)",
+      "type": "Dine In",
+      "tableId": "a2dc08ce-edda-4c9e-90f0-6d838088c404",
+      "tableName": "1",
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "items": [
+        {
+          "itemId": "1",
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 99
+        },
+        {
+          "itemId": "2",
+          "name": "Margherita Pizza",
+          "qty": 1,
+          "price": 199
+        }
+      ],
+      "subtotal": 298,
+      "gst": 14.9,
+      "total": 312.9,
+      "paymentMethod": "Cash",
+      "paymentStatus": "Billed",
+      "status": "Accepted",
+      "createdAt": "2026-11-13T16:15:46.645Z",
+      "customerNote": "",
+      "kotNo": "KOT-546645",
+      "billNo": "RP-86546645"
+    },
+    {
+      "id": "e8bfe3fa-91e2-4c1b-b74b-11d020c1989c",
+      "orderNo": "QR-0000256",
+      "source": "QR",
+      "waiterName": "",
+      "type": "Dine In",
+      "tableId": "a2dc08ce-edda-4c9e-90f0-6d838088c404",
+      "tableName": "1",
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "items": [
+        {
+          "itemId": "1",
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 99
+        }
+      ],
+      "subtotal": 99,
+      "gst": 4.95,
+      "total": 103.95,
+      "paymentMethod": "Cash",
+      "paymentStatus": "Pending",
+      "status": "Completed",
+      "createdAt": "2026-11-11T20:46:40.256Z",
+      "customerNote": "",
+      "kotNo": "KOT-009566",
+      "billNo": "RP-30009566"
+    },
+    {
+      "id": "421f4b68-64bc-40b7-b237-8d7bd67a97ec",
+      "orderNo": "QR-5971941",
+      "source": "QR",
+      "type": "Dine In",
+      "tableId": "a2dc08ce-edda-4c9e-90f0-6d838088c404",
+      "tableName": "1",
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "items": [
+        {
+          "itemId": "1",
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 99
+        }
+      ],
+      "subtotal": 99,
+      "gst": 4.95,
+      "total": 103.95,
+      "paymentMethod": "Cash",
+      "paymentStatus": "Pay at Counter (Cash)",
+      "status": "Completed",
+      "createdAt": "2026-11-11T19:39:31.941Z",
+      "customerNote": "No onion ",
+      "updatedAt": "2026-11-11T19:39:58.231Z",
+      "kotNo": "KOT-998231",
+      "billNo": "RP-25998231",
+      "kotId": "63b5cc89-634b-46b5-8217-bc1f0d576081"
+    },
+    {
+      "id": "8ff971ce-02bf-4e3a-b7f4-8c7bd140b187",
+      "orderNo": "QR-5817912",
+      "source": "QR",
+      "type": "Dine In",
+      "tableId": "bbd5d987-0154-4ede-a1fb-0c92f5fd5e6a",
+      "tableName": "4",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "items": [
+        {
+          "itemId": "4",
+          "name": "Cold Coffee",
+          "qty": 2,
+          "price": 119
+        }
+      ],
+      "subtotal": 238,
+      "gst": 11.9,
+      "total": 249.9,
+      "paymentMethod": "Cash",
+      "paymentStatus": "Pay at Counter (Cash)",
+      "status": "Accepted",
+      "createdAt": "2026-11-11T19:36:57.912Z",
+      "customerNote": "",
+      "updatedAt": "2026-11-11T19:37:20.869Z",
+      "kotNo": "KOT-840869",
+      "billNo": "RP-25840869",
+      "kotId": "9f0bce45-0630-462c-87fa-a5ced19072a8"
+    },
+    {
+      "id": "3ca10f14-9912-4337-be7f-a466918c8046",
+      "orderNo": "QR-5788315",
+      "source": "QR",
+      "type": "Dine In",
+      "tableId": "53e415b7-a76c-4fa5-bcaa-4efaa3332d26",
+      "tableName": "7",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "items": [
+        {
+          "itemId": "1",
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 99
+        },
+        {
+          "itemId": "2",
+          "name": "Margherita Pizza",
+          "qty": 1,
+          "price": 199
+        },
+        {
+          "itemId": "3",
+          "name": "Masala Dosa",
+          "qty": 1,
+          "price": 129
+        }
+      ],
+      "subtotal": 427,
+      "gst": 21.35,
+      "total": 448.35,
+      "paymentMethod": "Cash",
+      "paymentStatus": "Pay at Counter (Cash)",
+      "status": "Ready",
+      "createdAt": "2026-11-11T19:36:28.316Z",
+      "customerNote": "",
+      "updatedAt": "2026-11-11T19:37:21.637Z",
+      "kotNo": "KOT-841637",
+      "billNo": "RP-25841637",
+      "kotId": "c08303bc-f310-4beb-b996-4407842488d6"
+    }
+  ],
+  "kot": [
+    {
+      "id": "479df4e9-eb31-42a7-8866-bc2241cc763b",
+      "kotNo": "KOT-930561",
+      "billNo": "RP-87930561",
+      "orderId": "b95f21e4-4616-4b28-8c3b-d0be4afcfe5a",
+      "orderNo": "QR-7895550",
+      "tableName": "5",
+      "orderType": "Dine In",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "items": [
+        {
+          "itemId": "1",
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 99
+        },
+        {
+          "itemId": "2",
+          "name": "Margherita Pizza",
+          "qty": 7,
+          "price": 199
+        },
+        {
+          "itemId": "3",
+          "name": "Masala Dosa",
+          "qty": 1,
+          "price": 129
+        },
+        {
+          "itemId": "4",
+          "name": "Cold Coffee",
+          "qty": 2,
+          "price": 119
+        }
+      ],
+      "customerNote": "",
+      "total": 1951.95,
+      "status": "New",
+      "createdAt": "2026-11-13T16:38:50.562Z"
+    },
+    {
+      "id": "c1f27f41-28e9-422c-aac6-92690c71ffbe",
+      "kotNo": "KOT-546645",
+      "billNo": "RP-86546645",
+      "orderId": "9051ce02-7d1d-45fa-9278-25afbe79a47a",
+      "orderNo": "ORD-6546645",
+      "tableName": "1",
+      "orderType": "Dine In (Captain)",
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "items": [
+        {
+          "itemId": "1",
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 99
+        },
+        {
+          "itemId": "2",
+          "name": "Margherita Pizza",
+          "qty": 1,
+          "price": 199
+        }
+      ],
+      "customerNote": "",
+      "total": 312.9,
+      "status": "New",
+      "createdAt": "2026-11-13T16:15:46.645Z"
+    },
+    {
+      "id": "529165fd-f3b6-4c0e-a253-94a4f0370b36",
+      "kotNo": "KOT-009566",
+      "billNo": "RP-30009566",
+      "orderId": "e8bfe3fa-91e2-4c1b-b74b-11d020c1989c",
+      "orderNo": "QR-0000256",
+      "tableName": "1",
+      "orderType": "Dine In",
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "items": [
+        {
+          "itemId": "1",
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 99
+        }
+      ],
+      "customerNote": "",
+      "total": 103.95,
+      "status": "Completed",
+      "createdAt": "2026-11-11T20:46:49.566Z"
+    },
+    {
+      "id": "63b5cc89-634b-46b5-8217-bc1f0d576081",
+      "kotNo": "KOT-998231",
+      "billNo": "RP-25998231",
+      "orderId": "421f4b68-64bc-40b7-b237-8d7bd67a97ec",
+      "orderNo": "QR-5971941",
+      "tableName": "1",
+      "orderType": "Dine In",
+      "outlet": "RestaurantPro - Arunachal Pradesh",
+      "items": [
+        {
+          "itemId": "1",
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 99
+        }
+      ],
+      "customerNote": "No onion ",
+      "total": 103.95,
+      "status": "Completed",
+      "createdAt": "2026-11-11T19:39:58.231Z"
+    },
+    {
+      "id": "c08303bc-f310-4beb-b996-4407842488d6",
+      "kotNo": "KOT-841637",
+      "billNo": "RP-25841637",
+      "orderId": "3ca10f14-9912-4337-be7f-a466918c8046",
+      "orderNo": "QR-5788315",
+      "tableName": "7",
+      "orderType": "Dine In",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "items": [
+        {
+          "itemId": "1",
+          "name": "Veg Burger",
+          "qty": 1,
+          "price": 99
+        },
+        {
+          "itemId": "2",
+          "name": "Margherita Pizza",
+          "qty": 1,
+          "price": 199
+        },
+        {
+          "itemId": "3",
+          "name": "Masala Dosa",
+          "qty": 1,
+          "price": 129
+        }
+      ],
+      "customerNote": "",
+      "total": 448.35,
+      "status": "Ready",
+      "createdAt": "2026-11-11T19:37:21.637Z"
+    },
+    {
+      "id": "9f0bce45-0630-462c-87fa-a5ced19072a8",
+      "kotNo": "KOT-840869",
+      "billNo": "RP-25840869",
+      "orderId": "8ff971ce-02bf-4e3a-b7f4-8c7bd140b187",
+      "orderNo": "QR-5817912",
+      "tableName": "4",
+      "orderType": "Dine In",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "items": [
+        {
+          "itemId": "4",
+          "name": "Cold Coffee",
+          "qty": 2,
+          "price": 119
+        }
+      ],
+      "customerNote": "",
+      "total": 249.9,
+      "status": "New",
+      "createdAt": "2026-11-11T19:37:20.869Z"
+    }
+  ],
+  "staffUsers": [
+    {
+      "id": "a19b3f33-cef1-428e-856f-4baf0b5437ff",
+      "role": "Captain",
+      "phone": "8755925082",
+      "password": "1234",
+      "outlet": "RestaurantPro - Arunachal Pradesh"
+    }
+  ],
+  "posUsers": [
+    {
+      "id": "d393934b-cf2f-4e7e-a03b-1175d84e35b5",
+      "name": "arun",
+      "phone": "8755925082",
+      "password": "1234",
+      "outlet": "RestaurantPro - Arunachal Pradesh"
+    }
+  ],
+  "sops": [
+    {
+      "id": "sop-1794507601612",
+      "role": "Waiter",
+      "title": "waiter",
+      "time": "Daily",
+      "steps": [
+        "tale Step 1",
+        "hand wash 2"
+      ],
+      "mcqs": []
+    },
+    {
+      "id": "sop-1794507570047",
+      "role": "Waiter",
+      "title": "",
+      "time": "Daily",
+      "steps": [
+        "1. hand wash",
+        "2. table set"
+      ],
+      "mcqs": []
+    },
+    {
+      "id": "sop-1794433228334",
+      "role": "Waiter",
+      "title": "service",
+      "time": "Daily",
+      "steps": [
+        "Step 1",
+        "Step 2"
+      ],
+      "mcqs": [
+        {
+          "q": "Sample Question?",
+          "opts": [
+            "Opt A",
+            "Opt B",
+            "Opt C",
+            "Opt D"
+          ],
+          "ans": 0
+        }
+      ]
+    },
+    {
+      "id": "sop-1",
+      "role": "Unit Manager",
+      "title": "Daily Outlet Opening & Closing Audit",
+      "time": "08:30 AM - 10:30 PM",
+      "steps": [
+        "Check kitchen hygiene & chiller temperatures (below 4°C)",
+        "Verify POS cash float & staff grooming checklist",
+        "Review daily sales target & KDS speed with Shift Manager"
+      ],
+      "mcqs": [
+        {
+          "q": "Chiller ka ideal temperature kya hona chahiye?",
+          "opts": [
+            "15°C",
+            "4°C se kam",
+            "25°C",
+            "10°C"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-2",
+      "role": "Cashier",
+      "title": "POS Billing & Cash Drawer Reconciliation",
+      "time": "Shift Start & End",
+      "steps": [
+        "Count opening cash float before first bill",
+        "Verify UPI payment alert before closing QR order",
+        "Tally Z-Report with physical cash & card slips"
+      ],
+      "mcqs": [
+        {
+          "q": "QR UPI order accept karne se pehle kya check karein?",
+          "opts": [
+            "Customer naam",
+            "Payment verification / UPI receipt",
+            "Table color",
+            "Kuch nahi"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-3",
+      "role": "Sweet Boy",
+      "title": "Sweet Counter Display & Hygiene SOP",
+      "time": "09:00 AM Daily",
+      "steps": [
+        "Wipe glass counter with food-grade sanitizer",
+        "Arrange fresh trays using FIFO (First-In, First-Out)",
+        "Always wear gloves & hairnet while packing sweets"
+      ],
+      "mcqs": [
+        {
+          "q": "Mithai counter par kaun sa rule follow hota hai?",
+          "opts": [
+            "LIFO",
+            "FIFO (First-In, First-Out)",
+            "Random",
+            "Koi nahi"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-4",
+      "role": "Chaat Boy",
+      "title": "Chaat Counter Prep & Crispness SOP",
+      "time": "11:00 AM Daily",
+      "steps": [
+        "Check freshness & cold temperature of curd and chutneys",
+        "Keep puris in airtight moisture-free containers",
+        "Assemble chaat only after KOT arrives so it stays crispy"
+      ],
+      "mcqs": [
+        {
+          "q": "Chaat assemble kab karni chahiye?",
+          "opts": [
+            "Subah bana kar rakh dein",
+            "KOT order aane ke turant baad",
+            "2 ghante pehle",
+            "Kabhi bhi"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-5",
+      "role": "Housekeeping",
+      "title": "30-Minute Dining & Washroom Sanitization",
+      "time": "Every 30 Mins",
+      "steps": [
+        "Sanitize dining tables immediately after guest leaves",
+        "Check and clean guest washrooms every 30 minutes",
+        "Keep wet-floor caution sign during mopping"
+      ],
+      "mcqs": [
+        {
+          "q": "Guest washroom ki safai kitni der mein check honi chahiye?",
+          "opts": [
+            "Din mein ek baar",
+            "Har 30 minute mein",
+            "Sirf raat ko",
+            "Hafte mein"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-6",
+      "role": "Waiter",
+      "title": "3-Minute Guest Greeting & Table Service",
+      "time": "Service Hours",
+      "steps": [
+        "Greet guest with smile & serve water within 3 minutes",
+        "Repeat order clearly before punching or serving",
+        "Clear empty plates within 2 minutes of meal completion"
+      ],
+      "mcqs": [
+        {
+          "q": "Guest baithne ke kitni der mein water & greeting honi chahiye?",
+          "opts": [
+            "15 minute",
+            "3 minute ke andar",
+            "30 minute",
+            "Order ke baad"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-7",
+      "role": "Captain",
+      "title": "Floor Management & Upselling SOP",
+      "time": "Service Hours",
+      "steps": [
+        "Assign tables evenly and monitor peak hour waiting",
+        "Suggest signature dishes, sweets or shakes while taking order",
+        "Verify KDS ready alerts and ensure hot food delivery"
+      ],
+      "mcqs": [
+        {
+          "q": "Order lete samay Captain ko kya suggest karna chahiye?",
+          "opts": [
+            "Kuch nahi",
+            "Signature dishes, shakes ya sweets (Upselling)",
+            "Sirf paani",
+            "Bill"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-8",
+      "role": "Shift Manager",
+      "title": "Peak Hour KDS & Floor Handover SOP",
+      "time": "Shift Change",
+      "steps": [
+        "Conduct 10-minute pre-shift briefing with all staff",
+        "Monitor KDS ticket timer (target under 12 mins)",
+        "Log pending maintenance or stock shortage in handover book"
+      ],
+      "mcqs": [
+        {
+          "q": "KDS par average order preparation target kitna hona chahiye?",
+          "opts": [
+            "45 mins",
+            "12 mins se kam",
+            "30 mins",
+            "1 ghanta"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-9",
+      "role": "Chef",
+      "title": "Standardized Recipe & Zero-Wastage SOP",
+      "time": "Kitchen Hours",
+      "steps": [
+        "Follow exact gram & spoon measurements from Recipe Book",
+        "Check garnish and plate rim cleanliness before pass",
+        "Record any spoilage or wastage in kitchen log"
+      ],
+      "mcqs": [
+        {
+          "q": "Har outlet par same taste rakhne ke liye kya zaroori hai?",
+          "opts": [
+            "Andaze se masale",
+            "Exact gram aur spoon size follow karna",
+            "Tez aanch",
+            "Koi nahi"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-10",
+      "role": "Helper",
+      "title": "Vegetable Prep & Dishwashing Sanitization",
+      "time": "08:00 AM - Closing",
+      "steps": [
+        "Wash vegetables in food-grade chlorine/salt water",
+        "Follow 3-sink dishwashing (Wash -> Rinse -> Sanitize)",
+        "Empty kitchen dustbins whenever 75% full"
+      ],
+      "mcqs": [
+        {
+          "q": "Kitchen dustbin kab khali karna chahiye?",
+          "opts": [
+            "Overload hone par",
+            "75% bharne par",
+            "Agle din",
+            "Hafte mein"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-11",
+      "role": "Admin",
+      "title": "Attendance, Compliance & License Audit",
+      "time": "Daily / Monthly",
+      "steps": [
+        "Verify biometric/app punch-in and shift roster daily",
+        "Track FSSAI, Fire Safety, and Pest Control renewal dates",
+        "Maintain updated KYC & employee files"
+      ],
+      "mcqs": [
+        {
+          "q": "Staff attendance kab verify honi chahiye?",
+          "opts": [
+            "Mahine ke ant mein",
+            "Daily (Rozana)",
+            "Saal mein ek baar",
+            "Kabhi nahi"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-12",
+      "role": "Accounts",
+      "title": "Daily Sales & Expense Reconciliation",
+      "time": "Next Day 11:00 AM",
+      "steps": [
+        "Match POS net sales with Bank UPI/Card settlements",
+        "Verify petty cash vouchers with physical bills",
+        "Generate monthly payroll & advance deductions"
+      ],
+      "mcqs": [
+        {
+          "q": "POS UPI/Card sales ko kisse match kiya jata hai?",
+          "opts": [
+            "Kitchen KOT se",
+            "Bank settlement statement se",
+            "Menu se",
+            "Table se"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "sop-13",
+      "role": "Raw Store Manager",
+      "title": "FIFO Stock Issue & Expiry Control SOP",
+      "time": "09:00 AM - 06:00 PM",
+      "steps": [
+        "Weigh and check quality of every incoming vendor delivery",
+        "Label all dry & cold items with receiving & expiry date",
+        "Issue older batch stock first (FIFO)"
+      ],
+      "mcqs": [
+        {
+          "q": "Vendor se maal aane par sabse pehle kya karein?",
+          "opts": [
+            "Seedha store mein rakhein",
+            "Wajan aur quality check karein",
+            "Phek dein",
+            "Bill faad dein"
+          ],
+          "ans": 1
+        }
+      ]
+    }
+  ],
+  "recipes": [
+    {
+      "id": "rec-1794507612671",
+      "category": "South Indian",
+      "name": "chole",
+      "photo": "https://unsplash.com",
+      "prepTime": "10 Mins",
+      "yieldQty": "1 Portion",
+      "ingredients": [
+        {
+          "item": "Item",
+          "qty": 100,
+          "unit": "gm",
+          "spoon": "1 Ladle"
+        }
+      ],
+      "steps": [],
+      "mcqs": []
+    },
+    {
+      "id": "rec-1794507120320",
+      "category": "North Indian",
+      "name": "chole",
+      "photo": "https://unsplash.com",
+      "prepTime": "10 Mins",
+      "yieldQty": "1 Portion",
+      "ingredients": [
+        {
+          "item": "namak-50gm",
+          "qty": 0,
+          "unit": "gm",
+          "spoon": "1 Spoon"
+        },
+        {
+          "item": "chini 10gm",
+          "qty": 0,
+          "unit": "gm",
+          "spoon": "1 Spoon"
+        }
+      ],
+      "steps": [],
+      "mcqs": []
+    },
+    {
+      "id": "rec-1794433244192",
+      "category": "South Indian",
+      "name": "",
+      "photo": "https://unsplash.com",
+      "prepTime": "10 Mins",
+      "yieldQty": "1 Portion",
+      "ingredients": [
+        {
+          "item": "Main Item",
+          "qty": 100,
+          "unit": "gm",
+          "spoon": "1 Ladle"
+        }
+      ],
+      "steps": [
+        "Step 1"
+      ],
+      "mcqs": [
+        {
+          "q": "Recipe Question?",
+          "opts": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "ans": 0
+        }
+      ]
+    },
+    {
+      "id": "rec-1",
+      "category": "South Indian",
+      "name": "Masala Dosa",
+      "photo": "https://unsplash.com",
+      "prepTime": "6 Mins",
+      "yieldQty": "1 Plate",
+      "ingredients": [
+        {
+          "item": "Fermented Dosa Batter",
+          "qty": 120,
+          "unit": "ml",
+          "spoon": "1 Full Soup Ladle (120ml)"
+        },
+        {
+          "item": "Spiced Potato Masala",
+          "qty": 90,
+          "unit": "gm",
+          "spoon": "2 Ice-Cream Scoops"
+        },
+        {
+          "item": "Pure Desi Ghee",
+          "qty": 15,
+          "unit": "ml",
+          "spoon": "1 Table Spoon (15ml)"
+        }
+      ],
+      "steps": [
+        "Heat tawa to 200°C and sprinkle light water.",
+        "Pour 1 full ladle (120ml) batter and spread thin.",
+        "Add 1 Table Spoon ghee, 2 scoops masala in center and fold crisp."
+      ],
+      "mcqs": [
+        {
+          "q": "1 Masala Dosa ke liye kitna batter ladle use hota hai?",
+          "opts": [
+            "50ml",
+            "1 Full Ladle (120ml)",
+            "300ml",
+            "1 Tea Spoon"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "rec-2",
+      "category": "South Indian",
+      "name": "Paneer Dosa",
+      "photo": "https://unsplash.com",
+      "prepTime": "7 Mins",
+      "yieldQty": "1 Plate",
+      "ingredients": [
+        {
+          "item": "Dosa Batter",
+          "qty": 120,
+          "unit": "ml",
+          "spoon": "1 Full Ladle (120ml)"
+        },
+        {
+          "item": "Grated Malai Paneer",
+          "qty": 80,
+          "unit": "gm",
+          "spoon": "1 Katori / Cup"
+        },
+        {
+          "item": "Chopped Onion & Capsicum",
+          "qty": 40,
+          "unit": "gm",
+          "spoon": "2 Table Spoons"
+        }
+      ],
+      "steps": [
+        "Spread 120ml batter on medium-hot tawa.",
+        "Top with grated paneer, onion, capsicum and roast golden brown."
+      ],
+      "mcqs": [
+        {
+          "q": "Paneer Dosa mein kitna grated paneer dalta hai?",
+          "opts": [
+            "20gm",
+            "80gm (1 Cup)",
+            "250gm",
+            "5gm"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "rec-3",
+      "category": "South Indian",
+      "name": "Pyaz (Onion) Dosa",
+      "photo": "https://unsplash.com",
+      "prepTime": "6 Mins",
+      "yieldQty": "1 Plate",
+      "ingredients": [
+        {
+          "item": "Dosa Batter",
+          "qty": 120,
+          "unit": "ml",
+          "spoon": "1 Full Ladle"
+        },
+        {
+          "item": "Finely Chopped Onion",
+          "qty": 50,
+          "unit": "gm",
+          "spoon": "3 Table Spoons"
+        },
+        {
+          "item": "Oil / Ghee",
+          "qty": 15,
+          "unit": "ml",
+          "spoon": "1 Table Spoon"
+        }
+      ],
+      "steps": [
+        "Sprinkle chopped onion and coriander on hot tawa.",
+        "Pour 1 ladle batter over onions and roast crisp."
+      ],
+      "mcqs": [
+        {
+          "q": "Pyaz Dosa mein kitna chopped onion padta hai?",
+          "opts": [
+            "5gm",
+            "50gm (3 Table Spoons)",
+            "200gm",
+            "1kg"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "rec-4",
+      "category": "North Indian",
+      "name": "Paneer Butter Masala",
+      "photo": "https://unsplash.com",
+      "prepTime": "10 Mins",
+      "yieldQty": "1 Full Portion (450gm)",
+      "ingredients": [
+        {
+          "item": "Fresh Paneer Cubes",
+          "qty": 200,
+          "unit": "gm",
+          "spoon": "12 Equal Cubes"
+        },
+        {
+          "item": "Makhani Tomato Gravy",
+          "qty": 220,
+          "unit": "gm",
+          "spoon": "2 Full Serving Ladles"
+        },
+        {
+          "item": "Amul Butter & Cream",
+          "qty": 35,
+          "unit": "gm",
+          "spoon": "2 Table Spoons"
+        }
+      ],
+      "steps": [
+        "Simmer 2 ladles makhani gravy with butter for 3 minutes.",
+        "Add 12 paneer cubes, kasuri methi and fresh cream."
+      ],
+      "mcqs": [
+        {
+          "q": "Paneer Butter Masala ke 1 full portion mein kitne paneer cubes hote hain?",
+          "opts": [
+            "4 cubes",
+            "12 Equal Cubes (200gm)",
+            "25 cubes",
+            "2 cubes"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "rec-5",
+      "category": "Continental",
+      "name": "Margherita Thin Crust Pizza",
+      "photo": "https://unsplash.com",
+      "prepTime": "9 Mins",
+      "yieldQty": "10 Inch Pizza",
+      "ingredients": [
+        {
+          "item": "Pizza Dough Base",
+          "qty": 180,
+          "unit": "gm",
+          "spoon": "1 Stretched Ball"
+        },
+        {
+          "item": "Herb Pizza Sauce",
+          "qty": 60,
+          "unit": "gm",
+          "spoon": "1 Medium Ladle (60ml)"
+        },
+        {
+          "item": "Mozzarella Cheese",
+          "qty": 110,
+          "unit": "gm",
+          "spoon": "1 Full Measuring Cup"
+        }
+      ],
+      "steps": [
+        "Spread 60gm pizza sauce leaving 1cm border.",
+        "Top with 110gm mozzarella cheese and bake at 260°C for 6-7 mins."
+      ],
+      "mcqs": [
+        {
+          "q": "10-inch Pizza par kitni Mozzarella cheese padti hai?",
+          "opts": [
+            "30gm",
+            "110gm (1 Full Cup)",
+            "400gm",
+            "10gm"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "rec-6",
+      "category": "Chaat",
+      "name": "Crisp Aloo Tikki Chaat",
+      "photo": "https://unsplash.com",
+      "prepTime": "5 Mins",
+      "yieldQty": "2 Tikkis / Plate",
+      "ingredients": [
+        {
+          "item": "Stuffed Potato Tikkis",
+          "qty": 160,
+          "unit": "gm",
+          "spoon": "2 Pieces (80gm each)"
+        },
+        {
+          "item": "Sweet Beaten Curd",
+          "qty": 60,
+          "unit": "ml",
+          "spoon": "1 Small Ladle"
+        },
+        {
+          "item": "Saunth & Mint Chutney",
+          "qty": 40,
+          "unit": "ml",
+          "spoon": "2 Table Spoons each"
+        }
+      ],
+      "steps": [
+        "Crisp fry 2 tikkis on tawa until golden brown.",
+        "Pour 1 ladle curd, 2 tbsp sweet chutney, 2 tbsp green chutney and sev."
+      ],
+      "mcqs": [
+        {
+          "q": "1 Plate Aloo Tikki Chaat mein kitni tikkis hoti hain?",
+          "opts": [
+            "1 Tikki",
+            "2 Pieces (80gm each)",
+            "5 Tikkis",
+            "4 Tikkis"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "rec-7",
+      "category": "Shakes",
+      "name": "Thick Cafe Cold Coffee",
+      "photo": "https://unsplash.com",
+      "prepTime": "3 Mins",
+      "yieldQty": "350 ml Glass",
+      "ingredients": [
+        {
+          "item": "Chilled Full-Cream Milk",
+          "qty": 220,
+          "unit": "ml",
+          "spoon": "1 Measuring Mug"
+        },
+        {
+          "item": "Coffee Powder",
+          "qty": 8,
+          "unit": "gm",
+          "spoon": "1.5 Tea Spoons"
+        },
+        {
+          "item": "Vanilla Ice Cream",
+          "qty": 60,
+          "unit": "gm",
+          "spoon": "1 Full Ice-Cream Scoop"
+        }
+      ],
+      "steps": [
+        "Blend milk, coffee, sugar and ice cubes for 35 seconds until frothy.",
+        "Top with 1 full scoop vanilla ice cream."
+      ],
+      "mcqs": [
+        {
+          "q": "Thick Cold Coffee mein kitna Vanilla Ice Cream dalta hai?",
+          "opts": [
+            "Kuch nahi",
+            "1 Full Scoop (60gm)",
+            "5 Scoops",
+            "1 Tea Spoon"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "rec-8",
+      "category": "Ghee Sweet",
+      "name": "Pure Desi Ghee Motichoor Ladoo",
+      "photo": "https://unsplash.com",
+      "prepTime": "25 Mins",
+      "yieldQty": "1 Kg (22 Ladoos)",
+      "ingredients": [
+        {
+          "item": "Fine Besan",
+          "qty": 350,
+          "unit": "gm",
+          "spoon": "Standard Batch Weight"
+        },
+        {
+          "item": "Pure Cow Desi Ghee",
+          "qty": 400,
+          "unit": "gm",
+          "spoon": "Frying + 2 Tbsp Bind"
+        },
+        {
+          "item": "Sugar Syrup (1-Thread)",
+          "qty": 450,
+          "unit": "gm",
+          "spoon": "Exact Ratio"
+        }
+      ],
+      "steps": [
+        "Fry micro boondi in pure desi ghee on medium heat.",
+        "Soak in warm 1-thread sugar syrup and shape 45gm uniform ladoos."
+      ],
+      "mcqs": [
+        {
+          "q": "1 Kg mein kitne standard Motichoor Ladoo bante hain?",
+          "opts": [
+            "10 Ladoos",
+            "22 Ladoos (approx 45gm each)",
+            "50 Ladoos",
+            "5 Ladoos"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "rec-9",
+      "category": "Chhena Sweet",
+      "name": "Kesar Rasmalai",
+      "photo": "https://unsplash.com",
+      "prepTime": "30 Mins",
+      "yieldQty": "10 Portions (20 Pcs)",
+      "ingredients": [
+        {
+          "item": "Soft Chhena Patties",
+          "qty": 500,
+          "unit": "gm",
+          "spoon": "20 Sponge Discs"
+        },
+        {
+          "item": "Reduced Kesar Rabri",
+          "qty": 1000,
+          "unit": "ml",
+          "spoon": "100ml per Portion"
+        }
+      ],
+      "steps": [
+        "Boil chhena discs in light sugar syrup for 12 mins.",
+        "Soak in chilled kesar-pista rabri for 3 hours before serving."
+      ],
+      "mcqs": [
+        {
+          "q": "1 Portion Rasmalai mein kitni rabri aur pieces serve hote hain?",
+          "opts": [
+            "1 piece + 20ml",
+            "2 Sponge Discs + 100ml Rabri",
+            "5 pieces",
+            "500ml"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "rec-10",
+      "category": "Khoya Sweet",
+      "name": "Ajmeri Kalakand",
+      "photo": "https://unsplash.com",
+      "prepTime": "25 Mins",
+      "yieldQty": "1 Kg Tray",
+      "ingredients": [
+        {
+          "item": "Fresh Danedar Khoya / Chhena",
+          "qty": 850,
+          "unit": "gm",
+          "spoon": "Batch Weight"
+        },
+        {
+          "item": "Castor Sugar",
+          "qty": 220,
+          "unit": "gm",
+          "spoon": "Gradual Mix"
+        }
+      ],
+      "steps": [
+        "Roast khoya and moist chhena on low-medium flame.",
+        "Set in greased tray 1.2-inch thick and cut into squares."
+      ],
+      "mcqs": [
+        {
+          "q": "Kalakand ko tray mein kitna mota (thick) set kiya jata hai?",
+          "opts": [
+            "0.2 inch",
+            "1.2 inch thick",
+            "5 inch",
+            "Paper thin"
+          ],
+          "ans": 1
+        }
+      ]
+    },
+    {
+      "id": "rec-11",
+      "category": "Kaju Sweet",
+      "name": "Royal Kaju Katli",
+      "photo": "https://unsplash.com",
+      "prepTime": "20 Mins",
+      "yieldQty": "1 Kg (45 Diamonds)",
+      "ingredients": [
+        {
+          "item": "Fine Cashew Powder",
+          "qty": 650,
+          "unit": "gm",
+          "spoon": "Sieved Fine Powder"
+        },
+        {
+          "item": "Sugar + Water Syrup",
+          "qty": 350,
+          "unit": "gm",
+          "spoon": "1-Thread Chashni"
+        }
+      ],
+      "steps": [
+        "Cook sieved cashew powder in 1-thread sugar syrup until dough leaves pan.",
+        "Roll to 4mm uniform thickness and cut into diamond shapes."
+      ],
+      "mcqs": [
+        {
+          "q": "Royal Kaju Katli ko kitna patla roll kiya jata hai?",
+          "opts": [
+            "15mm",
+            "4mm uniform thickness",
+            "20mm",
+            "1 inch"
+          ],
+          "ans": 1
+        }
+      ]
+    }
+  ],
+  "trainingStaff": [
+    {
+      "id": "b999a88f-ae54-400b-ab40-f34468c3a2f4",
+      "empId": "23456",
+      "name": "arun",
+      "role": "Unit Manager",
+      "outlet": "Main Outlet",
+      "password": "1234",
+      "recipeCats": [
+        "All"
+      ]
+    },
+    {
+      "id": "cff5cc60-e449-429b-bf09-2ac5871ab695",
+      "empId": "2222",
+      "name": "rohir",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "password": "1234",
+      "recipeCats": [
+        "All"
+      ]
+    },
+    {
+      "id": "b9a1cf23-02fd-4ac9-8355-54686e87b282",
+      "empId": "23453",
+      "name": "rohir",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "password": "1234",
+      "recipeCats": [
+        "All"
+      ]
+    }
+  ],
+  "trainingResults": [
+    {
+      "id": "6ba4334f-92fd-443b-8863-1fb2317cd81c",
+      "empId": "12345",
+      "name": "arunttt",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "Masala Dosa",
+      "scorePct": 100,
+      "stars": 5,
+      "promoStatus": "Ready for Promotion",
+      "submittedAt": "2026-11-12T19:06:16.705Z"
+    },
+    {
+      "id": "bc58e704-89a8-42ea-8c0b-45b730656bd1",
+      "empId": "12345",
+      "name": "arunttt",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "arun",
+      "scorePct": 50,
+      "stars": 2,
+      "promoStatus": "Retraining Needed",
+      "submittedAt": "2026-11-12T19:04:46.509Z"
+    },
+    {
+      "id": "e3b4323d-53e8-4010-aade-1aa9ae24e119",
+      "empId": "12345",
+      "name": "arunttt",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "Daily Outlet Opening & Closing Audit",
+      "scorePct": 100,
+      "stars": 5,
+      "promoStatus": "Ready for Promotion",
+      "submittedAt": "2026-11-12T18:59:50.467Z"
+    },
+    {
+      "id": "7f16e57a-2c18-4c6f-9b47-3c31b87999b6",
+      "empId": "1234",
+      "name": "arunar",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "Masala Dosa",
+      "scorePct": 100,
+      "stars": 5,
+      "promoStatus": "Ready for Promotion",
+      "submittedAt": "2026-11-12T18:58:01.838Z"
+    },
+    {
+      "id": "6d3cc3fe-6fbc-424e-84a9-3a2de891106f",
+      "empId": "1234",
+      "name": "arunar",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "Masala Dosa",
+      "scorePct": 50,
+      "stars": 2,
+      "promoStatus": "Retraining Needed",
+      "submittedAt": "2026-11-12T18:57:21.065Z"
+    },
+    {
+      "id": "c7b8ff95-a9bd-49b2-a38c-9c836af060df",
+      "empId": "1234",
+      "name": "arunar",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "Masala Dosa",
+      "scorePct": 50,
+      "stars": 2,
+      "promoStatus": "Retraining Needed",
+      "submittedAt": "2026-11-12T18:56:52.957Z"
+    },
+    {
+      "id": "f6b9f6a4-d0e2-4906-aa40-8c46455c0883",
+      "empId": "1234",
+      "name": "arunar",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "Standardized Recipe & Zero Wastage",
+      "scorePct": 100,
+      "stars": 5,
+      "promoStatus": "Ready for Promotion",
+      "submittedAt": "2026-11-12T18:51:14.626Z"
+    },
+    {
+      "id": "4c95560a-8b14-4912-97f2-d147dd52d4b4",
+      "empId": "1234",
+      "name": "arunar",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "3-Minute Guest Greeting & Service",
+      "scorePct": 100,
+      "stars": 5,
+      "promoStatus": "Ready for Promotion",
+      "submittedAt": "2026-11-12T18:51:11.216Z"
+    },
+    {
+      "id": "8266587a-1e4c-456e-b2b5-9825c50c7e2a",
+      "empId": "1234",
+      "name": "arunar",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "Chaat Prep & Crispness SOP",
+      "scorePct": 100,
+      "stars": 5,
+      "promoStatus": "Ready for Promotion",
+      "submittedAt": "2026-11-12T18:51:08.107Z"
+    },
+    {
+      "id": "fb5469b5-6fd9-4db8-88c3-17866c8aa55a",
+      "empId": "1234",
+      "name": "arunar",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "Sweet Counter Display & FIFO Rule",
+      "scorePct": 100,
+      "stars": 5,
+      "promoStatus": "Ready for Promotion",
+      "submittedAt": "2026-11-12T18:51:04.594Z"
+    },
+    {
+      "id": "a313a564-d234-4510-b230-4839bb527f33",
+      "empId": "1234",
+      "name": "arunar",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "POS Billing & Cash Drawer Tally",
+      "scorePct": 100,
+      "stars": 5,
+      "promoStatus": "Ready for Promotion",
+      "submittedAt": "2026-11-12T18:51:01.320Z"
+    },
+    {
+      "id": "dffff17f-fb9c-483c-a4a6-d733afb779f8",
+      "empId": "1234",
+      "name": "arunar",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "Daily Outlet Opening & Closing Audit",
+      "scorePct": 100,
+      "stars": 5,
+      "promoStatus": "Ready for Promotion",
+      "submittedAt": "2026-11-12T18:50:44.256Z"
+    },
+    {
+      "id": "a8c976a1-c57d-43ed-be79-25864b8a0249",
+      "empId": "1234",
+      "name": "arunar",
+      "role": "Unit Manager",
+      "outlet": "RestaurantPro - Andhra Pradesh",
+      "moduleTitle": "Daily Outlet Opening & Closing Audit",
+      "scorePct": 0,
+      "stars": 2,
+      "promoStatus": "Retraining Needed",
+      "submittedAt": "2026-11-12T18:50:32.909Z"
+    }
+  ]
+}

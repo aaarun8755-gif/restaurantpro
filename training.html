@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Training & Promotion Academy</title>
+<style>
+:root{--bg:#f4f7f6;--card:#fff;--ink:#132a25;--muted:#5c726d;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59;--soft:#eef6f4}
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink)}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.wrap{max-width:1440px;margin:auto;padding:18px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:12px;padding:14px}
+.kpi small{color:var(--muted);font-size:11px;font-weight:700}.kpi strong{display:block;font-size:24px;margin-top:4px}
+.big2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.hero{background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:18px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.hero.active{border-color:var(--teal);background:var(--soft)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:#f8faf9;padding:5px 11px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer}
+.chip.active{background:var(--teal);color:#fff}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.rcard{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.rcard img{width:100%;height:160px;object-fit:cover;background:#e2e8f0}.rcard .p{padding:12px}
+.btn{border:0;border-radius:7px;padding:7px 12px;background:var(--teal);color:#fff;font-weight:600;cursor:pointer;text-decoration:none;font-size:12px;display:inline-block}
+.btn.light{background:#fff;color:#0f766e;border:1px solid var(--line)}.btn.d{background:#fef2f2;color:#b91c1c}
+.btn.sm{padding:4px 8px;font-size:11px;margin:2px}
+table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #eef2f0;text-align:left;font-size:12.5px}
+.badge{padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#e6f4f1;color:var(--dark)}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:center;justify-content:center;padding:14px}
+.mbox{background:#fff;border-radius:12px;max-width:600px;width:100%;padding:18px;max-height:90vh;overflow-y:auto}
+input,select,textarea{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:7px;margin:4px 0 8px}
+@media(max-width:900px){.kpis,.big2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div><strong style="font-size:18px;color:var(--dark)">✦ RestaurantPro Academy &amp; Promotion Engine</strong><br><small id="hoBadge" style="color:var(--muted)"></small></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <select id="outletFilter" onchange="renderAll()" style="width:auto;margin:0;padding:6px 10px"><option value="All">All Outlets</option><option value="Head Office">Head Office</option><option value="RestaurantPro - Andhra Pradesh">Andhra Pradesh</option><option value="RestaurantPro - Arunachal Pradesh">Arunachal Pradesh</option><option value="Main Outlet">Main Outlet</option></select>
+    <a href="/training-app.html" target="_blank" class="btn">📱 Staff App ↗</a>
+    <a href="/index.html" class="btn light">← Dashboard</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="kpis">
+    <div class="kpi"><small>Total SOPs &amp; Recipes</small><strong id="kTotal">0</strong></div>
+    <div class="kpi"><small>Tests Completed</small><strong id="kDone" style="color:#15803d">0</strong></div>
+    <div class="kpi"><small>Tests Pending Staff</small><strong id="kPend" style="color:#b45309">0</strong></div>
+    <div class="kpi"><small>Ready for Promotion</small><strong id="kPromo" style="color:#1d4ed8">0</strong></div>
+  </div>
+  <div class="big2">
+    <div class="hero active" id="boxSop" onclick="switchTab('sop')"><div><h3 style="margin:0">📋 Role-Based SOPs (<span id="sopCnt">0</span>)</h3><small>Click to view all SOPs · View / Edit / Delete</small></div><span class="badge">Open SOPs →</span></div>
+    <div class="hero" id="boxRec" onclick="switchTab('rec')"><div><h3 style="margin:0">🍲 Standardized Recipes (<span id="recCnt">0</span>)</h3><small>Click to view all Recipes · Photo + Spoon Size</small></div><span class="badge">Open Recipes →</span></div>
+  </div>
+  <div class="card" id="sopSec">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0">All Department SOPs (<span id="sopCnt2">0</span>)</h3><button class="btn hoOnly" onclick="openSop()">+ Create SOP</button></div>
+    <div class="chips" id="roleChips"></div><div class="rgrid" id="sopGrid"></div>
+  </div>
+  <div class="card" id="recSec" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0">All Standardized Recipes (<span id="recCnt2">0</span>)</h3><button class="btn hoOnly" onclick="openRec()">+ Add Recipe (Upload Photo)</button></div>
+    <div class="chips" id="catChips"></div><div class="rgrid" id="recGrid"></div>
+  </div>
+  <div class="big2">
+    <div class="card"><h3 style="margin-top:0;color:#15803d">✅ Test Completed &amp; Rating</h3><table><thead><tr><th>Employee</th><th>Module</th><th>Score</th><th>Status</th></tr></thead><tbody id="doneBody"></tbody></table></div>
+    <div class="card"><h3 style="margin-top:0;color:#b45309">⏳ Test Pending Employees</h3><table><thead><tr><th>ID</th><th>Name</th><th>Outlet</th><th>Status</th></tr></thead><tbody id="pendBody"></tbody></table></div>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">🔐 Employee Users &amp; Rights (<span id="usrCnt">0</span> Users Created)</h3>
+    <form id="empForm" class="hoOnly" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;align-items:end;margin-bottom:12px">
+      <div><label style="font-size:11px">Emp ID *</label><input id="eId" placeholder="EMP-101" required style="margin:0"></div>
+      <div><label style="font-size:11px">Name *</label><input id="eName" placeholder="Rahul" required style="margin:0"></div>
+      <div><label style="font-size:11px">Role *</label><select id="eRole" style="margin:0"><option>Unit Manager</option><option>Shift Manager</option><option>Cashier</option><option>Captain</option><option>Waiter</option><option>Chef</option><option>Sweet Boy</option><option>Chaat Boy</option><option>Helper</option><option>Housekeeping</option><option>Admin</option><option>Accounts</option><option>Raw Store Manager</option></select></div>
+      <div><label style="font-size:11px">Outlet *</label><input id="eOut" value="RestaurantPro - Andhra Pradesh" required style="margin:0"></div>
+      <div><label style="font-size:11px">Pass &amp; Rights</label><div style="display:flex;gap:4px"><input id="ePass" placeholder="1234" required style="margin:0"><select id="eRight" style="margin:0"><option value="All">All Recipes</option><option value="South Indian">South Indian</option><option value="North Indian">North Indian</option><option value="Chaat">Chaat</option><option value="Sweets">Sweets</option><option value="None">SOPs Only</option></select></div></div>
+      <button class="btn" type="submit">＋ Create User</button>
+    </form>
+    <table><thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Outlet</th><th>Rights</th><th>View / Edit / Delete</th></tr></thead><tbody id="empBody"></tbody></table>
+  </div>
+</div>
+<div class="modal" id="viewModal"><div class="mbox" id="viewBox"></div></div>
+<div class="modal" id="editModal"><div class="mbox" id="editBox"></div></div>
+<script>
+const isHO = (localStorage.getItem('rpSelectedOutlet') || 'Head Office') === 'Head Office';
+hoBadge.textContent = isHO ? '● Head Office Master Mode' : '● Outlet View Only';
+if (!isHO) document.querySelectorAll('.hoOnly').forEach(e => e.style.display = 'none');
+
+const ROLES = ['All','Unit Manager','Cashier','Sweet Boy','Chaat Boy','Housekeeping','Waiter','Captain','Shift Manager','Chef','Helper','Admin','Accounts','Raw Store Manager'];
+const CATS = ['All','South Indian','North Indian','Continental','Chaat','Shakes','Ghee Sweet','Chhena Sweet','Khoya Sweet','Kaju Sweet'];
+
+const DEFAULT_DATA = {
+  sops: [
+    { id:'s1', role:'Unit Manager', title:'Daily Outlet Opening & Closing Audit', time:'08:30 AM', steps:['Check kitchen hygiene & chiller temp (<4°C)','Verify POS cash float & staff grooming'] },
+    { id:'s2', role:'Cashier', title:'POS Billing & Cash Drawer Tally', time:'Shift End', steps:['Count opening float before first bill','Verify UPI payment before closing QR order'] },
+    { id:'s3', role:'Sweet Boy', title:'Sweet Counter Display & FIFO Rule', time:'09:00 AM', steps:['Sanitize glass counter','Arrange fresh trays using FIFO rule & wear gloves'] },
+    { id:'s4', role:'Chaat Boy', title:'Chaat Prep & Crispness SOP', time:'11:00 AM', steps:['Keep curd & chutneys chilled','Assemble chaat only after KOT arrives'] },
+    { id:'s5', role:'Waiter', title:'3-Minute Guest Greeting & Service', time:'Service Hours', steps:['Greet guest & serve water within 3 mins','Clear empty plates within 2 mins'] },
+    { id:'s6', role:'Chef', title:'Standardized Recipe & Zero Wastage', time:'Kitchen Hours', steps:['Follow exact gram & spoon size from Recipe Book','Check plate garnish before pass'] }
+  ],
+  recipes: [
+    { id:'r1', category:'South Indian', name:'Masala Dosa', photo:'https://unsplash.com', prepTime:'6 Mins', ingredients:[{item:'Dosa Batter',qty:120,unit:'ml',spoon:'1 Full Ladle (120ml)'},{item:'Potato Masala',qty:90,unit:'gm',spoon:'2 Scoops'},{item:'Desi Ghee',qty:15,unit:'ml',spoon:'1 Table Spoon'}], steps:['Spread 1 ladle batter on hot tawa','Add ghee & 2 scoops masala, fold crisp'] },
+    { id:'r2', category:'South Indian', name:'Paneer Dosa', photo:'https://unsplash.com', prepTime:'7 Mins', ingredients:[{item:'Dosa Batter',qty:120,unit:'ml',spoon:'1 Full Ladle'},{item:'Grated Paneer',qty:80,unit:'gm',spoon:'1 Katori / Cup'}], steps:['Spread batter & top with grated paneer & spices'] },
+    { id:'r3', category:'North Indian', name:'Paneer Butter Masala', photo:'https://unsplash.com', prepTime:'10 Mins', ingredients:[{item:'Paneer Cubes',qty:200,unit:'gm',spoon:'12 Equal Cubes'},{item:'Makhani Gravy',qty:220,unit:'gm',spoon:'2 Full Ladles'}], steps:['Simmer gravy with butter, add 12 paneer cubes & cream'] },
+    { id:'r4', category:'Chaat', name:'Crisp Aloo Tikki Chaat', photo:'https://unsplash.com', prepTime:'5 Mins', ingredients:[{item:'Potato Tikkis',qty:160,unit:'gm',spoon:'2 Pieces'},{item:'Beaten Curd & Chutneys',qty:100,unit:'ml',spoon:'1 Ladle + 2 Tbsp'}], steps:['Crisp fry 2 tikkis, top with curd, chutneys & sev'] },
+    { id:'r5', category:'Kaju Sweet', name:'Royal Kaju Katli', photo:'https://unsplash.com', prepTime:'20 Mins', ingredients:[{item:'Fine Kaju Powder',qty:650,unit:'gm',spoon:'Sieved Batch'},{item:'Sugar Syrup',qty:350,unit:'gm',spoon:'1-Thread Chashni'}], steps:['Cook kaju powder in 1-thread syrup, roll 4mm & cut diamonds'] }
+  ],
+  staff: [],
+  results: []
+};
+
+let DATA = JSON.parse(localStorage.getItem('rpTrainingDB') || 'null') || DEFAULT_DATA;
+let selRole = 'All', selCat = 'All', tempPhoto = '';
+function saveDB() {
+  localStorage.setItem('rpTrainingDB', JSON.stringify(DATA));
+  fetch('/api/training/sync', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(DATA) }).catch(()=>{});
+  renderAll();
+}
+function switchTab(t) { sopSec.style.display=t==='sop'?'block':'none'; recSec.style.display=t==='rec'?'block':'none'; boxSop.classList.toggle('active',t==='sop'); boxRec.classList.toggle('active',t==='rec'); }
+function renderAll() {
+  const outF = outletFilter.value;
+  const fStaff = outF==='All' ? DATA.staff : DATA.staff.filter(s=>(s.outlet||'').toLowerCase()===outF.toLowerCase());
+  const fRes = outF==='All' ? DATA.results : DATA.results.filter(r=>(r.outlet||'').toLowerCase()===outF.toLowerCase());
+  sopCnt.textContent = sopCnt2.textContent = DATA.sops.length;
+  recCnt.textContent = recCnt2.textContent = DATA.recipes.length;
+  usrCnt.textContent = fStaff.length;
+  kTotal.textContent = DATA.sops.length + DATA.recipes.length;
+  kDone.textContent = fRes.length;
+  const doneIds = new Set(fRes.map(r=>r.empId.toLowerCase()));
+  const pend = fStaff.filter(s=>!doneIds.has(s.empId.toLowerCase()));
+  kPend.textContent = pend.length; kPromo.textContent = fRes.filter(r=>r.scorePct>=85).length;
+
+  roleChips.innerHTML = ROLES.map(r=>`<button class="chip ${selRole===r?'active':''}" onclick="selRole='${r}';renderSops()">${r}</button>`).join('');
+  catChips.innerHTML = CATS.map(c=>`<button class="chip ${selCat===c?'active':''}" onclick="selCat='${c}';renderRecs()">${c}</button>`).join('');
+  renderSops(); renderRecs();
+
+  doneBody.innerHTML = fRes.map(r=>`<tr><td><b>${r.name}</b> (${r.empId})</td><td>${r.moduleTitle}</td><td><b>${r.scorePct}%</b> ${'⭐'.repeat(r.stars)}</td><td><span class="badge">${r.promoStatus}</span></td></tr>`).join('') || '<tr><td colspan="4">No tests yet</td></tr>';
+  pendBody.innerHTML = pend.map(s=>`<tr><td><b>${s.empId}</b></td><td>${s.name} (${s.role})</td><td>${s.outlet}</td><td>Pending</td></tr>`).join('') || '<tr><td colspan="4">None</td></tr>';
+  empBody.innerHTML = fStaff.map(s=>`<tr><td><b>${s.empId}</b></td><td><b>${s.name}</b></td><td>${s.role}</td><td>${s.outlet}</td><td>${(s.recipeCats||['All']).join(',')}</td><td><button class="btn light sm" onclick="viewU('${s.id}')">View</button> ${isHO?`<button class="btn light sm" onclick="editU('${s.id}')">Edit</button> <button class="btn d sm" onclick="delU('${s.id}')">Delete</button>`:''}</td></tr>`).join('') || '<tr><td colspan="6">No users created yet</td></tr>';
+}
+
+function viewU(id){ const s=DATA.staff.find(x=>x.id===id); if(s) alert(`User Record:\nID: ${s.empId}\nName: ${s.name}\nRole: ${s.role}\nOutlet: ${s.outlet}\nPassword: ${s.password}\nRights: ${(s.recipeCats||['All']).join(', ')}`); }
+function editU(id){ const s=DATA.staff.find(x=>x.id===id); if(!s) return; const name=prompt('Name:',s.name), role=prompt('Role:',s.role), outlet=prompt('Outlet:',s.outlet), password=prompt('Pass:',s.password); if(name&&role){ Object.assign(s,{name,role,outlet,password}); saveDB(); } }
+function delU(id){ if(confirm('Delete User?')){ DATA.staff=DATA.staff.filter(x=>x.id!==id); saveDB(); } }
+empForm.onsubmit = e => {
+  e.preventDefault();
+  if(DATA.staff.some(x=>x.empId.toLowerCase()===eId.value.trim().toLowerCase())) return alert('Employee ID already exists!');
+  DATA.staff.unshift({ id:'u-'+Date.now(), empId:eId.value.trim(), name:eName.value.trim(), role:eRole.value, outlet:eOut.value.trim(), password:ePass.value.trim(), recipeCats:[eRight.value] });
+  eId.value=''; eName.value=''; ePass.value=''; saveDB();
+};
+
+function renderSops() {
+  const list = selRole==='All' ? DATA.sops : DATA.sops.filter(s=>s.role===selRole);
+  sopGrid.innerHTML = list.map(s=>`<div class="rcard"><div class="p"><span class="badge">${s.role}</span><h4>${s.title}</h4><ul>${s.steps.map(x=>`<li>${x}</li>`).join('')}</ul><button class="btn sm" onclick="viewSop('${s.id}')">View</button> ${isHO?`<button class="btn light sm" onclick="openSop('${s.id}')">Edit</button> <button class="btn d sm" onclick="delSop('${s.id}')">Delete</button>`:''}</div></div>`).join('');
+}
+function renderRecs() {
+  const list = selCat==='All' ? DATA.recipes : DATA.recipes.filter(r=>r.category===selCat);
+  recGrid.innerHTML = list.map(r=>`<div class="rcard"><img src="${r.photo||'https://unsplash.com'}"><div class="p"><span class="badge">${r.category}</span><h4>${r.name}</h4><button class="btn sm" onclick="viewRec('${r.id}',1)">View</button> ${isHO?`<button class="btn light sm" onclick="openRec('${r.id}')">Edit</button> <button class="btn d sm" onclick="delRec('${r.id}')">Delete</button>`:''}</div></div>`).join('');
+}
+function viewSop(id){ const s=DATA.sops.find(x=>x.id===id); viewBox.innerHTML=`<h3>${s.role}: ${s.title}</h3><ol>${s.steps.map(x=>`<li>${x}</li>`).join('')}</ol><button class="btn" onclick="viewModal.style.display='none'">Close</button>`; viewModal.style.display='flex'; }
+function viewRec(id,m){ const r=DATA.recipes.find(x=>x.id===id); const b='1,5,10,50'.split(','); viewBox.innerHTML=`<h3>${r.name} (${m}x)</h3><img src="${r.photo}" style="width:100%;height:180px;object-fit:cover;border-radius:8px;margin-bottom:8px"><div>${b.map(x=>`<button class="btn ${m==x?'':'light'} sm" onclick="viewRec('${id}',${x})">${x}x</button>`).join('')}</div><table><tr><th>Item</th><th>Qty</th><th>Spoon</th></tr>${r.ingredients.map(i=>`<tr><td>${i.item}</td><td>${i.qty*m} ${i.unit}</td><td>${i.spoon}</td></tr>`).join('')}</table><ol>${(r.steps||[]).map(s=>`<li>${s}</li>`).join('')}</ol><button class="btn" onclick="viewModal.style.display='none'">Close</button>`; viewModal.style.display='flex'; }
+
+function openSop(id){ const s=id?DATA.sops.find(x=>x.id===id):{role:'Waiter',title:'',steps:['Step 1']}; editBox.innerHTML=`<h3>${id?'Edit':'Create'} SOP</h3><select id="sfR">${ROLES.slice(1).map(r=>`<option ${s.role===r?'selected':''}>${r}</option>`).join('')}</select><input id="sfT" value="${s.title}" placeholder="SOP Title"><textarea id="sfS" rows="4">${s.steps.join('\n')}</textarea><button class="btn" onclick="saveSop('${id||''}')">Save SOP</button> <button class="btn light" onclick="editModal.style.display='none'">Cancel</button>`; editModal.style.display='flex'; }
+function saveSop(id){
+  const obj = { id: id||'sop-'+Date.now(), role:sfR.value, title:sfT.value, time:'Daily', steps:sfS.value.split('\n').filter(Boolean) };
+  if(id) Object.assign(DATA.sops.find(x=>x.id===id), obj); else DATA.sops.unshift(obj);
+  editModal.style.display='none'; saveDB();
+}
+function delSop(id){ if(confirm('Delete SOP?')){ DATA.sops=DATA.sops.filter(x=>x.id!==id); saveDB(); } }
+
+function readPhoto(e){ const f=e.target.files && e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>{ tempPhoto=r.result; rfPrev.src=tempPhoto; rfPrev.style.display='block'; }; r.readAsDataURL(f); }
+
+function openRec(id){ const r=id?DATA.recipes.find(x=>x.id===id):{category:'South Indian',name:'',photo:'',ingredients:[{item:'Item',qty:100,unit:'gm',spoon:'1 Ladle'}],steps:['Step 1']}; tempPhoto=r.photo||''; editBox.innerHTML=`<h3>${id?'Edit':'Add'} Recipe</h3><select id="rfC">${CATS.slice(1).map(c=>`<option ${r.category===c?'selected':''}>${c}</option>`).join('')}</select><input id="rfN" value="${r.name}" placeholder="Dish Name"><label style="font-size:12px;font-weight:700">Upload Dish Photo:</label><input type="file" accept="image/*" onchange="readPhoto(event)"><img id="rfPrev" src="${tempPhoto}" style="width:100%;height:120px;object-fit:cover;border-radius:8px;display:${tempPhoto?'block':'none'};margin-bottom:8px"><textarea id="rfI" rows="4">${r.ingredients.map(i=>`${i.item}|${i.qty}|${i.unit}|${i.spoon}`).join('\n')}</textarea><button class="btn" onclick="saveRec('${id||''}')">Save Recipe</button> <button class="btn light" onclick="editModal.style.display='none'">Cancel</button>`; editModal.style.display='flex'; }
+function saveRec(id){
+  const ingredients=rfI.value.split('\n').filter(Boolean).map(l=>{const [item,qty,unit,spoon]=l.split('|');return{item:(item||'').trim(),qty:Number(qty)||0,unit:(unit||'gm').trim(),spoon:(spoon||'1 Spoon').trim()}});
+  const obj = { id: id||'rec-'+Date.now(), category:rfC.value, name:rfN.value, photo:tempPhoto, prepTime:'8 Mins', ingredients, steps:['Follow standard prep'] };
+  if(id) Object.assign(DATA.recipes.find(x=>x.id===id), obj); else DATA.recipes.unshift(obj);
+  editModal.style.display='none'; saveDB();
+}
+function delRec(id){ if(confirm('Delete Recipe?')){ DATA.recipes=DATA.recipes.filter(x=>x.id!==id); saveDB(); } }
+
+renderAll();
+</script>
+<script>
+(function addSmartExcelPdfUpload() {
+  function getFilteredList(key) {
+    const outF = outletFilter.value;
+    if (key === 'sops') return selRole === 'All' ? DATA.sops : DATA.sops.filter(s => s.role === selRole);
+    if (key === 'recipes') return selCat === 'All' ? DATA.recipes : DATA.recipes.filter(r => r.category === selCat);
+    if (key === 'results') return outF === 'All' ? DATA.results : DATA.results.filter(r => (r.outlet||'').toLowerCase() === outF.toLowerCase());
+    if (key === 'staff') return outF === 'All' ? DATA.staff : DATA.staff.filter(s => (s.outlet||'').toLowerCase() === outF.toLowerCase());
+    return [];
+  }
+
+  function attachTools() {
+    const sections = [
+      { sel: '#sopSec h3', key: 'sops' },
+      { sel: '#recSec h3', key: 'recipes' },
+      { sel: '#doneBody', key: 'results', isTable: true },
+      { sel: '#empBody', key: 'staff', isTable: true }
+    ];
+    sections.forEach(s => {
+      const el = document.querySelector(s.sel);
+      if (!el) return;
+      const box = s.isTable ? el.closest('.card').querySelector('h3') : el.parentElement;
+      if (!box || box.querySelector('.rpExportBar')) return;
+      const bar = document.createElement('span');
+      bar.className = 'rpExportBar';
+      bar.style.cssText = 'float:right;display:inline-flex;gap:5px;flex-wrap:wrap;font-weight:600';
+      bar.innerHTML = `
+        <button type="button" class="btn light sm" onclick="rpSmartExcel('${s.key}')">⬇ Excel</button>
+        <button type="button" class="btn light sm" onclick="rpSmartPdf('${s.key}')">🖨 PDF</button>
+        ${isHO && (s.key==='sops'||s.key==='recipes') ? `<label class="btn light sm" style="margin:2px;cursor:pointer">⬆ Upload Excel/PDF<input type="file" accept=".csv,.pdf" hidden onchange="rpUploadDoc(event,'${s.key}')"></label>` : ''}
+      `;
+      box.appendChild(bar);
+    });
+  }
+
+  window.rpSmartExcel = function(key) {
+    const arr = getFilteredList(key);
+    if (!arr.length) return alert('Is filter mein download karne ke liye koi data nahi hai.');
+    let rows = [];
+    let tag = key === 'sops' ? selRole : key === 'recipes' ? selCat : outletFilter.value;
+    if (key === 'sops') rows = [['Role','SOP Title','Time','Steps'], ...arr.map(s=>[s.role,s.title,s.time,(s.steps||[]).join(' | ')])];
+    if (key === 'recipes') rows = [['Category','Dish Name','Prep Time','Ingredients & Spoon Size'], ...arr.map(r=>[r.category,r.name,r.prepTime,(r.ingredients||[]).map(i=>`${i.item}: ${i.qty}${i.unit} (${i.spoon})`).join(' | ')])];
+    if (key === 'results') rows = [['Employee ID','Name','Role','Outlet','Module','Score %','Stars','Promotion Status'], ...arr.map(r=>[r.empId,r.name,r.role,r.outlet,r.moduleTitle,r.scorePct,r.stars,r.promoStatus])];
+    if (key === 'staff') rows = [['Employee ID','Name','Role','Outlet','Rights'], ...arr.map(s=>[s.empId,s.name,s.role,s.outlet,(s.recipeCats||['All']).join(',')])];
+
+    const csv = rows.map(r => r.map(c => `"${String(c??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    a.download = `RestaurantPro_${key}_${tag.replace(/\s+/g,'_')}.csv`;
+    a.click();
+  };
+
+  window.rpSmartPdf = function(key) {
+    const arr = getFilteredList(key);
+    if (!arr.length) return alert('Is filter mein PDF ke liye koi data nahi hai.');
+    let title = '', tableHtml = '';
+    if (key === 'sops') {
+      title = `Role-Based SOPs Report (${selRole})`;
+      tableHtml = `<tr><th>Role</th><th>SOP Title</th><th>Steps</th></tr>` + arr.map(s=>`<tr><td><b>${s.role}</b></td><td>${s.title}</td><td>${(s.steps||[]).join('<br>')}</td></tr>`).join('');
+    } else if (key === 'recipes') {
+      title = `Standardized Recipes Manual (${selCat})`;
+      tableHtml = `<tr><th>Category</th><th>Dish Name</th><th>Ingredients & Spoon Size</th></tr>` + arr.map(r=>`<tr><td><b>${r.category}</b></td><td><b>${r.name}</b></td><td>${(r.ingredients||[]).map(i=>`${i.item}: <b>${i.qty} ${i.unit}</b> (${i.spoon})`).join('<br>')}</td></tr>`).join('');
+    } else if (key === 'results') {
+      title = `Employee Rating & Promotion Report (${outletFilter.value})`;
+      tableHtml = `<tr><th>Emp ID</th><th>Name & Role</th><th>Module</th><th>Score</th><th>Promotion Status</th></tr>` + arr.map(r=>`<tr><td>${r.empId}</td><td><b>${r.name}</b> (${r.role})</td><td>${r.moduleTitle}</td><td><b>${r.scorePct}%</b> (${'⭐'.repeat(r.stars)})</td><td><b>${r.promoStatus}</b></td></tr>`).join('');
+    } else if (key === 'staff') {
+      title = `Registered Training Users (${outletFilter.value})`;
+      tableHtml = `<tr><th>Emp ID</th><th>Name</th><th>Role</th><th>Outlet</th><th>Rights</th></tr>` + arr.map(s=>`<tr><td>${s.empId}</td><td>${s.name}</td><td>${s.role}</td><td>${s.outlet}</td><td>${(s.recipeCats||['All']).join(', ')}</td></tr>`).join('');
+    }
+
+    const w = window.open('', '_blank');
+    w.document.write(`<html><head><title>${title}</title><style>body{font-family:Arial,sans-serif;padding:20px;color:#132a25}h2{color:#0f766e;margin-bottom:4px}table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12.5px}th,td{border:1px solid #cbd5e1;padding:8px;text-align:left;vertical-align:top}th{background:#f1f5f9}</style></head><body><h2>✦ RestaurantPro — ${title}</h2><small>Generated: ${new Date().toLocaleString()}</small><table>${tableHtml}</table><script>window.onload=()=>{window.print();}<\/script></body></html>`);
+    w.document.close();
+  };
+
+  window.rpUploadDoc = async function(e, key) {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    if (f.name.toLowerCase().endsWith('.pdf')) {
+      if (key === 'sops') DATA.sops.unshift({ id:'sop-'+Date.now(), role: selRole==='All'?'Unit Manager':selRole, title: f.name.replace(/\.pdf$/i,'') + ' (PDF)', time:'Document', steps:['Attached PDF Manual: ' + f.name] });
+      else DATA.recipes.unshift({ id:'rec-'+Date.now(), category: selCat==='All'?'South Indian':selCat, name: f.name.replace(/\.pdf$/i,'') + ' (PDF)', photo:'https://unsplash.com', prepTime:'Doc', ingredients:[{item:'PDF Manual',qty:1,unit:'File',spoon:f.name}], steps:['Refer uploaded PDF'] });
+      saveDB(); alert('✓ PDF Uploaded!'); return;
+    }
+    const lines = (await f.text()).split('\n').slice(1).filter(Boolean);
+    lines.forEach(line => {
+      const c = line.split(',').map(x => x.replace(/^"|"$/g,'').trim());
+      if (key === 'sops' && c[1]) DATA.sops.unshift({ id:'sop-'+Date.now()+Math.random(), role:c[0]||'Waiter', title:c[1], time:c[2]||'Daily', steps:(c[3]||'Standard SOP').split('|') });
+      if (key === 'recipes' && c[1]) DATA.recipes.unshift({ id:'rec-'+Date.now()+Math.random(), category:c[0]||'South Indian', name:c[1], photo:'https://unsplash.com', prepTime:'8 Mins', ingredients:[{item:'Standard Batch',qty:100,unit:'gm',spoon:c[3]||'1 Spoon'}], steps:['Standard prep'] });
+    });
+    saveDB(); alert('✓ Excel (CSV) Uploaded!');
+  };
+
+  setInterval(attachTools, 600);
+})();
+</script>

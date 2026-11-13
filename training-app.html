@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f766e"><link rel="manifest" href="/manifest.json">
+<title>RestaurantPro | Staff Training App</title>
+<style>
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:#f4f7f6;color:#132a25;padding-bottom:40px}
+header{background:#115e59;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10}
+.wrap{max-width:740px;margin:auto;padding:14px}
+.card{background:#fff;border:1px solid #dbe5e2;border-radius:14px;padding:16px;margin-bottom:14px}
+input{width:100%;padding:11px;border:1px solid #dbe5e2;border-radius:9px;margin:5px 0 11px;font-size:15px}
+.btn{border:0;border-radius:9px;padding:10px 15px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;font-size:13px}
+.btn.light{background:#fff;color:#0f766e;border:1px solid #dbe5e2}.hidden{display:none!important}
+.badge{padding:3px 9px;border-radius:12px;font-size:11px;font-weight:700;background:#e6f4f1;color:#115e59}
+img{width:100%;height:185px;object-fit:cover;border-radius:10px;margin:10px 0}
+table{width:100%;border-collapse:collapse;font-size:12.5px;margin:8px 0}
+th,td{border:1px solid #dbe5e2;padding:7px 9px;text-align:left}th{background:#f8faf9}
+</style>
+</head>
+<body>
+<header>
+  <div><strong style="font-size:17px">✦ RestaurantPro Training App</strong><br><small id="sub">SOPs · Recipes · MCQ Exam</small></div>
+  <div style="display:flex;gap:6px">
+    <button id="ibtn" class="btn light hidden" style="padding:6px 10px;font-size:12px">📲 Install</button>
+    <button id="lout" class="btn light hidden" style="padding:6px 10px;font-size:12px" onclick="localStorage.removeItem('rpTrUser');location.reload()">Logout</button>
+  </div>
+</header>
+<div class="wrap" id="vLog">
+  <div class="card" style="max-width:400px;margin:30px auto;border-top:4px solid #0f766e">
+    <h2 style="margin-top:0;color:#115e59">Employee Training Login</h2>
+    <p style="font-size:13px;color:#5c726d">Head Office dwara di gayi Employee ID aur Password dalein.</p>
+    <form id="lf"><input id="eid" required placeholder="Employee ID (e.g. 161616)"><input id="epw" type="password" required placeholder="Password"><button class="btn" style="width:100%">Start Training &amp; Test →</button></form>
+    <p id="err" style="color:#b91c1c;font-weight:700"></p>
+  </div>
+</div>
+<div class="wrap hidden" id="vApp">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+    <button class="btn" id="t1" onclick="show('s')">📋 My Role SOPs</button>
+    <button class="btn light" id="t2" onclick="show('r')">🍲 Standardized Recipes</button>
+  </div>
+  <div id="sBox"></div>
+  <div id="rBox" class="hidden"></div>
+</div>
+<script>
+let u = JSON.parse(localStorage.getItem('rpTrUser')||'null'), D = null, dp = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); dp = e; ibtn.classList.remove('hidden'); });
+ibtn.onclick = async () => { if(dp){ dp.prompt(); dp = null; } else alert('Browser menu se "Add to Home Screen" karein'); };
+
+lf.onsubmit = async e => {
+  e.preventDefault();
+  try {
+    const r = await fetch('/api/training/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({empId:eid.value,password:epw.value})});
+    if(r.ok){ u = await r.json(); localStorage.setItem('rpTrUser', JSON.stringify(u)); init(); return; }
+  } catch(_) {}
+  const localDB = JSON.parse(localStorage.getItem('rpTrainingDB') || '{"staff":[]}');
+  const found = (localDB.staff || []).find(x => x.empId.toLowerCase() === eid.value.trim().toLowerCase() && x.password === epw.value.trim());
+  if(!found){ err.textContent = 'Invalid Employee ID or Password'; return; }
+  u = found; localStorage.setItem('rpTrUser', JSON.stringify(u)); init();
+};
+
+function show(w){
+  sBox.classList.toggle('hidden',w!=='s'); rBox.classList.toggle('hidden',w!=='r');
+  t1.className = w==='s' ? 'btn' : 'btn light';
+  t2.className = w==='r' ? 'btn' : 'btn light';
+}
+
+async function init() {
+  vLog.classList.add('hidden'); vApp.classList.remove('hidden'); lout.classList.remove('hidden');
+  sub.textContent = `${u.name} (${u.empId}) · ${u.role}`;
+  const localDB = JSON.parse(localStorage.getItem('rpTrainingDB') || '{"sops":[],"recipes":[]}');
+  try {
+    const res = await fetch('/api/training/data');
+    if (res.ok) D = await res.json();
+  } catch(_) {}
+  if (!D) D = localDB;
+  if ((!D.recipes || !D.recipes.length) && localDB.recipes) D.recipes = localDB.recipes;
+  if ((!D.sops || !D.sops.length) && localDB.sops) D.sops = localDB.sops;
+
+  const mySops = (D.sops||[]).filter(s => s.role === u.role || u.role === 'Unit Manager');
+  sBox.innerHTML = (mySops.length ? mySops : (D.sops||[])).map(s => `<div class="card" style="border-top:4px solid #0f766e">
+    <span class="badge">${s.role} SOP</span>
+    <h3 style="margin:6px 0">${s.title}</h3>
+    <ol style="padding-left:18px;font-size:13.5px;line-height:1.6">${(s.steps||[]).map(x=>`<li>${x}</li>`).join('')}</ol>
+    ${renderQuiz('sop', s.id, s.title, s.mcqs||[{q:`Kya aapne "${s.title}" SOP ko dhyan se samajh liya hai?`,opts:['Haan, main is SOP ko follow karunga','Nahi'],ans:0}])}
+  </div>`).join('');
+  const right = Array.isArray(u.recipeCats) ? (u.recipeCats[0] || 'All') : (u.recipeCats || 'All');
+  if (right === 'None') { rBox.innerHTML = '<div class="card">Aapko recipes view rights assign nahi kiye gaye hain.</div>'; return; }
+  const myRecs = right === 'All' ? (D.recipes||[]) : right === 'Sweets' ? (D.recipes||[]).filter(r=>(r.category||'').includes('Sweet')) : (D.recipes||[]).filter(r=>r.category===right);
+
+  rBox.innerHTML = (myRecs.length ? myRecs : (D.recipes||[])).map(r => {
+    const ings = r.ingredients || [];
+    const ingSummary = ings.map(i=>`${i.item} (${i.qty} ${i.unit})`).join(' + ');
+    const firstIng = ings[0] || { item: 'Main Item', qty: 100, unit: 'gm', spoon: '1 Ladle' };
+    const autoMcqs = [
+      {
+        q: `1 Plate "${r.name}" banane ke liye kya-kya samagri aur kitne gram/ml chaiye?`,
+        opts: [
+          ingSummary || 'Exact Gram & Spoon Size',
+          'Andaze se koi bhi masale aur batter',
+          'Sirf aadha maap (50%)',
+          'Koi fixed maap nahi'
+        ],
+        ans: 0
+      },
+      {
+        q: `"${r.name}" mein "${firstIng.item}" kitne gram/ml aur kis spoon size se dalna hai?`,
+        opts: [
+          '10 gm (1 Pinch)',
+          `${firstIng.qty} ${firstIng.unit} (${firstIng.spoon})`,
+          '500 gm (1 Bowl)',
+          '25 gm'
+        ],
+        ans: 1
+      }
+    ];
+    r._mcqs = autoMcqs;
+    return `<div class="card" style="border-top:4px solid #b45309">
+      <span class="badge">${r.category}</span>
+      <h3 style="margin:6px 0">${r.name}</h3>
+      <img src="${r.photo||'https://unsplash.com'}">
+      <table><tr><th>Ingredient (Samagri)</th><th>Qty (Gm/Ml)</th><th>Spoon / Ladle Size</th></tr>${ings.map(i=>`<tr><td><b>${i.item}</b></td><td><b>${i.qty} ${i.unit}</b></td><td>${i.spoon}</td></tr>`).join('')}</table>
+      <ol style="padding-left:18px;font-size:13.5px;line-height:1.6">${(r.steps||[]).map(x=>`<li>${x}</li>`).join('')}</ol>
+      ${renderQuiz('rec', r.id, r.name, autoMcqs)}
+    </div>`;
+  }).join('');
+}
+
+function renderQuiz(type, id, title, mcqs) {
+  return `<div style="background:#eef6f4;border:1px solid #cbe3dc;padding:12px;border-radius:12px;margin-top:12px">
+    <strong style="color:#115e59">📝 Training &amp; Recipe MCQ Test (${mcqs.length} Questions)</strong>
+    ${mcqs.map((m,qi)=>`<p style="margin:8px 0 4px;font-size:13.5px"><b>${qi+1}. ${m.q}</b></p>${m.opts.map((o,oi)=>`<label style="display:block;font-size:13px;padding:3px 0"><input type="radio" name="q_${id}_${qi}" value="${oi}" style="width:auto"> ${o}</label>`).join('')}`).join('')}
+    <button class="btn" style="margin-top:8px;width:100%" onclick="submitQuiz('${id}','${title.replace(/'/g,'')}',${mcqs.length},'${type}')">Submit Test &amp; Send Rating →</button>
+  </div>`;
+}
+
+async function submitQuiz(id, title, total, type) {
+  const item = (type==='sop'?(D.sops||[]):(D.recipes||[])).find(x=>x.id===id) || {};
+  const mcqs = item._mcqs || item.mcqs || [{ans:0}];
+  let right = 0;
+  mcqs.forEach((m,qi)=>{ const sel=document.querySelector(`input[name="q_${id}_${qi}"]:checked`); if(sel && Number(sel.value)===Number(m.ans)) right++; });
+  const scorePct = Math.round((right / mcqs.length) * 100);
+  const stars = scorePct >= 90 ? 5 : scorePct >= 75 ? 4 : scorePct >= 60 ? 3 : 2;
+  const promoStatus = scorePct >= 85 ? 'Ready for Promotion' : scorePct >= 60 ? 'Qualified (Good)' : 'Retraining Needed';
+  const entry = { id:'res-'+Date.now(), empId:u.empId, name:u.name, role:u.role, outlet:u.outlet||'', moduleTitle:title, scorePct, stars, promoStatus };
+
+  const localDB = JSON.parse(localStorage.getItem('rpTrainingDB') || '{"results":[]}');
+  localDB.results = localDB.results || []; localDB.results.unshift(entry);
+  localStorage.setItem('rpTrainingDB', JSON.stringify(localDB));
+  fetch('/api/training/submit-test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)}).catch(()=>{});
+  alert(`✅ Test Submitted!\nScore: ${scorePct}%\nRating: ${'⭐'.repeat(stars)}\nStatus: ${promoStatus}`);
+}
+if (u) init();
+</script>
+</body>
+</html>

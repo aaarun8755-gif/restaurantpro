@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RestaurantPro | Kitchen Display System (KDS)</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+:root{--ink:#173b34;--muted:#687b77;--line:#dce6e1;--bg:#f3f6f4;--green:#0f766e;--dark:#115e59}
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink)}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.brand{font-size:21px;font-weight:800;color:var(--dark)}
+.wrap{max-width:1540px;margin:auto;padding:24px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.stat-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.stat-card strong{display:block;font-size:28px;margin-top:6px;color:var(--dark)}
+.tickets{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+.ticket{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 6px 18px #173b3408;display:flex;flex-direction:column}
+.ticket.ready{border:2px solid #2563eb}
+.item-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #e5ece7;font-size:14px}
+.btn{border:0;border-radius:8px;padding:9px 12px;background:var(--green);color:#fff;font-weight:700;cursor:pointer;flex:1}
+.btn.light{background:#fff;color:var(--green);border:1px solid var(--line)}
+.pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#e6f5ec;color:var(--green)}
+@media(max-width:700px){.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="brand">✦ RestaurantPro <span style="font-weight:400;color:var(--muted);font-size:15px">/ Kitchen Display System (KDS)</span></div>
+    <small id="connStatus" style="color:var(--muted)">Connecting to central server...</small>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn light" onclick="loadKOT()">↻ Refresh</button>
+    <a href="/pos.html" class="btn light" style="text-decoration:none">POS Orders</a>
+    <a href="/index.html" class="btn light" style="text-decoration:none">← Dashboard</a>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat-card"><span>New KOT</span><strong id="cntNew">0</strong></div>
+    <div class="stat-card"><span>Preparing</span><strong id="cntPrep">0</strong></div>
+    <div class="stat-card"><span>Ready</span><strong id="cntReady">0</strong></div>
+    <div class="stat-card"><span>Completed</span><strong id="cntDone">0</strong></div>
+  </div>
+  <div id="ticketsGrid" class="tickets"></div>
+</div>
+
+<script>
+const socket = io();
+const currentOutlet = localStorage.getItem('rpSelectedOutlet') || 'RestaurantPro - Uttar Pradesh';
+
+socket.on('connect', () => {
+  document.getElementById('connStatus').textContent = '● Live Kitchen Sync Active · ' + currentOutlet;
+  document.getElementById('connStatus').style.color = '#0f766e';
+});
+
+socket.on('kot:changed', loadKOT);
+
+function elapsedMinutes(iso) {
+  const mins = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 60000));
+  return mins + ' min ago';
+}
+
+async function setStatus(id, status) {
+  await fetch('/api/kot/' + id, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status })
+  });
+  loadKOT();
+}
+
+async function loadKOT() {
+  const query = currentOutlet === 'Head Office' ? '' : '?outlet=' + encodeURIComponent(currentOutlet);
+  const res = await fetch('/api/kot' + query);
+  const list = await res.json();
+
+  document.getElementById('cntNew').textContent = list.filter(x => x.status === 'New').length;
+  document.getElementById('cntPrep').textContent = list.filter(x => x.status === 'Preparing').length;
+  document.getElementById('cntReady').textContent = list.filter(x => x.status === 'Ready').length;
+  document.getElementById('cntDone').textContent = list.filter(x => x.status === 'Completed').length;
+
+  const active = list.filter(x => x.status !== 'Completed');
+  const grid = document.getElementById('ticketsGrid');
+
+  if (!active.length) {
+    grid.innerHTML = '<div class="stat-card" style="grid-column:1/-1;text-align:center;padding:35px">Abhi kitchen mein koi pending KOT nahi hai.</div>';
+    return;
+  }
+
+  grid.innerHTML = active.map(k => `
+    <article class="ticket ${k.status === 'Ready' ? 'ready' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <small style="color:var(--muted);font-weight:700">${k.kotNo || 'KOT'} · ${k.billNo || ''}</small>
+          <h3 style="margin:4px 0">${k.tableName} (${k.orderType || 'Dine In'})</h3>
+        </div>
+        <span class="pill">${k.status}</span>
+      </div>
+      <small style="color:var(--muted);margin-bottom:10px">⏱ ${elapsedMinutes(k.createdAt)} · ${k.outlet}</small>
+      <div style="flex:1">
+        ${(k.items || []).map(i => `<div class="item-row"><span>${i.name}</span><strong>× ${i.qty}</strong></div>`).join('')}
+      </div>
+      ${k.customerNote ? `<p style="background:#fff7df;padding:8px;border-radius:8px;font-size:12px;color:#795a00">Note: ${k.customerNote}</p>` : ''}
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn light" onclick="setStatus('${k.id}', 'Preparing')">Preparing</button>
+        <button class="btn" onclick="setStatus('${k.id}', 'Ready')">Ready</button>
+        <button class="btn light" onclick="setStatus('${k.id}', 'Completed')">Complete</button>
+      </div>
+    </article>
+  `).join('');
+}
+
+loadKOT();
+setInterval(loadKOT, 15000);
+</script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Digital Menu</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6f4;color:#173b34;padding-bottom:85px}
+header{background:#fff;padding:14px 16px;border-bottom:1px solid #dce6e1;position:sticky;top:0;z-index:10}
+.badge{display:inline-block;margin-top:5px;padding:4px 10px;border-radius:20px;background:#e6f5ec;color:#0f766e;font-size:12px;font-weight:700}
+.wrap{max-width:650px;margin:auto;padding:14px}
+.cats{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:10px}
+.cat{border:1px solid #dce6e1;background:#fff;padding:7px 13px;border-radius:20px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.cat.active{background:#0f766e;color:#fff}
+.item{background:#fff;border:1px solid #dce6e1;border-radius:12px;padding:12px;margin-bottom:9px;display:flex;justify-content:space-between;align-items:center}
+.card{background:#fff;border:1px solid #dce6e1;border-radius:12px;padding:14px;margin-top:14px}
+select,textarea{width:100%;padding:10px;border:1px solid #dce6e1;border-radius:8px;margin-top:6px;box-sizing:border-box}
+.bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #dce6e1;padding:11px 16px;display:flex;justify-content:space-between;align-items:center}
+.btn{border:0;border-radius:8px;padding:10px 16px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer}
+.btn:disabled{opacity:.5}
+.qbtn{width:30px;height:30px;border:1px solid #dce6e1;background:#f7fbf8;border-radius:6px;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <strong style="font-size:18px;color:#115e59">✦ RestaurantPro Digital Menu</strong><br>
+  <span id="tinfo" class="badge">Loading table...</span>
+</header>
+<div class="wrap" id="main">
+  <div class="cats" id="cbar"></div>
+  <div id="mlist">Loading menu...</div>
+  <div class="card">
+    <label style="font-weight:700;font-size:13px">Special Cooking Instructions</label>
+    <textarea id="note" rows="2" placeholder="e.g. Less spicy..."></textarea>
+    <label style="font-weight:700;font-size:13px;display:block;margin-top:10px">Payment Option</label>
+    <select id="pay"><option value="Cash">Cash at Counter / Table</option><option value="UPI">Online UPI</option></select>
+  </div>
+</div>
+<div class="bar" id="bbar">
+  <div><small style="color:#687b77">Total (+5% GST)</small><br><strong id="gtot" style="font-size:18px">₹0.00</strong></div>
+  <button class="btn" id="obtn" disabled>Place Order →</button>
+</div>
+<script>
+const p = new URLSearchParams(location.search);
+const tid = p.get('table');
+let tbl = null, menu = [], cart = {}, cat = 'All';
+
+(async () => {
+  const tables = await (await fetch('/api/tables')).json();
+  tbl = tables.find(t => t.id === tid);
+  if (!tbl || !tbl.active) {
+    tinfo.textContent = 'Table Inactive / Not Found';
+    mlist.innerHTML = '<div class="card">Ye table QR active nahi hai.</div>';
+    return;
+  }
+  tinfo.textContent = `${tbl.outlet} · ${tbl.name}`;
+  menu = (await (await fetch('/api/menu?outlet=' + encodeURIComponent(tbl.outlet))).json()).filter(m => m.available !== false);
+  draw();
+})();
+
+function draw() {
+  const cats = ['All', ...new Set(menu.map(m => m.category))];
+  cbar.innerHTML = cats.map(c => `<button class="cat ${cat===c?'active':''}" onclick="cat='${c}';draw()">${c}</button>`).join('');
+  mlist.innerHTML = menu.filter(m => cat==='All' || m.category===cat).map(m => {
+    const q = cart[m.id] || 0;
+    return `<div class="item">
+      <div><small style="color:#687b77">${m.category}</small><br><strong>${m.name}</strong><br><b style="color:#0f766e">₹${Number(m.price).toFixed(2)}</b></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${q>0 ? `<button class="qbtn" onclick="upd('${m.id}',-1)">−</button><b>${q}</b><button class="qbtn" onclick="upd('${m.id}',1)">+</button>`
+              : `<button class="btn" style="padding:7px 12px;font-size:13px" onclick="upd('${m.id}',1)">+ Add</button>`}
+      </div>
+    </div>`;
+  }).join('') || '<div class="card">No menu items found.</div>';
+}
+
+function upd(id, d) {
+  cart[id] = (cart[id] || 0) + d;
+  if (cart[id] <= 0) delete cart[id];
+  draw(); calc();
+}
+
+function calc() {
+  let sub = 0, cnt = 0;
+  for (const [id, q] of Object.entries(cart)) {
+    const it = menu.find(m => String(m.id) === String(id));
+    if (it) { sub += it.price * q; cnt += q; }
+  }
+  gtot.textContent = '₹' + (sub * 1.05).toFixed(2);
+  obtn.disabled = cnt === 0;
+}
+
+obtn.onclick = async () => {
+  obtn.disabled = true; obtn.textContent = 'Sending...';
+  const items = Object.entries(cart).map(([id, qty]) => {
+    const it = menu.find(m => String(m.id) === String(id));
+    return { itemId: id, name: it.name, qty, price: it.price };
+  });
+  const res = await fetch('/api/orders', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ tableId: tbl.id, items, customerNote: note.value, paymentMethod: pay.value })
+  });
+  const d = await res.json();
+  if (!res.ok) { alert(d.error || 'Error'); obtn.disabled = false; obtn.textContent = 'Place Order →'; return; }
+  bbar.style.display = 'none';
+  main.innerHTML = `<div class="card" style="text-align:center;padding:25px">
+    <div style="font-size:40px">✅</div><h2>Order Sent to Cashier!</h2>
+    <p><strong>${d.orderNo}</strong> · ${tbl.name}</p>
+    <p>Total: <strong>₹${Number(d.total).toFixed(2)}</strong> (${d.paymentMethod})</p>
+    <button class="btn" onclick="location.reload()">Order More</button>
+  </div>`;
+};
+</script>
+</body>
+</html>

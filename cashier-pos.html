@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Cashier POS Terminal</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6f4;color:#173b34}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 22px;background:#115e59;color:#fff}
+.wrap{max-width:1440px;margin:auto;padding:18px}.grid{display:grid;grid-template-columns:1.3fr 1fr;gap:14px}
+.card{background:#fff;border:1px solid #dce6e1;border-radius:12px;padding:16px;margin-bottom:14px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px}
+.mitem{border:1px solid #dce6e1;border-radius:8px;padding:10px;cursor:pointer;background:#fff;text-align:left}
+.mitem:hover{border-color:#0f766e;background:#eef8f4}
+table{width:100%;border-collapse:collapse}th,td{padding:9px;border-bottom:1px solid #edf2ee;text-align:left;font-size:13px}
+input,select{width:100%;padding:10px;border:1px solid #dce6e1;border-radius:7px;box-sizing:border-box;margin:5px 0 10px}
+.btn{border:0;border-radius:7px;padding:10px 14px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer}
+.btn.light{background:#fff;color:#0f766e;border:1px solid #dce6e1}.btn.danger{background:#fff0ee;color:#b42318}
+.hidden{display:none!important}
+@media(max-width:850px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div><strong>✦ RestaurantPro | Cashier POS Terminal</strong><br><small id="psub">4-Digit PIN Login Required</small></div>
+  <button id="plout" class="btn light hidden" onclick="localStorage.removeItem('rpPosOnly');location.reload()">Lock POS</button>
+</header>
+<div class="wrap" id="pLogin">
+  <div class="card" style="max-width:380px;margin:40px auto">
+    <h2 style="margin-top:0">POS Login (4-Digit PIN)</h2>
+    <form id="plf">
+      <input id="pp" type="tel" required placeholder="Mobile Number (e.g. 8755825082)">
+      <input id="ppw" type="password" maxlength="4" pattern="\d{4}" required placeholder="4-Digit Password">
+      <button class="btn" style="width:100%">Unlock POS Only →</button>
+    </form>
+    <p id="perr" style="color:#b42318;font-weight:700"></p>
+  </div>
+</div>
+<div class="wrap hidden" id="pMain">
+  <div class="grid">
+    <div class="card">
+      <h3 style="margin-top:0">Quick POS Billing</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><select id="btype"><option>Dine In</option><option>Takeaway</option></select><input id="btbl" placeholder="Table No."></div>
+      <div id="mgrid" class="mgrid"></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Current Bill</h3><div id="cbox">Empty</div><hr>
+      <select id="pmode"><option>Cash</option><option>UPI</option><option>Card</option></select>
+      <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:800;margin:8px 0"><span>Total (+5% GST):</span><span id="btot">₹0.00</span></div>
+      <button class="btn" id="gbtn" style="width:100%" disabled>Generate Bill &amp; KOT →</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Live Outlet Orders</h3>
+    <table><thead><tr><th>KOT / Order</th><th>Table / Source</th><th>Items</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead><tbody id="obody"></tbody></table>
+  </div>
+</div>
+<script>
+const socket = io();
+let pu = JSON.parse(localStorage.getItem('rpPosOnly') || 'null'), menu = [], cart = {};
+plf.onsubmit = async e => {
+  e.preventDefault();
+  const r = await fetch('/api/pos-login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone:pp.value,password:ppw.value})});
+  const d = await r.json(); if(!r.ok){ perr.textContent = d.error; return; }
+  pu = d; localStorage.setItem('rpPosOnly', JSON.stringify(pu)); openP();
+};
+async function openP() {
+  pLogin.classList.add('hidden'); pMain.classList.remove('hidden'); plout.classList.remove('hidden');
+  psub.textContent = `Cashier: ${pu.name} (${pu.phone}) · ${pu.outlet}`;
+  menu = (await (await fetch('/api/menu?outlet='+encodeURIComponent(pu.outlet))).json()).filter(m=>m.available!==false);
+  mgrid.innerHTML = menu.map(m => `<button class="mitem" onclick="addC('${m.id}')"><strong>${m.name}</strong><br><b style="color:#0f766e">₹${m.price}</b></button>`).join('');
+  loadO();
+}
+function addC(id) { const it=menu.find(m=>String(m.id)===String(id)); if(!cart[id]) cart[id]={...it,qty:0}; cart[id].qty++; drawC(); }
+function drawC() {
+  const l = Object.values(cart); if(!l.length){ cbox.innerHTML='Empty'; btot.textContent='₹0.00'; gbtn.disabled=true; return; }
+  const s = l.reduce((a,b)=>a+b.price*b.qty,0);
+  cbox.innerHTML = l.map(i=>`<div style="display:flex;justify-content:space-between;padding:4px 0">${i.name} × ${i.qty} <b>₹${(i.price*i.qty).toFixed(2)}</b></div>`).join('');
+  btot.textContent = '₹' + (s*1.05).toFixed(2); gbtn.disabled = false;
+}
+gbtn.onclick = async () => {
+  await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'POS',waiterPhone:pu.name,outlet:pu.outlet,orderType:btype.value,tableName:btbl.value||btype.value,items:Object.values(cart).map(i=>({itemId:i.id,name:i.name,qty:i.qty,price:i.price})),paymentMethod:pmode.value})});
+  cart = {}; btbl.value = ''; drawC(); loadO();
+};
+async function act(id, status) { await fetch('/api/orders/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})}); loadO(); }
+async function loadO() {
+  if(!pu) return;
+  const list = await (await fetch('/api/orders?outlet='+encodeURIComponent(pu.outlet))).json();
+  obody.innerHTML = list.map(o => `<tr><td><b>${o.kotNo||o.orderNo}</b><br><small>${o.billNo||''}</small></td><td><b>${o.tableName}</b> (${o.source})</td><td>${(o.items||[]).map(i=>`${i.name}×${i.qty}`).join(', ')}</td><td><b>₹${Number(o.total).toFixed(2)}</b></td><td>${o.status}</td><td>${o.status==='Pending Approval'?`<button class="btn" onclick="act('${o.id}','Accepted')">Accept</button> <button class="btn danger" onclick="act('${o.id}','Rejected')">✕</button>`:o.paymentStatus||'Done'}</td></tr>`).join('');
+}
+socket.on('orders:changed', loadO); socket.on('orders:new_qr', loadO);
+if(pu) openP();
+</script>
+</body>
+</html>

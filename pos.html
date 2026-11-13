@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | QR Orders Approval</title>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6f4;color:#173b34;padding:18px}
+.card{background:#fff;border:1px solid #dce6e1;border-radius:12px;padding:18px;max-width:1280px;margin:auto}
+table{width:100%;border-collapse:collapse;margin-top:12px}th,td{padding:10px 8px;border-bottom:1px solid #edf2ee;text-align:left;font-size:13px}
+.btn{border:0;border-radius:7px;padding:8px 12px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;text-decoration:none}
+.btn.light{background:#fff;color:#0f766e;border:1px solid #dce6e1}.btn.d{background:#b42318}
+</style>
+</head>
+<body>
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+    <h2 style="margin:0;color:#115e59">✦ RestaurantPro | QR Orders Approval</h2>
+    <div><a class="btn light" href="/index.html">← Dashboard</a> <a class="btn light" href="/scan-qr.html">Scan &amp; QR</a> <a class="btn light" href="/kds.html">KDS</a></div>
+  </div>
+  <table>
+    <thead><tr><th>Order</th><th>Table / Outlet</th><th>Items</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody id="tb"></tbody>
+  </table>
+</div>
+<script>
+const s = io();
+function beep(){ try{ const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(); o.frequency.value=880; o.connect(c.destination); o.start(); o.stop(c.currentTime+0.25); }catch(_){} }
+s.on('orders:new_qr', () => { beep(); ld(); });
+s.on('orders:changed', ld);
+async function act(id, status){ await fetch('/api/orders/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})}); ld(); }
+async function ld(){
+  const list = await (await fetch('/api/orders')).json();
+  tb.innerHTML = list.map(o => `<tr>
+    <td><strong>${o.orderNo}</strong></td>
+    <td><strong>${o.tableName}</strong> (${o.outlet})</td>
+    <td>${(o.items||[]).map(i=>`${i.name} × ${i.qty}`).join(', ')}</td>
+    <td><strong>₹${Number(o.total).toFixed(2)}</strong></td>
+    <td><strong>${o.status}</strong></td>
+    <td>${o.status==='Pending Approval' ? `<button class="btn" onclick="act('${o.id}','Accepted')">✓ Accept &amp; KOT</button> <button class="btn d" onclick="act('${o.id}','Rejected')">✕</button>` : (o.kotNo || o.status)}</td>
+  </tr>`).join('') || '<tr><td colspan="6">Abhi koi QR order pending nahi hai.</td></tr>';
+}
+ld();
+</script>
+</body>
+</html>

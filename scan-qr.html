@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Scan & QR + Users</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6f4;color:#173b34}
+header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:12px 20px;background:#fff;border-bottom:1px solid #dce6e1}
+.wrap{max-width:1380px;margin:auto;padding:16px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.card{background:#fff;border:1px solid #dce6e1;border-radius:12px;padding:14px}
+input,select{width:100%;padding:8px;border:1px solid #dce6e1;border-radius:7px;margin:4px 0 8px;box-sizing:border-box}
+.btn{border:0;border-radius:7px;padding:8px 12px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.light{background:#fff;color:#0f766e;border:1px solid #dce6e1}.btn.small{padding:4px 7px;font-size:11px;margin:2px}
+.qr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-top:10px}
+.qr-card{background:#fff;border:1px solid #dce6e1;border-radius:10px;padding:12px;text-align:center}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div><strong>✦ RestaurantPro / Scan &amp; QR</strong><br><small id="netInfo" style="color:#0f766e;font-weight:700"></small></div>
+  <div><a href="/index.html" class="btn light">← Dashboard</a> <a href="/pos.html" target="_blank" class="btn light">POS ↗</a> <a href="/kds.html" target="_blank" class="btn light">KDS ↗</a></div>
+</header>
+<div class="wrap">
+  <div class="card" style="margin-bottom:12px;background:#eef8f4">
+    <strong>🌐 Active Public Cloud URL:</strong>
+    <div style="display:flex;gap:8px;margin-top:5px"><input id="pubUrl" style="margin:0"><button class="btn" onclick="saveUrl()">Save</button></div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h3 style="margin-top:0">1. Create Table &amp; QR</h3>
+      <form id="f1">
+        <input id="out" required><input id="tname" required placeholder="Table Name (Table 1)">
+        <select id="ttype"><option value="Dine In">Dine In</option><option value="Takeaway">Takeaway</option></select>
+        <button class="btn" style="width:100%">＋ Create Table</button>
+      </form><p id="m1" style="color:#0f766e;font-weight:700;font-size:12px"></p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">2. Create Captain / Waiter User</h3>
+      <form id="uf">
+        <select id="ur"><option value="Waiter">Waiter</option><option value="Captain">Captain</option><option value="Manager">Manager</option></select>
+        <input id="up" required placeholder="Mobile Number"><input id="upw" required placeholder="Password">
+        <button class="btn" style="width:100%">＋ Create Captain User</button>
+      </form><div id="ulist" style="font-size:12px;margin-top:6px"></div>
+      <hr style="border:0;border-top:1px solid #dce6e1;margin:10px 0">
+      <h3 style="margin:0 0 6px">Create POS Login (4-Digit PIN)</h3>
+      <form id="pf">
+        <input id="pn" required placeholder="Cashier Name"><input id="pp" required placeholder="Mobile Number"><input id="ppw" maxlength="4" pattern="\d{4}" required placeholder="4-Digit Password (1234)">
+        <button class="btn" style="width:100%">＋ Create POS User</button>
+      </form><div id="plist" style="font-size:12px;margin-top:6px"></div>
+    </div>
+    <div class="card" style="text-align:center">
+      <h3 style="margin-top:0">3. Device Links &amp; App QR</h3>
+      <img id="appQr" width="115" height="115" style="border:1px solid #eee;border-radius:8px"><br>
+      <a id="capLnk" href="/captain.html" target="_blank" class="btn small">Captain App ↗</a>
+      <button class="btn light small" onclick="cp('/captain.html')">Copy App Link</button><hr>
+      <a id="kdsLnk" href="/kds.html" target="_blank" class="btn small">KDS Only (No Pass) ↗</a>
+      <button class="btn light small" onclick="cp('/kds.html')">Copy KDS Link</button><hr>
+      <a id="posLnk" href="/pos.html" target="_blank" class="btn small">POS Only (4-Digit PIN) ↗</a>
+      <button class="btn light small" onclick="cp('/pos.html')">Copy POS Link</button><hr>
+      <button class="btn light small" id="sbtn">↻ Sync Menu</button> <span id="m2" style="font-size:12px;color:#0f766e;font-weight:700"></span>
+    </div>
+  </div>
+  <div class="card"><h3 style="margin-top:0">Table QR Codes</h3><div id="qgrid" class="qr-grid"></div></div>
+</div>
+<script>
+out.value = localStorage.getItem('rpSelectedOutlet') || 'RestaurantPro - Andhra Pradesh';
+let host = location.origin, uCache = [], pCache = [], tCache = [];
+const qStr = () => '?outlet=' + encodeURIComponent(out.value);
+function links() {
+  appQr.src = '/api/qr-image?text=' + encodeURIComponent(host + '/captain.html' + qStr());
+  capLnk.href = host + '/captain.html' + qStr(); kdsLnk.href = host + '/kds.html' + qStr(); posLnk.href = host + '/pos.html' + qStr();
+}
+function cp(p) { const full = host + p + qStr(); navigator.clipboard.writeText(full); alert('Copied:\n' + full); }
+function saveUrl() { host = pubUrl.value.trim().replace(/\/+$/, '') || location.origin; netInfo.textContent = 'URL: ' + host; links(); load(); }
+const u = t => `${host}/customer.html?table=${encodeURIComponent(t.id)}&outlet=${encodeURIComponent(t.outlet)}`;
+const qi = t => `/api/qr-image?text=${encodeURIComponent(u(t))}`;
+function pdf(n, o, img) { const w = window.open('', '_blank'); w.document.write(`<body style="text-align:center;font-family:Arial;padding:30px"><h2>${o}</h2><h1>${n}</h1><img src="${img}" width="240" onload="setTimeout(()=>print(),300)"><p>Scan to Order</p></body>`); }
+
+async function loadU() {
+  uCache = await (await fetch('/api/staff-users' + qStr())).json();
+  ulist.innerHTML = uCache.map(x => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee"><span><b>${x.role}</b>: ${x.phone}</span><div><button class="btn light small" onclick="alert('Role: ${x.role}\\nPhone: ${x.phone}\\nPass: ${x.password}')">View</button><button class="btn light small" onclick="edU('${x.id}')">Edit</button><button class="btn light small" onclick="dlU('${x.id}')">✕</button></div></div>`).join('');
+}
+async function edU(id) { const x = uCache.find(a=>a.id===id); const role=prompt('Role:',x.role), phone=prompt('Phone:',x.phone), password=prompt('Password:',x.password); if(role&&phone&&password){ await fetch('/api/staff-users/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({role,phone,password})}); loadU(); } }
+async function dlU(id) { await fetch('/api/staff-users/'+id,{method:'DELETE'}); loadU(); }
+uf.onsubmit = async e => { e.preventDefault(); await fetch('/api/staff-users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:ur.value,phone:up.value,password:upw.value,outlet:out.value})}); up.value=''; upw.value=''; loadU(); };
+
+async function loadP() {
+  pCache = await (await fetch('/api/pos-users' + qStr())).json();
+  plist.innerHTML = pCache.map(x => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee"><span><b>${x.name}</b>: ${x.phone}</span><div><button class="btn light small" onclick="alert('Name: ${x.name}\\nPhone: ${x.phone}\\nPIN: ${x.password}')">View</button><button class="btn light small" onclick="edP('${x.id}')">Edit</button><button class="btn light small" onclick="dlP('${x.id}')">✕</button></div></div>`).join('');
+}
+async function edP(id) { const x = pCache.find(a=>a.id===id); const name=prompt('Name:',x.name), phone=prompt('Phone:',x.phone), password=prompt('4-Digit PIN:',x.password); if(name&&phone&&password){ await fetch('/api/pos-users/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,phone,password})}); loadP(); } }
+async function dlP(id) { await fetch('/api/pos-users/'+id,{method:'DELETE'}); loadP(); }
+pf.onsubmit = async e => { e.preventDefault(); const r = await fetch('/api/pos-users',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:pn.value,phone:pp.value,password:ppw.value,outlet:out.value})}); if(!r.ok) return alert('4-digit PIN required'); pn.value=''; pp.value=''; ppw.value=''; loadP(); };
+
+async function load() {
+  tCache = await (await fetch('/api/tables' + qStr())).json();
+  qgrid.innerHTML = tCache.map(t => `<div class="qr-card"><strong>${t.name}</strong><br><small>${t.outlet}</small><div style="margin:8px 0"><img src="${qi(t)}" width="155" height="155"></div><button class="btn light small" onclick="alert('Table: ${t.name}\\nLink: ${u(t)}')">View</button><button class="btn light small" onclick="edT('${t.id}')">Edit</button><a class="btn small" href="${u(t)}" target="_blank">Menu</a><a class="btn light small" href="${qi(t)}" download="${t.name}.png">PNG</a><button class="btn light small" onclick="pdf('${t.name}','${t.outlet}','${qi(t)}')">PDF</button></div>`).join('');
+}
+async function edT(id) { const t=tCache.find(a=>a.id===id), name=prompt('Table Name:',t.name); if(name){ await fetch('/api/tables/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})}); load(); } }
+f1.onsubmit = async e => { e.preventDefault(); await fetch('/api/tables',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({outlet:out.value,name:tname.value,type:ttype.value})}); tname.value=''; m1.textContent='✓ Created'; load(); };
+sbtn.onclick = async () => {
+  let items = JSON.parse(localStorage.getItem('rpMenuItems::outlet:'+encodeURIComponent(out.value)) || localStorage.getItem('rpMenuItems') || '[]');
+  if(!items.length) items = [{id:1,name:'Veg Burger',category:'Fast Food',price:99},{id:2,name:'Margherita Pizza',category:'Pizza',price:199},{id:3,name:'Masala Dosa',category:'Indian',price:129},{id:4,name:'Cold Coffee',category:'Drinks',price:119}];
+  const d = await (await fetch('/api/menu/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({outlet:out.value,items})})).json();
+  m2.textContent = `✓ ${d.count} synced`;
+};
+(async()=>{
+  try { const n = await (await fetch('/api/network-info')).json(); if(n.tunnelUrl){ host=n.tunnelUrl; pubUrl.value=n.tunnelUrl; } } catch(_){}
+  netInfo.textContent = 'URL: ' + host; links(); sbtn.click(); load(); loadU(); loadP();
+})();
+</script>
+</body>
+</html>
