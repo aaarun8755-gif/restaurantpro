@@ -102,7 +102,7 @@ app.patch('/api/tables/:id', (req, res) => {
   persist(); io.emit('tables:changed', t); res.json(t);
 });
 
-app.get('/api/menu', (req, res) => {
+app.get('/api/menu', (req, res) => { const list = byOutlet(db.menu, String(req.query.outlet || '').trim()); if (!list.length && db.menu.length) return res.json(db.menu); if (!db.menu.length) return res.json([{id:'m1',name:'Masala Dosa',category:'South Indian',price:120,available:true},{id:'m2',name:'Idli Sambar (2 Pcs)',category:'South Indian',price:80,available:true},{id:'m3',name:'Paneer Butter Masala',category:'North Indian',price:240,available:true},{id:'m4',name:'Veg Biryani',category:'Rice',price:180,available:true},{id:'m5',name:'Cold Coffee',category:'Beverages',price:90,available:true}]);
   const out = String(req.query.outlet || '').trim();
   res.json(out && out !== 'Head Office' ? db.menu.filter(m => !m.outlet || m.outlet === out || m.activeAllAreas) : db.menu);
 });
@@ -115,7 +115,7 @@ app.post('/api/menu/sync', (req, res) => {
 app.get('/api/orders', (req, res) => res.json(byOutlet(db.orders, String(req.query.outlet || '').trim())));
 app.post('/api/orders', (req, res) => {
   const b = req.body || {};
-  const isDirect = ['Waiter', 'Captain', 'Manager', 'POS'].includes(b.source);
+  const isDirect = ['Waiter', 'Captain', 'Manager', 'POS', 'QR'].includes(b.source);
   const table = b.tableId ? db.tables.find(t => t.id === b.tableId) : null;
   if (!isDirect && !table) return res.status(400).json({ error: 'Table inactive' });
   const items = (b.items || []).map(i => ({ itemId: String(i.itemId), name: String(i.name), qty: Math.max(1, Number(i.qty) || 1), price: Number(i.price) || 0 }));
@@ -155,6 +155,19 @@ app.patch('/api/orders/:id', (req, res) => {
   persist(); io.emit('orders:changed', o); if (k) io.emit('kot:changed', k); res.json(o);
 });
 
+
+  app.post('/api/orders/:id/approve-qr', (req, res) => {
+    const o = db.orders.find(x => x.id === req.params.id);
+    if (!o) return res.status(404).json({ error: 'Order not found' });
+    o.status = 'Accepted';
+    const kotItem = { id: 'kot-' + Date.now(), orderId: o.id, outlet: o.outlet, tableName: o.tableName || 'QR Table', items: o.items, customerNote: o.customerNote || '', status: 'New', createdAt: new Date().toISOString() };
+    db.kot.unshift(kotItem);
+    persist();
+    io.emit('orders:changed', o);
+    io.emit('kot:changed', kotItem);
+    res.json({ ok: true, order: o });
+  });
+  
 app.get('/api/kot', (req, res) => res.json(byOutlet(db.kot, String(req.query.outlet || '').trim())));
 app.patch('/api/kot/:id', (req, res) => {
   const k = db.kot.find(x => x.id === req.params.id); if (!k) return res.status(404).end();

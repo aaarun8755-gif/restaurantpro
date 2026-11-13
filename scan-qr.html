@@ -96,10 +96,10 @@ async function loadAll() {
   }).join('') || '<p>No tables yet. Create a table above.</p>';
 
   const staff = await (await fetch('/api/staff-users' + qStr())).json();
-  ulist.innerHTML = staff.map(u => `<div class="urow"><span><b>${u.name}</b> (${u.phone})</span><button class="btn d sm" onclick="delU('${u.id}')">Del</button></div>`).join('');
+  ulist.innerHTML = (staff.length ? staff : []).map(u => `<div class="urow"><span><b>${u.name||'Staff'}</b> ? ${u.phone} <small style='color:#0f766e'>(Pass: ${u.password})</small></span><button class="btn d sm" onclick="delU('${u.id}')">Del</button></div>`).join('') || '<small style="color:#5c726d">No Captain users in this outlet yet.</small>';
 
   const posU = await (await fetch('/api/pos-users' + qStr())).json();
-  plist.innerHTML = posU.map(u => `<div class="urow"><span><b>${u.name}</b> (PIN: ${u.password})</span><button class="btn d sm" onclick="delP('${u.id}')">Del</button></div>`).join('');
+  plist.innerHTML = (posU.length ? posU : []).map(u => `<div class="urow"><span><b>${u.name||'Cashier'}</b> ? ${u.phone} <small style='color:#0f766e'>(PIN: ${u.password})</small></span><button class="btn d sm" onclick="delP('${u.id}')">Del</button></div>`).join('') || '<small style="color:#5c726d">No POS users in this outlet yet.</small>';
 }
 
 tf.onsubmit = async e => { e.preventDefault(); await fetch('/api/tables',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({outlet:outlet.value,name:tname.value})}); tname.value=''; loadAll(); };
