@@ -1813,53 +1813,45 @@ setInterval(async function() {
 })();
 </script>
 
+
+
 <script id="rpAggregatorSidebarLinks">
 (function(){
+  const swLogo = '<span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:4px;background:#fc8019;color:#fff;font-weight:900;font-size:10px">S</span>';
+  const zmLogo = '<span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:4px;background:#e23744;color:#fff;font-weight:900;font-size:10px;font-style:italic">Z</span>';
+  const rpLogo = '<span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:4px;background:#0f766e;color:#fff;font-weight:900;font-size:9px">RP</span>';
+
   setInterval(() => {
-    if (document.getElementById('rpSwiggyNav')) return;
-    const allOrdEl = Array.from(document.querySelectorAll('aside *, nav *'))
-      .find(el => el.children.length <= 2 && (el.innerText || '').trim().includes('All Orders'));
-    if (!allOrdEl) return;
-
-    const target = allOrdEl.closest('a, button, li, div') || allOrdEl;
-    const channels = [
-      { id: 'rpSwiggyNav', label: '?? Swiggy Orders', url: '/online-channels.html?channel=Swiggy' },
-      { id: 'rpZomatoNav', label: '?? Zomato Orders', url: '/online-channels.html?channel=Zomato' },
-      { id: 'rpWebNav',    label: '?? Web Orders',    url: '/online-channels.html?channel=Web' }
-    ];
-
-    let ref = target;
-    channels.forEach(ch => {
-      const btn = document.createElement('div');
-      btn.id = ch.id;
-      btn.textContent = ch.label;
-      btn.style.cssText = 'padding:8px 14px 8px 28px;font-size:13px;font-weight:700;color:#1e293b;cursor:pointer;border-radius:8px;margin:2px 8px;display:block';
-      btn.onmouseover = () => btn.style.background = '#eef6f4';
-      btn.onmouseout = () => btn.style.background = 'transparent';
-      btn.onclick = () => { window.location.href = ch.url; };
-      ref.parentNode.insertBefore(btn, ref.nextSibling);
-      ref = btn;
-    });
+    if (!document.getElementById('rpSwiggyNav')) {
+      const allOrd = Array.from(document.querySelectorAll('aside *, nav *')).find(el => el.children.length <= 2 && (el.innerText || '').trim().includes('All Orders'));
+      if (allOrd) {
+        const target = allOrd.closest('a, button, li, div') || allOrd;
+        const items = [
+          { id: 'rpSwiggyNav', html: swLogo + '<span>Swiggy Orders</span>', url: '/online-channels.html?channel=Swiggy' },
+          { id: 'rpZomatoNav', html: zmLogo + '<span>Zomato Orders</span>', url: '/online-channels.html?channel=Zomato' },
+          { id: 'rpWebNav', html: rpLogo + '<span>Web Orders</span>', url: '/online-channels.html?channel=Web' }
+        ];
+        let ref = target;
+        items.forEach(ch => {
+          const d = document.createElement('div'); d.id = ch.id; d.innerHTML = ch.html;
+          d.style.cssText = 'padding:8px 14px 8px 26px;font-size:13px;font-weight:700;color:#1e293b;cursor:pointer;border-radius:8px;margin:2px 8px;display:flex;align-items:center;gap:8px';
+          d.onclick = () => { location.href = ch.url; };
+          ref.parentNode.insertBefore(d, ref.nextSibling); ref = d;
+        });
+      }
+    }
+    const isHO = (localStorage.getItem('rpSelectedOutlet') || '') === 'Head Office';
+    let hoBtn = document.getElementById('rpHoWebMenuBtn');
+    if (!isHO) { if (hoBtn) hoBtn.style.display = 'none'; return; }
+    if (hoBtn) { hoBtn.style.display = 'flex'; return; }
+    const anchor = document.getElementById('rpWebNav'); if (!anchor) return;
+    hoBtn = document.createElement('div'); hoBtn.id = 'rpHoWebMenuBtn';
+    hoBtn.innerHTML = '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:#d9261c;color:#fff;font-weight:900;font-size:9px">RP</span><span>RestaurantPro Web &#8599;</span>';
+    hoBtn.style.cssText = 'padding:9px 14px;font-size:13px;font-weight:700;color:#d9261c;background:#fff7ed;border:1px solid #fed7aa;cursor:pointer;border-radius:8px;margin:6px 8px;display:flex;align-items:center;gap:8px';
+    hoBtn.onclick = () => window.open('/website.html', '_blank');
+    anchor.parentNode.insertBefore(hoBtn, anchor.nextSibling);
   }, 300);
 })();
-</script>
-<script id="rpHoWebsiteNav">
-setInterval(() => {
-  const curOut = localStorage.getItem('rpSelectedOutlet') || '';
-  const isHO = curOut === 'Head Office';
-  let nav = document.getElementById('rpHoWebMenuBtn');
-  if (!isHO) { if (nav) nav.style.display = 'none'; return; }
-  if (nav) { nav.style.display = 'block'; return; }
-  const anchor = document.getElementById('rpWebNav') || Array.from(document.querySelectorAll('aside *, nav *')).find(el => el.children.length <= 2 && (el.innerText || '').trim().includes('All Orders'));
-  if (!anchor) return;
-  const target = anchor.closest('a, button, li, div') || anchor;
-  nav = document.createElement('div');
-  nav.id = 'rpHoWebMenuBtn';
-  nav.textContent = '?? RestaurantPro Web';
-  nav.style.cssText = 'padding:9px 14px;font-size:13px;font-weight:700;color:#d9261c;background:#fff7ed;border:1px solid #fed7aa;cursor:pointer;border-radius:8px;margin:6px 8px;display:block';
-  nav.onclick = () => { window.location.href = '/web-admin.html'; };
-  target.parentNode.insertBefore(nav, target.nextSibling);
-}, 300);
 </script>
 </body>
 </html>

@@ -35,30 +35,30 @@ input,select,textarea{width:100%;padding:8px 10px;border:1px solid #cbd5e1;borde
 </head>
 <body>
 <div class="top-strip">
-  <span>?? Flat &#8377;100 Off on Fresh Sweets above &#8377;1,499 + Free Delivery above &#8377;1,000</span>
-  <span>? Direct Order Dispatch from Your Selected State &amp; City Outlet</span>
+  <span>Flat &#8377;100 Off on Fresh Sweets above &#8377;1,499 + Free Delivery above &#8377;1,000</span>
+  <span>Direct Order Dispatch from Your Selected State &amp; City Outlet</span>
 </div>
 <header>
   <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
     <div class="logo">RESTAURANTPRO</div>
     <div class="nav-cats">
       <button class="cat-btn active" onclick="filterCat('All',this)">Shop All</button>
-      <button class="cat-btn" onclick="filterCat('Sweets',this)">?? Sweets</button>
-      <button class="cat-btn" onclick="filterCat('Namkeen',this)">?? Namkeen</button>
-      <button class="cat-btn" onclick="filterCat('Gifting',this)">?? Gifting Combos</button>
+      <button class="cat-btn" onclick="filterCat('Sweets',this)">Sweets</button>
+      <button class="cat-btn" onclick="filterCat('Namkeen',this)">Namkeen</button>
+      <button class="cat-btn" onclick="filterCat('Gifting',this)">Gifting Combos</button>
     </div>
   </div>
-  <input id="webSearch" placeholder="?? Search Navratan Mixture, Kaju Katli..." oninput="renderProducts()" style="width:260px;margin:0">
-</header>
+  <input id="webSearch" placeholder="Search Navratan Mixture, Kaju Katli..." oninput="renderProducts()" style="width:260px;margin:0">
+<a href="/web-admin.html" style="background:#115e59;color:#fff;padding:7px 13px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700">+ Manage Catalog (HO)</a></header>
 <div class="loc-bar">
-  <strong style="font-size:13px;color:#9a3412">?? Select Delivery Location:</strong>
+  <strong style="font-size:13px;color:#9a3412">Select Delivery Location:</strong>
   <div style="display:flex;align-items:center;gap:6px"><label style="font-size:12px;font-weight:700">State:</label><select id="selState" onchange="onStateChange()" style="width:auto;min-width:190px;margin:0;font-weight:700"></select></div>
   <div style="display:flex;align-items:center;gap:6px"><label style="font-size:12px;font-weight:700">City / Outlet:</label><select id="selCityOutlet" style="width:auto;min-width:240px;margin:0;font-weight:700"></select></div>
 </div>
 <div class="wrap">
   <div><h2 style="margin:0 0 14px;font-size:20px" id="catHeading">All Sweets &amp; Namkeen Specials</h2><div class="pgrid" id="prodGrid"></div></div>
   <div class="card" style="height:fit-content;position:sticky;top:76px">
-    <h3 style="margin-top:0;color:var(--red)">?? Your Order Bag (<span id="bagCount">0</span>)</h3>
+    <h3 style="margin-top:0;color:var(--red)">Your Order Bag (<span id="bagCount">0</span>)</h3>
     <div id="bagBox" style="font-size:13px;color:var(--muted);margin-bottom:12px">Your cart is empty.</div>
     <div style="background:#fff7ed;padding:12px;border-radius:10px;margin-bottom:12px;font-size:13px;border:1px solid #fed7aa">
       <div style="display:flex;justify-content:space-between"><span>Subtotal:</span><b id="wSub">&#8377;0</b></div>
@@ -71,7 +71,7 @@ input,select,textarea{width:100%;padding:8px 10px;border:1px solid #cbd5e1;borde
       <label style="font-size:12px;font-weight:700">10-Digit Mobile Number *</label><input id="wPhone" type="tel" maxlength="10" required placeholder="Enter 10-digit mobile number">
       <label style="font-size:12px;font-weight:700">Complete Delivery Address *</label><textarea id="wAddr" rows="2" required placeholder="House/Flat No., Street, Landmark..."></textarea>
       <label style="font-size:12px;font-weight:700">Payment Mode</label><select id="wPay"><option>UPI / Online Paid</option><option>Cash on Delivery (COD)</option><option>Credit / Debit Card</option></select>
-      <button class="btn btn-buy" style="width:100%;font-size:14px;padding:11px">BUY NOW ? Place Order ?</button>
+      <button class="btn btn-buy" style="width:100%;font-size:14px;padding:11px">BUY NOW Place Order ?</button>
     </form>
   </div>
 </div>
@@ -111,7 +111,7 @@ function getStoreProducts() {
   return saved;
 }
 let curCat = 'All', selSize = {}, selQty = {}, cart = [];
-function filterCat(c, btn) { curCat = c; catHeading.textContent = c === 'All' ? 'All Sweets & Namkeen Specials' : c + ' Collection'; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderProducts(); }
+function filterCat(c, btn) { curCat = c; catHeading.textContent = c === 'All' 'All Sweets & Namkeen Specials' : c + ' Collection'; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderProducts(); }
 function setSize(id, mult) { selSize[id] = mult; renderProducts(); }
 function chgQty(id, d) { selQty[id] = Math.max(1, (selQty[id]||1) + d); renderProducts(); }
 
@@ -119,13 +119,13 @@ function renderProducts() {
   const q = (webSearch.value || '').toLowerCase();
   const list = getStoreProducts().filter(p => (curCat === 'All' || p.cat === curCat) && (!q || p.name.toLowerCase().includes(q)));
   prodGrid.innerHTML = list.map(p => {
-    const mult = selSize[p.id] || 1, price = Math.round(Number(p.basePrice) * mult), qty = selQty[p.id] || 1, wLabel = mult === 1 ? '200g' : (mult === 2 ? '400g' : '1 Kg');
+    const mult = selSize[p.id] || 1, price = Math.round(Number(p.basePrice) * mult), qty = selQty[p.id] || 1, wLabel = mult === 1 '200g' : (mult === 2 '400g' : '1 Kg');
     return '<div class="pcard"><img src="' + p.img + '" alt="' + p.name + '"><div class="pbody"><span style="font-size:11px;font-weight:700;color:#ea580c">' + p.cat.toUpperCase() + '</span><h4 style="margin:4px 0">' + p.name + '</h4><small style="color:#64748b;display:block;min-height:32px">' + (p.desc||'') + '</small><div style="font-size:17px;font-weight:800;color:#d9261c;margin-top:6px">Rs. ' + price + '.00 <small style="font-size:11px;color:#64748b">(' + wLabel + ')</small></div><div class="sizes"><button class="sz ' + (mult===1?'active':'') + '" onclick="setSize(\'' + p.id + '\',1)">200g</button><button class="sz ' + (mult===2?'active':'') + '" onclick="setSize(\'' + p.id + '\',2)">400g</button><button class="sz ' + (mult===4.5?'active':'') + '" onclick="setSize(\'' + p.id + '\',4.5)">1 Kg</button></div><div style="display:flex;align-items:center;gap:8px;margin:8px 0"><button class="sz" onclick="chgQty(\'' + p.id + '\',-1)">?</button><b>' + qty + '</b><button class="sz" onclick="chgQty(\'' + p.id + '\',1)">+</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px"><button class="btn btn-add" onclick="addToBag(\'' + p.id + '\',false)">Add to Cart</button><button class="btn btn-buy" onclick="addToBag(\'' + p.id + '\',true)">BUY NOW</button></div></div></div>';
   }).join('');
 }
 
 function addToBag(id, focusCheckout) {
-  const p = getStoreProducts().find(x => x.id === id), mult = selSize[id] || 1, wLabel = mult === 1 ? '200g' : (mult === 2 ? '400g' : '1 Kg'), price = Math.round(Number(p.basePrice) * mult), qty = selQty[id] || 1, key = id + '_' + wLabel;
+  const p = getStoreProducts().find(x => x.id === id), mult = selSize[id] || 1, wLabel = mult === 1 '200g' : (mult === 2 '400g' : '1 Kg'), price = Math.round(Number(p.basePrice) * mult), qty = selQty[id] || 1, key = id + '_' + wLabel;
   const ex = cart.find(c => c.key === key); if (ex) ex.qty += qty; else cart.push({ key, itemId: key, name: p.name + ' (' + wLabel + ')', price, qty });
   renderBag(); if (focusCheckout) wName.focus();
 }
@@ -133,7 +133,7 @@ function addToBag(id, focusCheckout) {
 function renderBag() {
   bagCount.textContent = cart.reduce((s,c)=>s+c.qty,0);
   if (!cart.length) { bagBox.innerHTML = 'Your cart is empty.'; wSub.textContent='?0'; wTax.textContent='?0'; wTot.textContent='?0'; return; }
-  bagBox.innerHTML = cart.map((c,idx) => '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f1f5f9"><span>' + c.name + ' ? ' + c.qty + '</span><span><b>?' + (c.price*c.qty) + '</b> <button onclick="cart.splice(' + idx + ',1);renderBag()" style="border:0;background:none;color:#dc2626;cursor:pointer;font-weight:700">?</button></span></div>').join('');
+  bagBox.innerHTML = cart.map((c,idx) => '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f1f5f9"><span>' + c.name + ' ' + c.qty + '</span><span><b>?' + (c.price*c.qty) + '</b> <button onclick="cart.splice(' + idx + ',1);renderBag()" style="border:0;background:none;color:#dc2626;cursor:pointer;font-weight:700">?</button></span></div>').join('');
   const sub = cart.reduce((s,c)=>s+c.price*c.qty,0), tax = Math.round(sub * 0.05 + 20);
   wSub.textContent = '?' + sub; wTax.textContent = '?' + tax; wTot.textContent = '?' + (sub + tax);
 }
@@ -144,7 +144,7 @@ webOrderForm.onsubmit = async e => {
   if (!/^[0-9]{10}$/.test(wPhone.value.trim())) return alert('Kripya 10-digit Mobile Number bharein.');
   const sub = cart.reduce((s,c)=>s+c.price*c.qty,0), total = sub + Math.round(sub * 0.05 + 20), targetOutlet = selCityOutlet.value;
   const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'Web', outlet: targetOutlet, tableName: 'WEB-STORE (' + selState.value + ')', orderType: 'Web Store', customerName: wName.value.trim(), customerPhone: wPhone.value.trim(), customerNote: 'State: ' + selState.value + ' | Address: ' + wAddr.value.trim(), paymentMode: wPay.value, items: cart, total }) });
-  if (res.ok) { cart = []; renderBag(); wName.value=''; wPhone.value=''; wAddr.value=''; alert('? Order Placed! Request sent directly to ' + targetOutlet + ' POS for Approval.'); }
+  if (res.ok) { cart = []; renderBag(); wName.value=''; wPhone.value=''; wAddr.value=''; alert('Order Placed! Request sent directly to ' + targetOutlet + ' POS for Approval.'); }
   else alert('Order failed. Please try again.');
 };
 renderProducts();

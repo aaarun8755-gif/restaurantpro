@@ -48,8 +48,8 @@ input,select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;fon
     </select>
     <button class="btn light" onclick="exportChannelExcel()">⬇ Excel</button>
     <button class="btn light" onclick="window.print()">🖨 PDF</button>
-    <a href="/kds.html" target="_blank" class="btn">Kitchen KDS ↗</a>
-    <a href="/index.html" class="btn light">← Dashboard</a>
+    <a href="/kds.html" target="_blank" class="btn">Kitchen KDS &#8599;</a>
+    <a href="/index.html" class="btn light">&larr; Dashboard</a>
   </div>
 </header>
 
@@ -80,7 +80,7 @@ input,select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;fon
       <input id="fOrdId" required placeholder="Order ID (e.g. SWG-8941)">
       <input id="fCust" required placeholder="Customer Name">
       <input id="fItems" required placeholder="Items (e.g. Paneer Tikka x1, Naan x2)">
-      <input id="fAmt" type="number" required placeholder="Amount (₹)">
+      <input id="fAmt" type="number" required placeholder="Amount (&#8377;)">
       <select id="fStat"><option value="Success">Success (On-Time)</option><option value="Late Delivery">Late Delivery</option><option value="Restaurant Rejected">Restaurant Rejected</option><option value="Customer Cancelled">Customer Cancelled</option></select>
       <input id="fComp" placeholder="Complaint (Optional, e.g. Late / Missing item)">
       <button class="btn">+ Add &amp; Send to KDS</button>
@@ -105,7 +105,7 @@ let curChannel = p.get('channel') || 'All';
 const selOutlet = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
 const isHO = selOutlet === 'Head Office';
 
-subRole.textContent = isHO ? '● Head Office Master Control (All 31 Outlets + Filter)' : '● Outlet View: ' + selOutlet;
+subRole.textContent = isHO '● Head Office Master Control (All 31 Outlets + Filter)' : '● Outlet View: ' + selOutlet;
 if (isHO) hoFilter.style.display = 'inline-block';
 
 function getChannelOrders() {
@@ -147,9 +147,9 @@ function seedAll31OutletsDemo() {
     channels.forEach(ch => {
       for (let i = 0; i < 2; i++) {
         const st = statuses[(seq + i) % statuses.length];
-        const comp = st === 'Late Delivery' ? comps[2] : (st === 'Success' && seq % 4 === 0 ? comps[3] : '');
+        const comp = st === 'Late Delivery' comps[2] : (st === 'Success' && seq % 4 === 0 comps[3] : '');
         demoList.push({
-          id: (ch === 'Swiggy' ? 'SWG-' : (ch === 'Zomato' ? 'ZMT-' : 'WEB-')) + seq++,
+          id: (ch === 'Swiggy' 'SWG-' : (ch === 'Zomato' 'ZMT-' : 'WEB-')) + seq++,
           channel: ch,
           date: new Date(Date.now() - Math.floor(Math.random()*86400000)).toLocaleString('en-GB'),
           outlet: out,
@@ -157,7 +157,7 @@ function seedAll31OutletsDemo() {
           items: dishes[seq % dishes.length],
           amount: 220 + (seq % 5) * 85,
           status: st,
-          sla: st === 'Late Delivery' ? 'Late (+14m)' : (st === 'Success' ? 'On-Time (22m)' : 'Cancelled'),
+          sla: st === 'Late Delivery' 'Late (+14m)' : (st === 'Success' 'On-Time (22m)' : 'Cancelled'),
           complaint: comp
         });
       }
@@ -166,7 +166,7 @@ function seedAll31OutletsDemo() {
 
   localStorage.setItem('rpChannelOrders', JSON.stringify(demoList));
   setChannel(curChannel);
-  alert('? Demo Ready! Total ' + demoList.length + ' Swiggy, Zomato & Web orders added across all 31 Outlets!');
+  alert('Demo Ready! Total ' + demoList.length + ' Swiggy, Zomato & Web orders added across all 31 Outlets!');
 }
 
 function setChannel(ch) {
@@ -183,12 +183,12 @@ newChForm.onsubmit = async e => {
     id: fOrdId.value.trim(),
     channel: fCh.value,
     date: new Date().toLocaleString('en-GB'),
-    outlet: isHO ? (hoFilter.value !== 'ALL' ? hoFilter.value : 'Main Outlet') : selOutlet,
+    outlet: isHO (hoFilter.value !== 'ALL' hoFilter.value : 'Main Outlet') : selOutlet,
     customer: fCust.value.trim(),
     items: fItems.value.trim(),
     amount: Number(fAmt.value || 0),
     status: st,
-    sla: st === 'Late Delivery' ? 'Late (+15m)' : (st === 'Success' ? 'On-Time (22m)' : 'Cancelled'),
+    sla: st === 'Late Delivery' 'Late (+15m)' : (st === 'Success' 'On-Time (22m)' : 'Cancelled'),
     complaint: fComp.value.trim()
   };
   list.unshift(ord);
@@ -237,13 +237,13 @@ function renderPage() {
     if ([...hoFilter.options].some(o => o.value === curVal)) hoFilter.value = curVal;
   }
 
-  const outF = isHO ? hoFilter.value : selOutlet;
+  const outF = isHO hoFilter.value : selOutlet;
   const stF = statusFilter.value;
 
   const filtered = all.filter(o => {
     const matchCh = curChannel === 'All' || o.channel === curChannel;
     const matchOut = outF === 'ALL' || o.outlet === outF;
-    const matchSt = stF === 'ALL' || (stF === 'Complaint' ? Boolean(o.complaint) : o.status === stF);
+    const matchSt = stF === 'ALL' || (stF === 'Complaint' Boolean(o.complaint) : o.status === stF);
     return matchCh && matchOut && matchSt;
   });
 
@@ -255,7 +255,7 @@ function renderPage() {
   const comp = filtered.filter(x => x.complaint && x.complaint.trim()).length;
 
   kTotal.textContent = filtered.length;
-  kRev.textContent = '₹' + rev.toLocaleString('en-IN');
+  kRev.textContent = '&#8377;' + rev.toLocaleString('en-IN');
   kSuccess.textContent = succ;
   kRestRej.textContent = rRej;
   kCustRej.textContent = cRej;
@@ -263,15 +263,15 @@ function renderPage() {
   kComp.textContent = comp;
 
   chBody.innerHTML = filtered.map(o => {
-    const chCls = o.channel === 'Swiggy' ? 'b-swiggy' : (o.channel === 'Zomato' ? 'b-zomato' : 'b-web');
-    const stCls = o.status === 'Success' ? 'b-ok' : (o.status === 'Late Delivery' ? 'b-warn' : 'b-bad');
+    const chCls = o.channel === 'Swiggy' 'b-swiggy' : (o.channel === 'Zomato' 'b-zomato' : 'b-web');
+    const stCls = o.status === 'Success' 'b-ok' : (o.status === 'Late Delivery' 'b-warn' : 'b-bad');
     return `<tr>
       <td><span class="badge ${chCls}">${o.channel}</span></td>
       <td><b>${o.id}</b></td><td>${o.date}</td><td><b>${o.outlet}</b></td><td>${o.customer}</td><td>${o.items}</td>
-      <td><b>₹${o.amount}</b></td>
+      <td><b>&#8377;${o.amount}</b></td>
       <td><span class="badge ${stCls}">${o.status}</span></td>
       <td>${o.sla}</td>
-      <td>${o.complaint ? `<span class="badge b-bad">⚠ ${o.complaint}</span>` : '<span style="color:#64748b">No Complaint</span>'}</td>
+      <td>${o.complaint `<span class="badge b-bad">⚠ ${o.complaint}</span>` : '<span style="color:#64748b">No Complaint</span>'}</td>
       <td><button class="btn light sm" onclick="logComplaint('${o.id}')">+ Complaint</button></td>
     </tr>`;
   }).join('') || '<tr><td colspan="11">No orders found for this channel/outlet filter.</td></tr>';
