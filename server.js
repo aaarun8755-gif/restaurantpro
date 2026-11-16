@@ -115,24 +115,21 @@ app.post('/api/menu/sync', (req, res) => {
 app.get('/api/orders', (req, res) => res.json(byOutlet(db.orders, String(req.query.outlet || '').trim())));
 app.post('/api/orders', (req, res) => {
   const b = req.body || {};
-  // Customer QR orders must ALWAYS wait for the boss approval.
-  const isQr = String(b.source || '').toUpperCase() === 'QR';
-  const isDirect = ['Waiter', 'Captain', 'Manager', 'POS'].includes(b.source);
+  const isDirect = ['Waiter', 'Captain', 'Manager', 'POS', 'QR'].includes(b.source);
   const table = b.tableId ? db.tables.find(t => t.id === b.tableId) : null;
-  if (!isDirect && !isQr && !table) return res.status(400).json({ error: 'Table inactive' });
-  const items = (b.items || []).map(i => ({ itemId: String(i.itemId || ''), name: String(i.name || ''), qty: Math.max(1, Number(i.qty) || 1), price: Number(i.price) || 0 })).filter(i => i.name);
+  if (!isDirect && !table) return res.status(400).json({ error: 'Table inactive' });
+  const items = (b.items || []).map(i => ({ itemId: String(i.itemId), name: String(i.name), qty: Math.max(1, Number(i.qty) || 1), price: Number(i.price) || 0 }));
   if (!items.length) return res.status(400).json({ error: 'Empty cart' });
-  const subtotal = Number(items.reduce((sum, i) => sum + i.qty * i.price, 0).toFixed(2));
+  const subtotal = items.reduce((s, i) => s + i.qty * i.price, 0);
   const gst = Number((subtotal * 0.05).toFixed(2));
   const total = Number((subtotal + gst).toFixed(2));
   const order = {
-    id: crypto.randomUUID(), orderNo: (isQr ? 'QR-' : 'ORD-') + String(Date.now()).slice(-7),
-    source: isQr ? 'QR' : (isDirect ? b.source : 'QR'), waiterName: isDirect ? `${b.source} (${b.waiterPhone || ''})` : '',
-    type: b.orderType || (table ? table.type : 'Dine In'), tableId: table ? table.id : String(b.tableId || ''),
+    id: crypto.randomUUID(), orderNo: (isDirect ? 'ORD-' : 'QR-') + String(Date.now()).slice(-7),
+    source: isDirect ? b.source : 'QR', waiterName: isDirect ? `${b.source} (${b.waiterPhone || ''})` : '',
+    type: b.orderType || (table ? table.type : 'Dine In'), tableId: table ? table.id : '',
     tableName: String(b.tableName || (table ? table.name : 'Counter')), outlet: String(b.outlet || (table ? table.outlet : 'Main Outlet')),
-    customerName: String(b.customerName || ''), customerPhone: String(b.customerPhone || ''),
-    items, subtotal, gst, total, paymentMethod: b.paymentMode || b.paymentMethod || 'Cash',
-    paymentStatus: isQr ? 'Pending' : 'Billed', status: isQr ? 'Pending Approval' : 'Accepted',
+    items, subtotal, gst, total, paymentMethod: b.paymentMethod || 'Cash',
+    paymentStatus: isDirect ? 'Billed' : 'Pending', status: isDirect ? 'Accepted' : 'Pending Approval',
     createdAt: new Date().toISOString(), customerNote: String(b.customerNote || '')
   };
   if (isDirect) {
@@ -141,84 +138,46 @@ app.post('/api/orders', (req, res) => {
     db.kot.unshift(tkt); io.emit('kot:changed', tkt);
   }
   db.orders.unshift(order); persist(); io.emit('orders:changed', order);
-  if (isQr) io.emit('orders:new_qr', order);
+  if (!isDirect) io.emit('orders:new_qr', order);
   res.status(201).json(order);
 });
 
-// Update an order status. QR approval creates exactly one KOT.
 app.patch('/api/orders/:id', (req, res) => {
   const o = db.orders.find(x => x.id === req.params.id); if (!o) return res.status(404).end();
-  if (Array.isArray(req.body.items)) {
-    if (o.source !== 'QR' || !['Pending Approval', 'Rejected'].includes(o.status)) return res.status(409).json({ error: 'Only pending or rejected QR orders can be edited' });
-    const items = req.body.items.map(i => ({ itemId: String(i.itemId || ''), name: String(i.name || ''), qty: Math.max(1, Number(i.qty) || 1), price: Number(i.price) || 0 })).filter(i => i.name);
-    if (!items.length) return res.status(400).json({ error: 'Order must contain at least one item' });
-    o.items = items;
-    o.subtotal = Number(items.reduce((sum, i) => sum + i.qty * i.price, 0).toFixed(2));
-    o.gst = Number((o.subtotal * 0.05).toFixed(2));
-    o.total = Number((o.subtotal + o.gst).toFixed(2));
-    o.status = 'Pending Approval';
-    o.editedAt = new Date().toISOString();
-  }
-  const nextStatus = String(req.body.status || o.status);
-  if (nextStatus === 'Accepted' && o.source === 'QR') {
-    return res.status(409).json({ error: 'QR orders must be approved from QR Order POS' });
-    o.status = 'Accepted';
-    if (!db.kot.some(k => k.orderId === o.id)) {
-      o.kotNo = 'KOT-' + String(Date.now()).slice(-6); o.billNo = 'RP-' + String(Date.now()).slice(-8);
-      const tkt = { id: crypto.randomUUID(), kotNo: o.kotNo, billNo: o.billNo, orderId: o.id, orderNo: o.orderNo, tableName: o.tableName, orderType: `${o.type} (QR)`, outlet: o.outlet, items: o.items, customerNote: o.customerNote, total: o.total, status: 'New', createdAt: new Date().toISOString() };
-      db.kot.unshift(tkt); io.emit('kot:changed', tkt);
-    }
-  } else if (nextStatus === 'Rejected' && o.source === 'QR') {
-    return res.status(409).json({ error: 'QR orders must be rejected from QR Order POS' });
-  } else if (nextStatus === 'Cancelled' && o.source === 'QR') {
-    if (!['Pending Approval', 'Rejected'].includes(o.status)) return res.status(409).json({ error: 'Only pending or rejected QR orders can be cancelled' });
-    o.status = 'Cancelled';
-  } else if (nextStatus !== o.status) {
-    o.status = nextStatus;
-    if (o.status === 'Accepted' && !o.kotNo) {
-      o.kotNo = 'KOT-' + String(Date.now()).slice(-6); o.billNo = 'RP-' + String(Date.now()).slice(-8);
-      const tkt = { id: crypto.randomUUID(), kotNo: o.kotNo, billNo: o.billNo, orderId: o.id, orderNo: o.orderNo, tableName: o.tableName, orderType: o.type, outlet: o.outlet, items: o.items, customerNote: o.customerNote, total: o.total, status: 'New', createdAt: new Date().toISOString() };
-      db.kot.unshift(tkt); io.emit('kot:changed', tkt);
-    }
+  o.status = String(req.body.status || o.status);
+  if (o.status === 'Accepted' && !o.kotNo) {
+    o.kotNo = 'KOT-' + String(Date.now()).slice(-6); o.billNo = 'RP-' + String(Date.now()).slice(-8);
+    const tkt = { id: crypto.randomUUID(), kotNo: o.kotNo, billNo: o.billNo, orderId: o.id, orderNo: o.orderNo, tableName: o.tableName, orderType: o.type, outlet: o.outlet, items: o.items, customerNote: o.customerNote, total: o.total, status: 'New', createdAt: new Date().toISOString() };
+    db.kot.unshift(tkt); io.emit('kot:changed', tkt);
   }
   const k = db.kot.find(x => x.orderId === o.id);
   if (k && ['Preparing', 'Ready', 'Completed'].includes(o.status)) k.status = o.status;
   persist(); io.emit('orders:changed', o); if (k) io.emit('kot:changed', k); res.json(o);
 });
 
-app.post('/api/orders/:id/approve-qr', (req, res) => {
-  const o = db.orders.find(x => x.id === req.params.id);
-  if (!o) return res.status(404).json({ error: 'Order not found' });
-  if (o.source !== 'QR') return res.status(400).json({ error: 'This is not a QR order' });
-  if (o.status !== 'Pending Approval') return res.status(409).json({ error: 'Only pending QR orders can be approved' });
-  o.status = 'Accepted';
-  if (!db.kot.some(k => k.orderId === o.id)) {
-    o.kotNo = 'KOT-' + String(Date.now()).slice(-6); o.billNo = 'RP-' + String(Date.now()).slice(-8);
-    const kotItem = { id: crypto.randomUUID(), kotNo: o.kotNo, billNo: o.billNo, orderId: o.id, orderNo: o.orderNo, outlet: o.outlet, tableName: o.tableName || 'QR Table', orderType: `${o.type || 'Dine In'} (QR)`, items: o.items, customerNote: o.customerNote || '', total: o.total, status: 'New', createdAt: new Date().toISOString() };
-    db.kot.unshift(kotItem); io.emit('kot:changed', kotItem);
-  }
-  persist(); io.emit('orders:changed', o);
-  res.json({ ok: true, order: o });
-});
 
-app.post('/api/orders/:id/reject-qr', (req, res) => {
-  const o = db.orders.find(x => x.id === req.params.id);
-  if (!o) return res.status(404).json({ error: 'Order not found' });
-  if (o.source !== 'QR' || o.status !== 'Pending Approval') return res.status(409).json({ error: 'Only pending QR orders can be rejected' });
-  o.status = 'Rejected'; o.rejectedAt = new Date().toISOString();
-  persist(); io.emit('orders:changed', o);
-  res.json({ ok: true, order: o });
-});
+  app.post('/api/orders/:id/approve-qr', (req, res) => {
+    const o = db.orders.find(x => x.id === req.params.id);
+    if (!o) return res.status(404).json({ error: 'Order not found' });
+    o.status = 'Accepted';
+    const kotItem = { id: 'kot-' + Date.now(), orderId: o.id, outlet: o.outlet, tableName: o.tableName || 'QR Table', items: o.items, customerNote: o.customerNote || '', status: 'New', createdAt: new Date().toISOString() };
+    db.kot.unshift(kotItem);
+    persist();
+    io.emit('orders:changed', o);
+    io.emit('kot:changed', kotItem);
+    res.json({ ok: true, order: o });
+  });
+  
 
-app.post('/api/orders/:id/cancel-qr', (req, res) => {
-  const o = db.orders.find(x => x.id === req.params.id);
-  if (!o) return res.status(404).json({ error: 'Order not found' });
-  if (o.source !== 'QR' || !['Pending Approval', 'Rejected'].includes(o.status)) return res.status(409).json({ error: 'Only pending or rejected QR orders can be cancelled' });
-  o.status = 'Cancelled'; o.cancelledAt = new Date().toISOString();
-  persist(); io.emit('orders:changed', o);
-  res.json({ ok: true, order: o });
-});
-
+  app.post('/api/orders/:id/reject-qr', (req, res) => {
+    const o = db.orders.find(x => x.id === req.params.id);
+    if (!o) return res.status(404).json({ error: 'Order not found' });
+    o.status = 'Cancelled';
+    persist();
+    io.emit('orders:changed', o);
+    res.json({ ok: true });
+  });
+  
 app.get('/api/kot', (req, res) => res.json(byOutlet(db.kot, String(req.query.outlet || '').trim())));
 app.patch('/api/kot/:id', (req, res) => {
   const k = db.kot.find(x => x.id === req.params.id); if (!k) return res.status(404).end();
