@@ -1812,33 +1812,35 @@ setInterval(async function() {
   pollAllOutletsQr();
 })();
 </script>
+
 <script id="rpAggregatorSidebarLinks">
 (function(){
   setInterval(() => {
     if (document.getElementById('rpSwiggyNav')) return;
-    const allOrdEl = Array.from(document.querySelectorAll('aside a, aside button, aside li, nav a, nav button, nav li, div'))
-      .find(el => (el.innerText || '').trim() === 'All Orders' && el.closest('aside, nav, [class*="sidebar"]'));
+    const allOrdEl = Array.from(document.querySelectorAll('aside *, nav *'))
+      .find(el => el.children.length <= 2 && (el.innerText || '').trim().includes('All Orders'));
     if (!allOrdEl) return;
 
+    const target = allOrdEl.closest('a, button, li, div') || allOrdEl;
     const channels = [
       { id: 'rpSwiggyNav', label: '?? Swiggy Orders', url: '/online-channels.html?channel=Swiggy' },
       { id: 'rpZomatoNav', label: '?? Zomato Orders', url: '/online-channels.html?channel=Zomato' },
       { id: 'rpWebNav',    label: '?? Web Orders',    url: '/online-channels.html?channel=Web' }
     ];
 
-    let ref = allOrdEl;
+    let ref = target;
     channels.forEach(ch => {
       const btn = document.createElement('div');
       btn.id = ch.id;
       btn.textContent = ch.label;
-      btn.style.cssText = 'padding:9px 14px 9px 26px;font-size:13px;font-weight:600;color:#334155;cursor:pointer;border-radius:8px;margin:2px 8px;display:flex;align-items:center;gap:6px';
+      btn.style.cssText = 'padding:8px 14px 8px 28px;font-size:13px;font-weight:700;color:#1e293b;cursor:pointer;border-radius:8px;margin:2px 8px;display:block';
       btn.onmouseover = () => btn.style.background = '#eef6f4';
       btn.onmouseout = () => btn.style.background = 'transparent';
       btn.onclick = () => { window.location.href = ch.url; };
       ref.parentNode.insertBefore(btn, ref.nextSibling);
       ref = btn;
     });
-  }, 400);
+  }, 300);
 })();
 </script>
 </body>
