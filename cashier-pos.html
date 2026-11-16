@@ -86,116 +86,14 @@ async function act(id, status) { await fetch('/api/orders/'+id,{method:'PATCH',h
 async function loadO() {
   if(!pu) return;
   const list = await (await fetch('/api/orders?outlet='+encodeURIComponent(pu.outlet))).json();
-  obody.innerHTML = list.map(o => `<tr><td><b>${o.kotNo||o.orderNo}</b><br><small>${o.billNo||''}</small></td><td><b>${o.tableName}</b> (${o.source})</td><td>${(o.items||[]).map(i=>`${i.name}×${i.qty}`).join(', ')}</td><td><b>₹${Number(o.total).toFixed(2)}</b></td><td>${o.status}</td><td>${o.status==='Pending Approval'?`<button class="btn" onclick="act('${o.id}','Accepted')">Accept</button> <button class="btn danger" onclick="act('${o.id}','Rejected')">✕</button>`:o.paymentStatus||'Done'}</td></tr>`).join('');
+  obody.innerHTML = list.map(o => `<tr><td><b>${o.kotNo||o.orderNo}</b><br><small>${o.billNo||''}</small></td><td><b>${o.tableName}</b> (${o.source})</td><td>${(o.items||[]).map(i=>`${i.name}×${i.qty}`).join(', ')}</td><td><b>₹${Number(o.total).toFixed(2)}</b></td><td>${o.status}</td><td>${o.source==='QR' && o.status==='Pending Approval' ? '<span style="color:#a16207;font-weight:700">Awaiting Boss Approval · QR Order POS</span>' : (o.paymentStatus||'Done')}</td></tr>`).join('');
 }
 socket.on('orders:changed', loadO); socket.on('orders:new_qr', loadO);
 if(pu) openP();
 </script>
 
-<script id="rpForwardPosToKot">
-  (function(){
-    window._sentOrderIds = window._sentOrderIds || {};
-    function syncLatestOrders() {
-      ['rpOrders', 'rpBills'].forEach(key => {
-        try {
-          const arr = JSON.parse(localStorage.getItem(key) || '[]');
-          if (!Array.isArray(arr) || !arr.length) return;
-          const latest = arr;
-          const oid = latest.id || latest.billNo || JSON.stringify(latest.items);
-          if (oid && !window._sentOrderIds[oid]) {
-            window._sentOrderIds[oid] = true;
-            fetch('/api/orders', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                outlet: latest.outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
-                table: latest.table || latest.tableNo || 'POS-Counter',
-                orderType: latest.orderType || 'Dine-In',
-                customerName: latest.customerName || 'Walk-in',
-                items: latest.items || [],
-                total: latest.total || 0,
-                paymentMode: latest.paymentMode || 'Cash'
-              })
-            }).catch(()=>{});
-          }
-        } catch(_) {}
-      });
-    }
-    setInterval(syncLatestOrders, 1500);
-  })();
-  </script>
 
-<script id="rpQrApprovalSuite">
-(function(){
-  if (document.getElementById('rpQrBarBox')) return;
-  const bar = document.createElement('div');
-  bar.id = 'rpQrBarBox';
-  bar.style.cssText = 'display:none;position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:99999;background:#fffbeb;border:2px solid #f59e0b;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:10px 16px;border-radius:12px;font-family:Inter,Arial,sans-serif;font-size:13px;max-width:94vw';
-  document.body.appendChild(bar);
 
-  const modal = document.createElement('div');
-  modal.id = 'rpQrViewModal';
-  modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100000;align-items:center;justify-content:center';
-  modal.innerHTML = '<div style="background:#fff;border-radius:14px;padding:18px;max-width:420px;width:92%;font-family:Inter,Arial,sans-serif"><h3 style="margin-top:0;color:#115e59">?? QR Order Details</h3><div id="rpQrModalBody" style="font-size:13px;line-height:1.6"></div><div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end" id="rpQrModalBtns"></div></div>';
-  document.body.appendChild(modal);
 
-  window._qrCache = {};
-  async function pollQr() {
-    try {
-      const r = await fetch('/api/orders');
-      if (!r.ok) return;
-      const all = await r.json();
-      const selOut = localStorage.getItem('rpSelectedOutlet') || '';
-      const pend = all.filter(o => (o.source === 'QR' || o.status === 'Pending') && !['Accepted','Completed','Cancelled'].includes(o.status) && (!selOut || selOut === 'Head Office' || o.outlet === selOut));
-      if (!pend.length) { bar.style.display = 'none'; return; }
-      pend.forEach(o => window._qrCache[o.id] = o);
-      bar.style.display = 'block';
-      bar.innerHTML = '<strong style="color:#92400e">?? QR Order Approval Required (' + pend.length + '):</strong> ' +
-        pend.map(o => '<span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #fcd34d;padding:5px 10px;border-radius:8px;margin:3px">' +
-          '<b>' + (o.tableName||'Table') + '</b> ? ' + (o.customerName||'Guest') + ' (' + (o.customerPhone||'-') + ') ? <b>?' + (o.total||0) + '</b> ' +
-          '<button onclick="viewQrOrd(\'' + o.id + '\')" style="background:#e0f2fe;color:#0369a1;border:0;border-radius:6px;padding:4px 8px;cursor:pointer;font-weight:700">?? View</button>' +
-          '<button onclick="actQrOrd(\'' + o.id + '\',\'approve\')" style="background:#0f766e;color:#fff;border:0;border-radius:6px;padding:4px 8px;cursor:pointer;font-weight:700">? Approve</button>' +
-          '<button onclick="actQrOrd(\'' + o.id + '\',\'reject\')" style="background:#fee2e2;color:#b91c1c;border:0;border-radius:6px;padding:4px 8px;cursor:pointer;font-weight:700">? Reject</button>' +
-        '</span>').join('');
-    } catch(_) {}
-  }
-
-  window.viewQrOrd = function(id) {
-    const o = window._qrCache[id]; if (!o) return;
-    document.getElementById('rpQrModalBody').innerHTML =
-      '<b>Outlet:</b> ' + (o.outlet||'-') + '<br><b>Table:</b> ' + (o.tableName||'-') +
-      '<br><b>Customer:</b> ' + (o.customerName||'-') + ' (<b>?? ' + (o.customerPhone||'N/A') + '</b>)' +
-      '<br><b>Payment:</b> ' + (o.paymentMode||'Cash') + (o.customerNote ? '<br><b>Note:</b> ' + o.customerNote : '') +
-      '<hr style="border:0;border-top:1px solid #e2e8f0;margin:8px 0">' +
-      (o.items||[]).map(i => '<div style="display:flex;justify-content:space-between"><span>' + i.name + ' ? ' + i.qty + '</span><b>?' + (i.price*i.qty) + '</b></div>').join('') +
-      '<hr style="border:0;border-top:1px solid #e2e8f0;margin:8px 0"><div style="text-align:right;font-size:15px"><b>Total: ?' + (o.total||0) + '</b></div>';
-    document.getElementById('rpQrModalBtns').innerHTML =
-      '<button onclick="document.getElementById(\'rpQrViewModal\').style.display=\'none\'" style="padding:7px 12px;border:1px solid #cbd5e1;background:#fff;border-radius:7px;cursor:pointer">Close</button>' +
-      '<button onclick="actQrOrd(\'' + id + '\',\'reject\')" style="padding:7px 12px;border:0;background:#fee2e2;color:#b91c1c;border-radius:7px;font-weight:700;cursor:pointer">? Reject</button>' +
-      '<button onclick="actQrOrd(\'' + id + '\',\'approve\')" style="padding:7px 12px;border:0;background:#0f766e;color:#fff;border-radius:7px;font-weight:700;cursor:pointer">? Approve ? KDS &amp; Sale</button>';
-    modal.style.display = 'flex';
-  };
-
-  window.actQrOrd = async function(id, type) {
-    modal.style.display = 'none';
-    const url = type === 'approve' ? '/api/orders/' + id + '/approve-qr' : '/api/orders/' + id + '/reject-qr';
-    const r = await fetch(url, { method: 'POST' });
-    if (r.ok && type === 'approve') {
-      const data = await r.json(); const o = data.order;
-      if (o) {
-        const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
-        bills.unshift({ billNo: 'QR-' + Date.now(), date: new Date().toISOString(), outlet: o.outlet, table: o.tableName, customerName: o.customerName, customerPhone: o.customerPhone, items: o.items, total: o.total, paymentMode: o.paymentMode || 'Cash', status: 'Paid' });
-        localStorage.setItem('rpBills', JSON.stringify(bills));
-      }
-      alert('? Approved! Order sent to KDS & added to Sales.');
-    } else if (r.ok) {
-      alert('? QR Order Rejected (Not added to KDS or Sales).');
-    }
-    pollQr();
-  };
-  setInterval(pollQr, 2500);
-  pollQr();
-})();
-</script>
 </body>
 </html>
