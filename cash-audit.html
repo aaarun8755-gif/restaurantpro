@@ -248,13 +248,24 @@ function approveImprest(id) {
 }
 
 function renderHO() {
-  const list = JSON.parse(localStorage.getItem('rpCashAudits') || '[]');
+  const all = JSON.parse(localStorage.getItem('rpCashAudits') || '[]');
+  const sel = document.getElementById('hoOutletFilter');
+  const dt = document.getElementById('hoDateFilter')?.value || '';
+  if (sel) {
+    const curVal = sel.value || 'ALL';
+    const uniqueOuts = [...new Set(all.map(x => x.outlet).filter(Boolean))];
+    sel.innerHTML = '<option value="ALL">All Outlets (' + all.length + ' Records)</option>' +
+      uniqueOuts.map(o => '<option value="' + o + '">' + o + '</option>').join('');
+    if ([...sel.options].some(o => o.value === curVal)) sel.value = curVal;
+  }
+  const fOut = sel ? sel.value : 'ALL';
+  const list = all.filter(r => (fOut === 'ALL' || r.outlet === fOut) && (!dt || r.date === dt));
   hoBody.innerHTML = list.map(r => `<tr>
     <td><b>${r.outlet}</b><br><small style="color:#5c726d">${r.mail}</small></td>
     <td><b>${r.unitManager || '-'}</b></td><td>${r.updatedBy}</td><td>${r.date}<br><small>${r.time}</small></td>
-    <td><b>₹${r.imprest}</b> ${r.imprestApproved ? '<span class="badge">✓ Approved</span>' : `<span class="badge pend">Pending Imprest</span> <button class="btn sm" onclick="approveImprest('${r.id}')">Approve</button>`}</td>
-    <td><span class="badge ${r.diffText.includes('SHORTAGE')?'short':''}">${r.diffText} (₹${r.diffAmt})</span></td>
-  </tr>`).join('') || '<tr><td colspan="6">Abhi kisi outlet ne Cash Audit submit nahi kiya hai.</td></tr>';
+    <td><b>?${r.imprest}</b> ${r.imprestApproved ? '<span class="badge">? Approved</span>' : `<span class="badge pend">Pending Imprest</span> <button class="btn sm" onclick="approveImprest('${r.id}')">Approve</button>`}</td>
+    <td><span class="badge ${r.diffText.includes('SHORTAGE')?'short':''}">${r.diffText} (?${r.diffAmt})</span></td>
+  </tr>`).join('') || '<tr><td colspan="6">Is filter ke liye koi record nahi mila.</td></tr>';
 }
 
 function exportAuditExcel() {
