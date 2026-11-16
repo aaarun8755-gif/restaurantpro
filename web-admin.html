@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RestaurantPro Web | Head Office Store Manager</title>
+<style>:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e;--red:#d9261c}*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}body{margin:0;background:var(--bg);color:var(--ink)}header{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}.wrap{max-width:1280px;margin:auto;padding:18px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}input,select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;font-size:13px}.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12.5px}.btn.light{background:#fff;color:var(--teal);border:1px solid var(--line)}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:5px 9px;font-size:11.5px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid #eef2f0;padding:10px;text-align:left}img.thumb{width:54px;height:54px;object-fit:cover;border-radius:8px}</style></head>
+<body>
+<header><div><strong style="font-size:18px;color:var(--red)">?? RestaurantPro Web ? Head Office Product, Photo &amp; Price Manager</strong></div><div style="display:flex;gap:8px"><a href="/website.html" target="_blank" class="btn" style="background:#ea580c">Open Customer Website ?</a><a href="/index.html" class="btn light">? Dashboard</a></div></header>
+<div class="wrap">
+  <div class="card"><h3 style="margin-top:0">? Add New Product to Website</h3>
+    <form id="addProdForm" class="fgrid">
+      <div><label style="font-size:11px;font-weight:700">Item Name *</label><input id="pName" required placeholder="e.g. Besan Ladoo"></div>
+      <div><label style="font-size:11px;font-weight:700">Category</label><select id="pCat"><option>Sweets</option><option>Namkeen</option><option>Gifting</option></select></div>
+      <div><label style="font-size:11px;font-weight:700">200g Price ? *</label><input id="pPrice" type="number" required placeholder="120"></div>
+      <div><label style="font-size:11px;font-weight:700">Photo URL</label><input id="pImg" placeholder="https://..."></div>
+      <div><label style="font-size:11px;font-weight:700">Description</label><input id="pDesc" placeholder="Fresh pure ghee..."></div>
+      <div style="display:flex;align-items:end"><button class="btn" style="width:100%">+ Publish Item</button></div>
+    </form>
+  </div>
+  <div class="card"><h3 style="margin-top:0">?? Live Website Items (Edit Price / Pic / Delete)</h3><table><thead><tr><th>Photo</th><th>Name</th><th>Category</th><th>200g Price</th><th>Description</th><th>Actions</th></tr></thead><tbody id="prodTableBody"></tbody></table></div>
+</div>
+<script>
+function getProds(){ let s=JSON.parse(localStorage.getItem('rpWebStoreProducts')||'[]'); if(!s.length){ s=[{id:'p1',name:'Navratan Mixture',cat:'Namkeen',basePrice:57,img:'https://unsplash.com spicy mix'},{id:'p2',name:'Royal Kaju Katli',cat:'Sweets',basePrice:280,img:'https://unsplash.com cashew fudge'},{id:'p3',name:'Desi Ghee Motichoor Ladoo',cat:'Sweets',basePrice:190,img:'https://unsplash.com ghee boondi ladoo'},{id:'p4',name:'Bikaneri Bhujia Sev',cat:'Namkeen',basePrice:65,img:'https://unsplash.com spiced bhujia'},{id:'p5',name:'Hot Gulab Jamun (Tin)',cat:'Sweets',basePrice:160,img:'https://unsplash.com dumplings in syrup'},{id:'p6',name:'Festive Gift Box',cat:'Gifting',basePrice:540,img:'https://unsplash.com sweets & namkeen'}]; localStorage.setItem('rpWebStoreProducts',JSON.stringify(s)); } return s; }
+function saveProds(l){ localStorage.setItem('rpWebStoreProducts',JSON.stringify(l)); }
+addProdForm.onsubmit=e=>{ e.preventDefault(); const l=getProds(); l.unshift({id:'p-'+Date.now(),name:pName.value.trim(),cat:pCat.value,basePrice:Number(pPrice.value),img:pImg.value.trim()||'https://placehold.co(pName.value.trim()),desc:pDesc.value.trim()}); saveProds(l); pName.value='';pPrice.value='';pImg.value='';pDesc.value='';renderTable(); alert('? Published!'); };
+function editProd(id){ const l=getProds(),p=l.find(x=>x.id===id); if(!p)return; const n=prompt('Name:',p.name); if(!n)return; const pr=prompt('Price ?:',p.basePrice); if(!pr)return; const im=prompt('Photo URL:',p.img); p.name=n.trim(); p.basePrice=Number(pr); if(im)p.img=im.trim(); saveProds(l); renderTable(); }
+function delProd(id){ if(confirm('Delete?')){ saveProds(getProds().filter(x=>x.id!==id)); renderTable(); } }
+function renderTable(){ prodTableBody.innerHTML=getProds().map(p=>'<tr><td><img class="thumb" src="'+p.img+'"></td><td><b>'+p.name+'</b></td><td>'+p.cat+'</td><td><b>?'+p.basePrice+'</b></td><td>'+(p.desc||'-')+'</td><td><button class="btn light sm" onclick="editProd(\''+p.id+'\')">? Edit</button> <button class="btn d sm" onclick="delProd(\''+p.id+'\')">Del</button></td></tr>').join(''); }
+renderTable();
+</script>
+</body></html>

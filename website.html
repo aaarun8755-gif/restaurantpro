@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Official Sweets, Namkeen &amp; Online Food Ordering Website</title>
+<meta name="description" content="RestaurantPro Official Online Ordering Store - Order fresh Sweets, Namkeen, Navratan Mixture, Kaju Katli across 31 outlets in India.">
+<meta name="keywords" content="RestaurantPro, Restaurant Pro, RestaurantPro Website, RestaurantPro Sweets Namkeen">
+<meta name="robots" content="index, follow">
+<style>
+:root{--bg:#fffaf5;--card:#fff;--ink:#1e293b;--muted:#64748b;--line:#fed7aa;--red:#d9261c;--orange:#ea580c}
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink)}
+.top-strip{background:var(--orange);color:#fff;font-size:12px;padding:6px 18px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-weight:600}
+header{background:#fff;border-bottom:2px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;position:sticky;top:0;z-index:20}
+.logo{background:var(--red);color:#fff;padding:7px 14px;border-radius:8px;font-weight:900;font-size:18px;letter-spacing:.5px;border-bottom:3px solid #f59e0b}
+.nav-cats{display:flex;gap:6px;flex-wrap:wrap}
+.cat-btn{border:1px solid #cbd5e1;background:#fff;padding:6px 13px;border-radius:20px;font-weight:700;font-size:12px;cursor:pointer}
+.cat-btn.active{background:var(--red);color:#fff;border-color:var(--red)}
+.loc-bar{background:#fff7ed;border-bottom:1px solid #fed7aa;padding:10px 22px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+.wrap{max-width:1320px;margin:auto;padding:20px;display:grid;grid-template-columns:1.75fr 1fr;gap:20px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.pcard{background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+.pcard img{width:100%;height:185px;object-fit:cover;background:#fff7ed}
+.pbody{padding:14px}
+.sizes{display:flex;gap:6px;margin:8px 0}
+.sz{border:1px solid #cbd5e1;background:#fff;padding:4px 9px;border-radius:14px;font-size:11px;font-weight:700;cursor:pointer}
+.sz.active{background:#1e293b;color:#fff;border-color:#1e293b}
+.btn{border:0;border-radius:20px;padding:9px 14px;font-weight:700;cursor:pointer;font-size:12.5px}
+.btn-add{background:#fff;color:var(--orange);border:1.5px solid var(--orange)}
+.btn-buy{background:var(--orange);color:#fff}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:18px;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;margin:4px 0 9px;font-size:13px}
+@media(max-width:920px){.wrap{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="top-strip">
+  <span>?? Flat &#8377;100 Off on Fresh Sweets above &#8377;1,499 + Free Delivery above &#8377;1,000</span>
+  <span>? Direct Order Dispatch from Your Selected State &amp; City Outlet</span>
+</div>
+<header>
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <div class="logo">RESTAURANTPRO</div>
+    <div class="nav-cats">
+      <button class="cat-btn active" onclick="filterCat('All',this)">Shop All</button>
+      <button class="cat-btn" onclick="filterCat('Sweets',this)">?? Sweets</button>
+      <button class="cat-btn" onclick="filterCat('Namkeen',this)">?? Namkeen</button>
+      <button class="cat-btn" onclick="filterCat('Gifting',this)">?? Gifting Combos</button>
+    </div>
+  </div>
+  <input id="webSearch" placeholder="?? Search Navratan Mixture, Kaju Katli..." oninput="renderProducts()" style="width:260px;margin:0">
+</header>
+<div class="loc-bar">
+  <strong style="font-size:13px;color:#9a3412">?? Select Delivery Location:</strong>
+  <div style="display:flex;align-items:center;gap:6px"><label style="font-size:12px;font-weight:700">State:</label><select id="selState" onchange="onStateChange()" style="width:auto;min-width:190px;margin:0;font-weight:700"></select></div>
+  <div style="display:flex;align-items:center;gap:6px"><label style="font-size:12px;font-weight:700">City / Outlet:</label><select id="selCityOutlet" style="width:auto;min-width:240px;margin:0;font-weight:700"></select></div>
+</div>
+<div class="wrap">
+  <div><h2 style="margin:0 0 14px;font-size:20px" id="catHeading">All Sweets &amp; Namkeen Specials</h2><div class="pgrid" id="prodGrid"></div></div>
+  <div class="card" style="height:fit-content;position:sticky;top:76px">
+    <h3 style="margin-top:0;color:var(--red)">?? Your Order Bag (<span id="bagCount">0</span>)</h3>
+    <div id="bagBox" style="font-size:13px;color:var(--muted);margin-bottom:12px">Your cart is empty.</div>
+    <div style="background:#fff7ed;padding:12px;border-radius:10px;margin-bottom:12px;font-size:13px;border:1px solid #fed7aa">
+      <div style="display:flex;justify-content:space-between"><span>Subtotal:</span><b id="wSub">&#8377;0</b></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px"><span>GST (5%) + Packaging:</span><b id="wTax">&#8377;0</b></div>
+      <hr style="border:0;border-top:1px solid #fdba74;margin:8px 0">
+      <div style="display:flex;justify-content:space-between;font-size:16px;color:var(--red)"><strong>Total Payable:</strong><strong id="wTot">&#8377;0</strong></div>
+    </div>
+    <form id="webOrderForm">
+      <label style="font-size:12px;font-weight:700">Customer Name *</label><input id="wName" required placeholder="Enter full name">
+      <label style="font-size:12px;font-weight:700">10-Digit Mobile Number *</label><input id="wPhone" type="tel" maxlength="10" required placeholder="Enter 10-digit mobile number">
+      <label style="font-size:12px;font-weight:700">Complete Delivery Address *</label><textarea id="wAddr" rows="2" required placeholder="House/Flat No., Street, Landmark..."></textarea>
+      <label style="font-size:12px;font-weight:700">Payment Mode</label><select id="wPay"><option>UPI / Online Paid</option><option>Cash on Delivery (COD)</option><option>Credit / Debit Card</option></select>
+      <button class="btn btn-buy" style="width:100%;font-size:14px;padding:11px">BUY NOW ? Place Order ?</button>
+    </form>
+  </div>
+</div>
+<script>
+const STATE_OUTLET_MAP = {
+  'Delhi NCR': ['Main Outlet', 'RestaurantPro - Delhi', 'RestaurantPro - Noida'],
+  'Andhra Pradesh': ['RestaurantPro - Andhra Pradesh'], 'Arunachal Pradesh': ['RestaurantPro - Arunachal Pradesh'],
+  'Assam': ['RestaurantPro - Assam'], 'Bihar': ['RestaurantPro - Bihar'], 'Chhattisgarh': ['RestaurantPro - Chhattisgarh'],
+  'Goa': ['RestaurantPro - Goa'], 'Gujarat': ['RestaurantPro - Gujarat'], 'Haryana': ['RestaurantPro - Haryana'],
+  'Himachal Pradesh': ['RestaurantPro - Himachal Pradesh'], 'Jharkhand': ['RestaurantPro - Jharkhand'],
+  'Karnataka': ['RestaurantPro - Karnataka'], 'Kerala': ['RestaurantPro - Kerala'],
+  'Madhya Pradesh': ['RestaurantPro - Madhya Pradesh'], 'Maharashtra': ['RestaurantPro - Maharashtra'],
+  'Manipur': ['RestaurantPro - Manipur'], 'Meghalaya': ['RestaurantPro - Meghalaya'], 'Mizoram': ['RestaurantPro - Mizoram'],
+  'Nagaland': ['RestaurantPro - Nagaland'], 'Odisha': ['RestaurantPro - Odisha'], 'Punjab': ['RestaurantPro - Punjab'],
+  'Rajasthan': ['RestaurantPro - Rajasthan'], 'Sikkim': ['RestaurantPro - Sikkim'], 'Tamil Nadu': ['RestaurantPro - Tamil Nadu'],
+  'Telangana': ['RestaurantPro - Telangana'], 'Tripura': ['RestaurantPro - Tripura'],
+  'Uttar Pradesh': ['RestaurantPro - Uttar Pradesh', 'RestaurantPro - Noida'],
+  'Uttarakhand': ['RestaurantPro - Uttarakhand'], 'West Bengal': ['RestaurantPro - West Bengal']
+};
+selState.innerHTML = Object.keys(STATE_OUTLET_MAP).map(st => '<option value="' + st + '">' + st + '</option>').join('');
+function onStateChange() { const list = STATE_OUTLET_MAP[selState.value] || ['Main Outlet']; selCityOutlet.innerHTML = list.map(o => '<option value="' + o + '">' + o.replace('RestaurantPro - ', '') + ' (' + o + ')</option>').join(''); }
+onStateChange();
+
+function getStoreProducts() {
+  let saved = JSON.parse(localStorage.getItem('rpWebStoreProducts') || '[]');
+  if (!saved.length) {
+    saved = [
+      { id: 'p1', name: 'Navratan Mixture', cat: 'Namkeen', basePrice: 57, img: 'https://unsplash.com', desc: 'Crunchy spicy mix of lentils, peas & roasted peanuts' },
+      { id: 'p2', name: 'Royal Kaju Katli', cat: 'Sweets', basePrice: 280, img: 'https://unsplash.com', desc: 'Pure cashew diamond fudge topped with silver leaf' },
+      { id: 'p3', name: 'Desi Ghee Motichoor Ladoo', cat: 'Sweets', basePrice: 190, img: 'https://unsplash.com', desc: 'Soft melt-in-mouth boondi ladoos made in pure ghee' },
+      { id: 'p4', name: 'Bikaneri Bhujia Sev', cat: 'Namkeen', basePrice: 65, img: 'https://unsplash.com', desc: 'Authentic crispy moth dal & gram flour spiced bhujia' },
+      { id: 'p5', name: 'Hot Gulab Jamun (Tin)', cat: 'Sweets', basePrice: 160, img: 'https://unsplash.com', desc: 'Soft khoya dumplings soaked in saffron cardamom syrup' },
+      { id: 'p6', name: 'Festive Sweets & Namkeen Gift Box', cat: 'Gifting', basePrice: 540, img: 'https://unsplash.com', desc: 'Assorted Kaju Katli, Ladoo, Navratan Mixture & Bhujia' }
+    ];
+    localStorage.setItem('rpWebStoreProducts', JSON.stringify(saved));
+  }
+  return saved;
+}
+let curCat = 'All', selSize = {}, selQty = {}, cart = [];
+function filterCat(c, btn) { curCat = c; catHeading.textContent = c === 'All' ? 'All Sweets & Namkeen Specials' : c + ' Collection'; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderProducts(); }
+function setSize(id, mult) { selSize[id] = mult; renderProducts(); }
+function chgQty(id, d) { selQty[id] = Math.max(1, (selQty[id]||1) + d); renderProducts(); }
+
+function renderProducts() {
+  const q = (webSearch.value || '').toLowerCase();
+  const list = getStoreProducts().filter(p => (curCat === 'All' || p.cat === curCat) && (!q || p.name.toLowerCase().includes(q)));
+  prodGrid.innerHTML = list.map(p => {
+    const mult = selSize[p.id] || 1, price = Math.round(Number(p.basePrice) * mult), qty = selQty[p.id] || 1, wLabel = mult === 1 ? '200g' : (mult === 2 ? '400g' : '1 Kg');
+    return '<div class="pcard"><img src="' + p.img + '" alt="' + p.name + '"><div class="pbody"><span style="font-size:11px;font-weight:700;color:#ea580c">' + p.cat.toUpperCase() + '</span><h4 style="margin:4px 0">' + p.name + '</h4><small style="color:#64748b;display:block;min-height:32px">' + (p.desc||'') + '</small><div style="font-size:17px;font-weight:800;color:#d9261c;margin-top:6px">Rs. ' + price + '.00 <small style="font-size:11px;color:#64748b">(' + wLabel + ')</small></div><div class="sizes"><button class="sz ' + (mult===1?'active':'') + '" onclick="setSize(\'' + p.id + '\',1)">200g</button><button class="sz ' + (mult===2?'active':'') + '" onclick="setSize(\'' + p.id + '\',2)">400g</button><button class="sz ' + (mult===4.5?'active':'') + '" onclick="setSize(\'' + p.id + '\',4.5)">1 Kg</button></div><div style="display:flex;align-items:center;gap:8px;margin:8px 0"><button class="sz" onclick="chgQty(\'' + p.id + '\',-1)">?</button><b>' + qty + '</b><button class="sz" onclick="chgQty(\'' + p.id + '\',1)">+</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px"><button class="btn btn-add" onclick="addToBag(\'' + p.id + '\',false)">Add to Cart</button><button class="btn btn-buy" onclick="addToBag(\'' + p.id + '\',true)">BUY NOW</button></div></div></div>';
+  }).join('');
+}
+
+function addToBag(id, focusCheckout) {
+  const p = getStoreProducts().find(x => x.id === id), mult = selSize[id] || 1, wLabel = mult === 1 ? '200g' : (mult === 2 ? '400g' : '1 Kg'), price = Math.round(Number(p.basePrice) * mult), qty = selQty[id] || 1, key = id + '_' + wLabel;
+  const ex = cart.find(c => c.key === key); if (ex) ex.qty += qty; else cart.push({ key, itemId: key, name: p.name + ' (' + wLabel + ')', price, qty });
+  renderBag(); if (focusCheckout) wName.focus();
+}
+
+function renderBag() {
+  bagCount.textContent = cart.reduce((s,c)=>s+c.qty,0);
+  if (!cart.length) { bagBox.innerHTML = 'Your cart is empty.'; wSub.textContent='?0'; wTax.textContent='?0'; wTot.textContent='?0'; return; }
+  bagBox.innerHTML = cart.map((c,idx) => '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f1f5f9"><span>' + c.name + ' ? ' + c.qty + '</span><span><b>?' + (c.price*c.qty) + '</b> <button onclick="cart.splice(' + idx + ',1);renderBag()" style="border:0;background:none;color:#dc2626;cursor:pointer;font-weight:700">?</button></span></div>').join('');
+  const sub = cart.reduce((s,c)=>s+c.price*c.qty,0), tax = Math.round(sub * 0.05 + 20);
+  wSub.textContent = '?' + sub; wTax.textContent = '?' + tax; wTot.textContent = '?' + (sub + tax);
+}
+
+webOrderForm.onsubmit = async e => {
+  e.preventDefault();
+  if (!cart.length) return alert('Kripya pehle cart mein Sweets ya Namkeen add karein.');
+  if (!/^[0-9]{10}$/.test(wPhone.value.trim())) return alert('Kripya 10-digit Mobile Number bharein.');
+  const sub = cart.reduce((s,c)=>s+c.price*c.qty,0), total = sub + Math.round(sub * 0.05 + 20), targetOutlet = selCityOutlet.value;
+  const res = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ source: 'Web', outlet: targetOutlet, tableName: 'WEB-STORE (' + selState.value + ')', orderType: 'Web Store', customerName: wName.value.trim(), customerPhone: wPhone.value.trim(), customerNote: 'State: ' + selState.value + ' | Address: ' + wAddr.value.trim(), paymentMode: wPay.value, items: cart, total }) });
+  if (res.ok) { cart = []; renderBag(); wName.value=''; wPhone.value=''; wAddr.value=''; alert('? Order Placed! Request sent directly to ' + targetOutlet + ' POS for Approval.'); }
+  else alert('Order failed. Please try again.');
+};
+renderProducts();
+</script>
+</body>
+</html>

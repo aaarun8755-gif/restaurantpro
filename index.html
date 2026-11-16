@@ -1843,5 +1843,23 @@ setInterval(async function() {
   }, 300);
 })();
 </script>
+<script id="rpHoWebsiteNav">
+setInterval(() => {
+  const curOut = localStorage.getItem('rpSelectedOutlet') || '';
+  const isHO = curOut === 'Head Office';
+  let nav = document.getElementById('rpHoWebMenuBtn');
+  if (!isHO) { if (nav) nav.style.display = 'none'; return; }
+  if (nav) { nav.style.display = 'block'; return; }
+  const anchor = document.getElementById('rpWebNav') || Array.from(document.querySelectorAll('aside *, nav *')).find(el => el.children.length <= 2 && (el.innerText || '').trim().includes('All Orders'));
+  if (!anchor) return;
+  const target = anchor.closest('a, button, li, div') || anchor;
+  nav = document.createElement('div');
+  nav.id = 'rpHoWebMenuBtn';
+  nav.textContent = '?? RestaurantPro Web';
+  nav.style.cssText = 'padding:9px 14px;font-size:13px;font-weight:700;color:#d9261c;background:#fff7ed;border:1px solid #fed7aa;cursor:pointer;border-radius:8px;margin:6px 8px;display:block';
+  nav.onclick = () => { window.location.href = '/web-admin.html'; };
+  target.parentNode.insertBefore(nav, target.nextSibling);
+}, 300);
+</script>
 </body>
 </html>
