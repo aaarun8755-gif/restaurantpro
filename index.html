@@ -1717,36 +1717,55 @@ setInterval(async function() {
 })();
 </script>
 
+
 <script id="rpQrApprovalSuite">
 (function(){
   if (document.getElementById('rpQrBarBox')) return;
   const bar = document.createElement('div');
   bar.id = 'rpQrBarBox';
-  bar.style.cssText = 'display:none;position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:99999;background:#fffbeb;border:2px solid #f59e0b;box-shadow:0 12px 30px rgba(0,0,0,.18);padding:10px 16px;border-radius:12px;font-family:Inter,Arial,sans-serif;font-size:13px;max-width:94vw';
+  bar.style.cssText = 'display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:99999;background:#fffbeb;border:2px solid #f59e0b;box-shadow:0 12px 30px rgba(0,0,0,.2);padding:10px 16px;border-radius:12px;font-family:Inter,Arial,sans-serif;font-size:13px;max-width:94vw';
   document.body.appendChild(bar);
 
   const modal = document.createElement('div');
   modal.id = 'rpQrViewModal';
   modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100000;align-items:center;justify-content:center';
-  modal.innerHTML = '<div style="background:#fff;border-radius:14px;padding:18px;max-width:420px;width:92%;font-family:Inter,Arial,sans-serif"><h3 style="margin-top:0;color:#115e59">?? QR Order Details</h3><div id="rpQrModalBody" style="font-size:13px;line-height:1.6"></div><div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end" id="rpQrModalBtns"></div></div>';
+  modal.innerHTML = '<div style="background:#fff;border-radius:14px;padding:18px;max-width:420px;width:92%;font-family:Inter,Arial,sans-serif"><h3 style="margin-top:0;color:#115e59">?? QR Table Order (Outlet Approval)</h3><div id="rpQrModalBody" style="font-size:13px;line-height:1.6"></div><div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end" id="rpQrModalBtns"></div></div>';
   document.body.appendChild(modal);
 
   window._qrCache = {};
-  async function pollQr() {
+  function getCurOutlet() {
+    const sel = document.querySelector('select');
+    if (sel && sel.value && sel.value.includes('RestaurantPro') || sel?.value === 'Main Outlet' || sel?.value === 'Head Office') return sel.value;
+    return localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+  }
+
+  async function pollAllOutletsQr() {
     try {
       const r = await fetch('/api/orders');
       if (!r.ok) return;
       const all = await r.json();
-      const selOut = localStorage.getItem('rpSelectedOutlet') || '';
-      const pend = all.filter(o => (o.source === 'QR' || o.status === 'Pending') && !['Accepted','Completed','Cancelled'].includes(o.status) && (!selOut || selOut === 'Head Office' || o.outlet === selOut));
+      const curOut = getCurOutlet();
+      const pend = all.filter(o =>
+        (o.source === 'QR' || o.status === 'Pending') &&
+        !['Accepted','Completed','Cancelled'].includes(o.status) &&
+        (curOut === 'Head Office' || !o.outlet || o.outlet.toLowerCase().includes(curOut.replace(/^RestaurantPro\s*-\s*/i,'').toLowerCase()))
+      );
+
+      // Update yellow "QR Orders (POS)" button count on dashboard
+      document.querySelectorAll('button, a').forEach(btn => {
+        if ((btn.innerText || '').includes('QR Orders (POS)')) {
+          btn.innerHTML = pend.length ? '?? QR Orders (POS) <span style="background:#dc2626;color:#fff;padding:1px 7px;border-radius:10px;font-size:11px;margin-left:4px">' + pend.length + '</span>' : '?? QR Orders (POS)';
+        }
+      });
+
       if (!pend.length) { bar.style.display = 'none'; return; }
       pend.forEach(o => window._qrCache[o.id] = o);
       bar.style.display = 'block';
-      bar.innerHTML = '<strong style="color:#92400e">?? QR Order Approval Required (' + pend.length + '):</strong> ' +
+      bar.innerHTML = '<strong style="color:#92400e">?? New QR Order (' + curOut + '):</strong> ' +
         pend.map(o => '<span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #fcd34d;padding:5px 10px;border-radius:8px;margin:3px">' +
           '<b>' + (o.tableName||'Table') + '</b> ? ' + (o.customerName||'Guest') + ' (' + (o.customerPhone||'-') + ') ? <b>?' + (o.total||0) + '</b> ' +
           '<button onclick="viewQrOrd(\'' + o.id + '\')" style="background:#e0f2fe;color:#0369a1;border:0;border-radius:6px;padding:4px 8px;cursor:pointer;font-weight:700">?? View</button>' +
-          '<button onclick="actQrOrd(\'' + o.id + '\',\'approve\')" style="background:#0f766e;color:#fff;border:0;border-radius:6px;padding:4px 8px;cursor:pointer;font-weight:700">? Approve</button>' +
+          '<button onclick="actQrOrd(\'' + o.id + '\',\'approve\')" style="background:#0f766e;color:#fff;border:0;border-radius:6px;padding:4px 8px;cursor:pointer;font-weight:700">? Accept ? KDS &amp; Sale</button>' +
           '<button onclick="actQrOrd(\'' + o.id + '\',\'reject\')" style="background:#fee2e2;color:#b91c1c;border:0;border-radius:6px;padding:4px 8px;cursor:pointer;font-weight:700">? Reject</button>' +
         '</span>').join('');
     } catch(_) {}
@@ -1764,7 +1783,7 @@ setInterval(async function() {
     document.getElementById('rpQrModalBtns').innerHTML =
       '<button onclick="document.getElementById(\'rpQrViewModal\').style.display=\'none\'" style="padding:7px 12px;border:1px solid #cbd5e1;background:#fff;border-radius:7px;cursor:pointer">Close</button>' +
       '<button onclick="actQrOrd(\'' + id + '\',\'reject\')" style="padding:7px 12px;border:0;background:#fee2e2;color:#b91c1c;border-radius:7px;font-weight:700;cursor:pointer">? Reject</button>' +
-      '<button onclick="actQrOrd(\'' + id + '\',\'approve\')" style="padding:7px 12px;border:0;background:#0f766e;color:#fff;border-radius:7px;font-weight:700;cursor:pointer">? Approve ? KDS &amp; Sale</button>';
+      '<button onclick="actQrOrd(\'' + id + '\',\'approve\')" style="padding:7px 12px;border:0;background:#0f766e;color:#fff;border-radius:7px;font-weight:700;cursor:pointer">? Accept ? KDS &amp; Sale</button>';
     modal.style.display = 'flex';
   };
 
@@ -1775,18 +1794,22 @@ setInterval(async function() {
     if (r.ok && type === 'approve') {
       const data = await r.json(); const o = data.order;
       if (o) {
-        const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
-        bills.unshift({ billNo: 'QR-' + Date.now(), date: new Date().toISOString(), outlet: o.outlet, table: o.tableName, customerName: o.customerName, customerPhone: o.customerPhone, items: o.items, total: o.total, paymentMode: o.paymentMode || 'Cash', status: 'Paid' });
-        localStorage.setItem('rpBills', JSON.stringify(bills));
+        const outKey = 'rpBills::' + (o.outlet || getCurOutlet());
+        [ 'rpBills', outKey ].forEach(k => {
+          const bills = JSON.parse(localStorage.getItem(k) || '[]');
+          bills.unshift({ billNo: 'QR-' + Date.now(), date: new Date().toISOString(), outlet: o.outlet, table: o.tableName, customerName: o.customerName, customerPhone: o.customerPhone, items: o.items, total: o.total, paymentMode: o.paymentMode || 'Cash', status: 'Paid' });
+          localStorage.setItem(k, JSON.stringify(bills));
+        });
       }
-      alert('? Approved! Order sent to KDS & added to Sales.');
+      alert('? QR Order Accepted! Sent to Outlet KDS & Added to Outlet Sales.');
+      location.reload();
     } else if (r.ok) {
-      alert('? QR Order Rejected (Not added to KDS or Sales).');
+      alert('? QR Order Rejected.');
+      pollAllOutletsQr();
     }
-    pollQr();
   };
-  setInterval(pollQr, 2500);
-  pollQr();
+  setInterval(pollAllOutletsQr, 2500);
+  pollAllOutletsQr();
 })();
 </script>
 </body>
