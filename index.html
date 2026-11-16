@@ -1854,19 +1854,24 @@ setInterval(async function() {
 })();
 </script>
 
+
 <script id="rpFiveEnterpriseBoxes">
 setInterval(() => {
   if (document.getElementById('rp5BoxRow')) return;
-  const purCard = Array.from(document.querySelectorAll('div, button, a'))
-    .find(el => el.children.length <= 3 && (el.innerText || '').trim() === 'Purchase Management');
-  if (!purCard) return;
+  const docCard = Array.from(document.querySelectorAll('div, button, a'))
+    .find(el => el.children.length <= 2 && (el.innerText || '').includes('Document Tracker'));
+  if (!docCard) return;
 
-  const row3 = purCard.closest('[style*="grid"], [class*="grid"]') || purCard.parentElement?.parentElement;
+  // Find the 3-card container row (Cash Audit, Document Tracker, Purchase Management)
+  let row3 = docCard.parentElement;
+  while (row3 && row3.parentElement && !(row3.innerText || '').includes('Cash Audit Sheet')) {
+    row3 = row3.parentElement;
+  }
   if (!row3 || !row3.parentElement) return;
 
   const row5 = document.createElement('div');
   row5.id = 'rp5BoxRow';
-  row5.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:12px;margin-top:12px;width:100%';
+  row5.style.cssText = 'display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:14px;width:100%';
 
   const boxes = [
     { title: 'Auto Purchase (AI Bill)', sub: 'Upload Bill -> Auto Stock & PDF', color: '#0f766e', url: '/auto-purchase.html' },
@@ -1877,14 +1882,14 @@ setInterval(() => {
   ];
 
   row5.innerHTML = boxes.map(b =>
-    '<div onclick="window.location.href=\'' + b.url + '\'" style="background:#fff;border:1px solid #dbe5e2;border-left:4px solid ' + b.color + ';border-radius:12px;padding:13px 15px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.03)">' +
-      '<div style="font-weight:800;font-size:13.5px;color:' + b.color + '">' + b.title + '</div>' +
-      '<div style="font-size:11.5px;color:#64748b;margin-top:3px">' + b.sub + '</div>' +
+    '<div onclick="window.location.href=\'' + b.url + '\'" style="background:#fff;border:1px solid #dbe5e2;border-left:4px solid ' + b.color + ';border-radius:12px;padding:13px 14px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.04)">' +
+      '<div style="font-weight:800;font-size:13px;color:' + b.color + '">' + b.title + '</div>' +
+      '<div style="font-size:11px;color:#64748b;margin-top:3px">' + b.sub + '</div>' +
     '</div>'
   ).join('');
 
   row3.parentElement.insertBefore(row5, row3.nextSibling);
-}, 350);
+}, 300);
 </script>
 </body>
 </html>
