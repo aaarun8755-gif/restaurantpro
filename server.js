@@ -115,7 +115,7 @@ app.post('/api/menu/sync', (req, res) => {
 app.get('/api/orders', (req, res) => res.json(byOutlet(db.orders, String(req.query.outlet || '').trim())));
 app.post('/api/orders', (req, res) => {
   const b = req.body || {};
-  const isDirect = ['Waiter', 'Captain', 'Manager', 'POS', 'QR'].includes(b.source);
+  const isDirect = ['Waiter', 'Captain', 'Manager', 'POS', 'QR', 'Web'].includes(b.source);
   const table = b.tableId ? db.tables.find(t => t.id === b.tableId) : null;
   if (!isDirect && !table) return res.status(400).json({ error: 'Table inactive' });
   const items = (b.items || []).map(i => ({ itemId: String(i.itemId), name: String(i.name), qty: Math.max(1, Number(i.qty) || 1), price: Number(i.price) || 0 }));
