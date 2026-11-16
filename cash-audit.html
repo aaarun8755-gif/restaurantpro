@@ -266,6 +266,17 @@ function exportAuditExcel() {
 initHoldFromSales();
 renderHO();
 </script>
+<script id="rpAll31Outlets">
+(function(){
+  const ALL_OUTLETS = ["Head Office","Main Outlet","RestaurantPro - Noida","RestaurantPro - Delhi NCT","RestaurantPro - Uttar Pradesh","RestaurantPro - Haryana","RestaurantPro - Andhra Pradesh","RestaurantPro - Arunachal Pradesh","RestaurantPro - Assam","RestaurantPro - Bihar","RestaurantPro - Chhattisgarh","RestaurantPro - Goa","RestaurantPro - Gujarat","RestaurantPro - Himachal Pradesh","RestaurantPro - Jharkhand","RestaurantPro - Karnataka","RestaurantPro - Kerala","RestaurantPro - Madhya Pradesh","RestaurantPro - Maharashtra","RestaurantPro - Manipur","RestaurantPro - Meghalaya","RestaurantPro - Mizoram","RestaurantPro - Nagaland","RestaurantPro - Odisha","RestaurantPro - Punjab","RestaurantPro - Rajasthan","RestaurantPro - Sikkim","RestaurantPro - Tamil Nadu","RestaurantPro - Telangana","RestaurantPro - Tripura","RestaurantPro - Uttarakhand","RestaurantPro - West Bengal","RestaurantPro -"];
+  const sel = localStorage.getItem('rpSelectedOutlet') || '';
+  document.querySelectorAll('select#outlet, select#fOutlet, select#outletFilter').forEach(el => {
+    const cur = el.value || sel;
+    el.innerHTML = ALL_OUTLETS.map(o => '<option value="' + o + '">' + o + '</option>').join('');
+    if (cur && ALL_OUTLETS.includes(cur)) el.value = cur;
+  });
+})();
+</script>
 </body>
 </html>
 

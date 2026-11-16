@@ -111,5 +111,16 @@ async function syncMenu() { let items = JSON.parse(localStorage.getItem('rpMenuI
 function exportUsersExcel() { const rows = [['Outlet','Role','Name','Mobile','Pass/PIN','Status']]; document.querySelectorAll('#allUsersBody tr').forEach(tr => { const cols = Array.from(tr.querySelectorAll('td')).slice(0,6).map(td => '"' + td.innerText.replace(/"/g,'') + '"'); if (cols.length) rows.push(cols); }); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = 'RestaurantPro_Users_List.csv'; a.click(); }
 loadAll();
 </script>
+<script id="rpAll31Outlets">
+(function(){
+  const ALL_OUTLETS = ["Head Office","Main Outlet","RestaurantPro - Noida","RestaurantPro - Delhi NCT","RestaurantPro - Uttar Pradesh","RestaurantPro - Haryana","RestaurantPro - Andhra Pradesh","RestaurantPro - Arunachal Pradesh","RestaurantPro - Assam","RestaurantPro - Bihar","RestaurantPro - Chhattisgarh","RestaurantPro - Goa","RestaurantPro - Gujarat","RestaurantPro - Himachal Pradesh","RestaurantPro - Jharkhand","RestaurantPro - Karnataka","RestaurantPro - Kerala","RestaurantPro - Madhya Pradesh","RestaurantPro - Maharashtra","RestaurantPro - Manipur","RestaurantPro - Meghalaya","RestaurantPro - Mizoram","RestaurantPro - Nagaland","RestaurantPro - Odisha","RestaurantPro - Punjab","RestaurantPro - Rajasthan","RestaurantPro - Sikkim","RestaurantPro - Tamil Nadu","RestaurantPro - Telangana","RestaurantPro - Tripura","RestaurantPro - Uttarakhand","RestaurantPro - West Bengal","RestaurantPro -"];
+  const sel = localStorage.getItem('rpSelectedOutlet') || '';
+  document.querySelectorAll('select#outlet, select#fOutlet, select#outletFilter').forEach(el => {
+    const cur = el.value || sel;
+    el.innerHTML = ALL_OUTLETS.map(o => '<option value="' + o + '">' + o + '</option>').join('');
+    if (cur && ALL_OUTLETS.includes(cur)) el.value = cur;
+  });
+})();
+</script>
 </body>
 </html>
