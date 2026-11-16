@@ -49,7 +49,7 @@ input,select,textarea{width:100%;padding:8px 10px;border:1px solid #cbd5e1;borde
     </div>
   </div>
   <input id="webSearch" placeholder="Search Navratan Mixture, Kaju Katli..." oninput="renderProducts()" style="width:260px;margin:0">
-<a href="/web-admin.html" style="background:#115e59;color:#fff;padding:7px 13px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:700">+ Manage Catalog (HO)</a></header>
+</header>
 <div class="loc-bar">
   <strong style="font-size:13px;color:#9a3412">Select Delivery Location:</strong>
   <div style="display:flex;align-items:center;gap:6px"><label style="font-size:12px;font-weight:700">State:</label><select id="selState" onchange="onStateChange()" style="width:auto;min-width:190px;margin:0;font-weight:700"></select></div>
@@ -111,7 +111,7 @@ function getStoreProducts() {
   return saved;
 }
 let curCat = 'All', selSize = {}, selQty = {}, cart = [];
-function filterCat(c, btn) { curCat = c; catHeading.textContent = c === 'All' 'All Sweets & Namkeen Specials' : c + ' Collection'; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderProducts(); }
+function filterCat(c, btn) { curCat = c; catHeading.textContent = c === 'All' ? 'All Sweets & Namkeen Specials' : c + ' Collection'; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderProducts(); }
 function setSize(id, mult) { selSize[id] = mult; renderProducts(); }
 function chgQty(id, d) { selQty[id] = Math.max(1, (selQty[id]||1) + d); renderProducts(); }
 
@@ -119,13 +119,13 @@ function renderProducts() {
   const q = (webSearch.value || '').toLowerCase();
   const list = getStoreProducts().filter(p => (curCat === 'All' || p.cat === curCat) && (!q || p.name.toLowerCase().includes(q)));
   prodGrid.innerHTML = list.map(p => {
-    const mult = selSize[p.id] || 1, price = Math.round(Number(p.basePrice) * mult), qty = selQty[p.id] || 1, wLabel = mult === 1 '200g' : (mult === 2 '400g' : '1 Kg');
+    const mult = selSize[p.id] || 1, price = Math.round(Number(p.basePrice) * mult), qty = selQty[p.id] || 1, wLabel = mult === 1 ? '200g' : (mult === 2 ? '400g' : '1 Kg');
     return '<div class="pcard"><img src="' + p.img + '" alt="' + p.name + '"><div class="pbody"><span style="font-size:11px;font-weight:700;color:#ea580c">' + p.cat.toUpperCase() + '</span><h4 style="margin:4px 0">' + p.name + '</h4><small style="color:#64748b;display:block;min-height:32px">' + (p.desc||'') + '</small><div style="font-size:17px;font-weight:800;color:#d9261c;margin-top:6px">Rs. ' + price + '.00 <small style="font-size:11px;color:#64748b">(' + wLabel + ')</small></div><div class="sizes"><button class="sz ' + (mult===1?'active':'') + '" onclick="setSize(\'' + p.id + '\',1)">200g</button><button class="sz ' + (mult===2?'active':'') + '" onclick="setSize(\'' + p.id + '\',2)">400g</button><button class="sz ' + (mult===4.5?'active':'') + '" onclick="setSize(\'' + p.id + '\',4.5)">1 Kg</button></div><div style="display:flex;align-items:center;gap:8px;margin:8px 0"><button class="sz" onclick="chgQty(\'' + p.id + '\',-1)">?</button><b>' + qty + '</b><button class="sz" onclick="chgQty(\'' + p.id + '\',1)">+</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px"><button class="btn btn-add" onclick="addToBag(\'' + p.id + '\',false)">Add to Cart</button><button class="btn btn-buy" onclick="addToBag(\'' + p.id + '\',true)">BUY NOW</button></div></div></div>';
   }).join('');
 }
 
 function addToBag(id, focusCheckout) {
-  const p = getStoreProducts().find(x => x.id === id), mult = selSize[id] || 1, wLabel = mult === 1 '200g' : (mult === 2 '400g' : '1 Kg'), price = Math.round(Number(p.basePrice) * mult), qty = selQty[id] || 1, key = id + '_' + wLabel;
+  const p = getStoreProducts().find(x => x.id === id), mult = selSize[id] || 1, wLabel = mult === 1 ? '200g' : (mult === 2 ? '400g' : '1 Kg'), price = Math.round(Number(p.basePrice) * mult), qty = selQty[id] || 1, key = id + '_' + wLabel;
   const ex = cart.find(c => c.key === key); if (ex) ex.qty += qty; else cart.push({ key, itemId: key, name: p.name + ' (' + wLabel + ')', price, qty });
   renderBag(); if (focusCheckout) wName.focus();
 }
