@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RestaurantPro | Tally, Swiggy & Zomato Integration</title>
+<style>:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e}*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}body{margin:0;background:var(--bg);color:var(--ink)}header{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;justify-content:space-between;align-items:center}.wrap{max-width:1180px;margin:auto;padding:18px}.tabs{display:flex;gap:8px;margin-bottom:16px}.tab{padding:9px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer}.tab.active{background:var(--teal);color:#fff}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}label{font-size:12px;font-weight:700;display:block;margin-bottom:4px}input{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}.btn{border:0;border-radius:8px;padding:9px 16px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}.btn.light{background:#fff;color:var(--teal);border:1px solid var(--line)}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:4px 8px;font-size:11px}table{width:100%;border-collapse:collapse;font-size:12.5px}th,td{border-bottom:1px solid #eef2f0;padding:9px;text-align:left}.badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}</style></head>
+<body>
+<header><div><strong style="font-size:18px;color:#115e59">Tally, Swiggy &amp; Zomato Integration Hub</strong></div><a href="/index.html" class="btn light">&larr; Dashboard</a></header>
+<div class="wrap">
+  <div class="tabs"><button class="tab" id="tTally" onclick="setIntTab('tally')">Tally Prime Integration</button><button class="tab" id="tSwiggy" onclick="setIntTab('swiggy')">Swiggy Integration</button><button class="tab" id="tZomato" onclick="setIntTab('zomato')">Zomato Integration</button></div>
+  <div class="card"><h3 style="margin-top:0" id="intHeading">Integrate Outlet</h3>
+    <form id="intForm" class="fgrid">
+      <div><label>Outlet Name *</label><input id="iOutlet" required></div>
+      <div><label>GSTIN Number *</label><input id="iGst" required placeholder="09AAACR1234F1Z5"></div>
+      <div><label id="lblId">Partner ID / Company *</label><input id="iPartnerId" required></div>
+      <div><label id="lblExtra">FSSAI / Server Port *</label><input id="iExtra" required></div>
+      <div style="display:flex;align-items:end"><button class="btn" style="width:100%" id="intBtn">Integrate Now</button></div>
+    </form>
+  </div>
+  <div class="card"><h3 style="margin-top:0">Integrated Outlets</h3><table><thead><tr><th>Platform</th><th>Outlet</th><th>GSTIN</th><th>Partner ID / Company</th><th>FSSAI / Port</th><th>Status</th><th>Action</th></tr></thead><tbody id="intBody"></tbody></table></div>
+</div>
+<script>
+const p = new URLSearchParams(location.search); let curTab = p.get('tab') || 'tally';
+const selOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet'; iOutlet.value = selOut === 'Head Office' ? 'Main Outlet' : selOut;
+function setIntTab(t){ curTab=t; tTally.classList.toggle('active',t==='tally'); tSwiggy.classList.toggle('active',t==='swiggy'); tZomato.classList.toggle('active',t==='zomato'); intHeading.textContent='Integrate '+t.toUpperCase()+' with Outlet'; lblId.textContent=t==='tally'?'Tally Company Name *':t.toUpperCase()+' Restaurant ID *'; lblExtra.textContent=t==='tally'?'Tally Port (e.g. 9000) *':'FSSAI License No. *'; renderInt(); }
+function getInts(){ return JSON.parse(localStorage.getItem('rpIntegrations')||'[]'); }
+intForm.onsubmit=e=>{ e.preventDefault(); const l=getInts(); l.unshift({id:'i-'+Date.now(),platform:curTab.toUpperCase(),outlet:iOutlet.value,gst:iGst.value,partnerId:iPartnerId.value,extra:iExtra.value}); localStorage.setItem('rpIntegrations',JSON.stringify(l)); iGst.value='';iPartnerId.value='';iExtra.value='';renderInt(); alert('Integrated Successfully!'); };
+function delInt(id){ localStorage.setItem('rpIntegrations',JSON.stringify(getInts().filter(x=>x.id!==id))); renderInt(); }
+function renderInt(){ const l=getInts().filter(x=>selOut==='Head Office'||x.outlet===selOut); intBody.innerHTML=l.map(x=>'<tr><td><b>'+x.platform+'</b></td><td>'+x.outlet+'</td><td>'+x.gst+'</td><td>'+x.partnerId+'</td><td>'+x.extra+'</td><td><span class="badge">Integrated</span></td><td><button class="btn d sm" onclick="delInt(\''+x.id+'\')">Remove</button></td></tr>').join('')||'<tr><td colspan="7">No integrations yet.</td></tr>'; }
+setIntTab(curTab);
+</script></body></html>

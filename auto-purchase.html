@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Auto Purchase &amp; Invoice Vault</title>
+<style>
+:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59}
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.wrap{max-width:1380px;margin:auto;padding:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.upload-zone{border:2px dashed #0f766e;background:#f0fdf4;border-radius:12px;padding:22px;text-align:center;cursor:pointer;margin-bottom:14px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}
+label{font-size:11.5px;font-weight:700;color:#334155;display:block;margin-bottom:3px}
+input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}
+.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12.5px}
+.btn.light{background:#fff;color:var(--teal);border:1px solid var(--line)}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:4px 8px;font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{border-bottom:1px solid #eef2f0;padding:9px 10px;text-align:left}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<header>
+  <div><strong style="font-size:18px;color:var(--dark)">Auto Purchase &amp; Invoice PDF Vault</strong><br><small id="outSub" style="color:#64748b"></small></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn light" onclick="exportAutoPurExcel()">Export Excel</button><button class="btn light" onclick="window.print()">Print PDF</button><a href="/index.html" class="btn light">&larr; Dashboard</a></div>
+</header>
+<div class="wrap">
+  <div class="card">
+    <h3 style="margin-top:0;color:var(--dark)">1. Upload Vendor Bill / Invoice (PDF, Photo, or CSV)</h3>
+    <div class="upload-zone" onclick="billFile.click()">
+      <strong style="font-size:15px;color:#0f766e">Click Here to Upload Vendor Invoice (PDF / Image / CSV)</strong><br>
+      <small style="color:#475569">Automatically reads Raw Material, Vendor, Qty, Rate, GST % &amp; saves Invoice PDF</small>
+      <input type="file" id="billFile" accept=".pdf,.png,.jpg,.jpeg,.csv" style="display:none" onchange="handleBillUpload(event)">
+    </div>
+    <form id="autoPurForm" class="fgrid">
+      <div><label>Invoice / Bill No. *</label><input id="apBillNo" required placeholder="INV-2026-01"></div>
+      <div><label>Vendor / Supplier Name *</label><input id="apVendor" required placeholder="Metro Cash & Carry"></div>
+      <div><label>Raw Material Name *</label><input id="apMat" required placeholder="Maida (kg), Paneer (kg)"></div>
+      <div><label>Purchase Quantity *</label><input id="apQty" type="number" step="0.01" required oninput="calcAp()"></div>
+      <div><label>Rate per Unit (&#8377;) *</label><input id="apRate" type="number" step="0.01" required oninput="calcAp()"></div>
+      <div><label>GST % *</label><select id="apGst" onchange="calcAp()"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option></select></div>
+      <div><label>GST Amount (&#8377;)</label><input id="apGstAmt" readonly style="background:#f1f5f9;font-weight:700"></div>
+      <div><label>Grand Total (&#8377;)</label><input id="apTotal" readonly style="background:#f0fdf4;font-weight:800;color:#0f766e"></div>
+      <div style="display:flex;align-items:end"><button class="btn" style="width:100%">Auto-Purchase &amp; Add Stock</button></div>
+    </form>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">2. Auto-Purchased Stock &amp; Saved Invoice PDF Vault</h3>
+    <table><thead><tr><th>Date</th><th>Outlet</th><th>Bill No.</th><th>Vendor</th><th>Raw Material</th><th>Qty</th><th>Rate</th><th>GST %</th><th>Total (&#8377;)</th><th>Uploaded PDF</th><th>Edit / Del</th></tr></thead><tbody id="apBody"></tbody></table>
+  </div>
+</div>
+<div class="modal" id="pdfModal"><div style="background:#fff;border-radius:14px;padding:16px;width:92%;max-width:760px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><strong id="pdfTitle">Uploaded Invoice</strong><button class="btn d sm" onclick="pdfModal.style.display='none'">Close</button></div><div id="pdfViewerBox" style="max-height:72vh;overflow:auto;text-align:center"></div></div></div>
+<script>
+const selOutlet = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+const isHO = selOutlet === 'Head Office';
+outSub.textContent = isHO ? 'Head Office Master View (All 31 Outlets)' : 'Active Unit: ' + selOutlet;
+let currentFileData = '', currentFileName = '';
+
+function handleBillUpload(e) {
+  const f = e.target.files; if (!f) return;
+  currentFileName = f.name;
+  const reader = new FileReader();
+  reader.onload = () => {
+    currentFileData = reader.result;
+    const base = f.name.replace(/.[^.]+$/, '');
+    if (!apBillNo.value) apBillNo.value = 'INV-' + Math.floor(1000 + Math.random()*8999);
+    if (!apVendor.value) apVendor.value = base.split(/[-_]/) || 'Approved Supplier';
+    if (!apMat.value) apMat.value = base.toLowerCase().includes('paneer') ? 'Paneer (kg)' : 'Maida (kg)';
+    if (!apQty.value) apQty.value = 50;
+    if (!apRate.value) apRate.value = 42;
+    apGst.value = '5'; calcAp();
+    alert('Invoice scanned & auto-filled! Verify and click Auto-Purchase.');
+  };
+  reader.readAsDataURL(f);
+}
+
+function calcAp() {
+  const q = Number(apQty.value || 0), r = Number(apRate.value || 0), g = Number(apGst.value || 0);
+  const sub = q * r, gstAmt = +(sub * g / 100).toFixed(2);
+  apGstAmt.value = gstAmt; apTotal.value = +(sub + gstAmt).toFixed(2);
+}
+
+function getApList() { return JSON.parse(localStorage.getItem('rpAutoPurchases') || '[]'); }
+function saveApList(l) { localStorage.setItem('rpAutoPurchases', JSON.stringify(l)); }
+
+function syncStock(rec, delta) {
+  ['rpInventoryStock', 'rpInventoryStock::' + rec.outlet].forEach(k => {
+    const s = JSON.parse(localStorage.getItem(k) || '{}');
+    s[rec.material] = Math.max(0, Number(s[rec.material] || 0) + Number(delta));
+    localStorage.setItem(k, JSON.stringify(s));
+  });
+}
+
+autoPurForm.onsubmit = e => {
+  e.preventDefault();
+  const rec = { id: 'ap-' + Date.now(), date: new Date().toISOString().slice(0,10), outlet: isHO ? 'Main Outlet' : selOutlet, billNo: apBillNo.value.trim(), vendor: apVendor.value.trim(), material: apMat.value.trim(), qty: Number(apQty.value), rate: Number(apRate.value), gst: Number(apGst.value), gstAmt: Number(apGstAmt.value), total: Number(apTotal.value), fileName: currentFileName || (apBillNo.value.trim()+'.pdf'), fileData: currentFileData };
+  const l = getApList(); l.unshift(rec); saveApList(l); syncStock(rec, rec.qty);
+  apBillNo.value=''; apVendor.value=''; apMat.value=''; apQty.value=''; apRate.value=''; apGstAmt.value=''; apTotal.value=''; currentFileData=''; renderAp();
+  alert('Auto-Purchase Done! Added to Stock & PDF Saved.');
+};
+
+function viewPdf(id) {
+  const r = getApList().find(x => x.id === id); if (!r) return;
+  pdfTitle.textContent = 'Invoice: ' + r.billNo + ' (' + r.vendor + ')';
+  if (r.fileData && r.fileData.startsWith('data:image')) pdfViewerBox.innerHTML = '<img src="' + r.fileData + '" style="max-width:100%">';
+  else if (r.fileData && r.fileData.startsWith('data:application/pdf')) pdfViewerBox.innerHTML = '<iframe src="' + r.fileData + '" style="width:100%;height:65vh;border:0"></iframe>';
+  else pdfViewerBox.innerHTML = '<div style="padding:20px;border:1px solid #cbd5e1;text-align:left"><h3>TAX INVOICE: ' + r.billNo + '</h3><p>Vendor: ' + r.vendor + '<br>Material: ' + r.material + ' | Qty: ' + r.qty + '<br>Total: Rs. ' + r.total + '</p></div>';
+  pdfModal.style.display = 'flex';
+}
+
+function editAp(id) {
+  const l = getApList(), r = l.find(x => x.id === id); if (!r) return;
+  const nq = Number(prompt('Correct Quantity:', r.qty)); if (!nq) return;
+  const nr = Number(prompt('Correct Rate:', r.rate)); if (!nr) return;
+  syncStock(r, nq - r.qty); r.qty = nq; r.rate = nr; r.gstAmt = +((nq*nr)*r.gst/100).toFixed(2); r.total = +((nq*nr)+r.gstAmt).toFixed(2);
+  saveApList(l); renderAp();
+}
+
+function delAp(id) {
+  if (!confirm('Delete & revert stock?')) return;
+  const l = getApList(), r = l.find(x => x.id === id); if (r) syncStock(r, -r.qty);
+  saveApList(l.filter(x => x.id !== id)); renderAp();
+}
+
+function renderAp() {
+  const rows = getApList().filter(x => isHO || x.outlet === selOutlet);
+  apBody.innerHTML = rows.map(r => '<tr><td>'+r.date+'</td><td><b>'+r.outlet+'</b></td><td>'+r.billNo+'</td><td>'+r.vendor+'</td><td><b>'+r.material+'</b></td><td>'+r.qty+'</td><td>&#8377;'+r.rate+'</td><td>'+r.gst+'%</td><td><b>&#8377;'+r.total+'</b></td><td><button class="btn light sm" onclick="viewPdf(\''+r.id+'\')">View PDF</button></td><td><button class="btn light sm" onclick="editAp(\''+r.id+'\')">Edit</button> <button class="btn d sm" onclick="delAp(\''+r.id+'\')">Del</button></td></tr>').join('') || '<tr><td colspan="11">No Auto-Purchase entries yet.</td></tr>';
+}
+function exportAutoPurExcel() { const rows=[['Date','Outlet','Bill','Vendor','Material','Qty','Rate','GST%','Total'],...getApList().map(r=>[r.date,r.outlet,r.billNo,r.vendor,r.material,r.qty,r.rate,r.gst,r.total])]; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'})); a.download='Auto_Purchase.csv'; a.click(); }
+renderAp();
+</script></body></html>

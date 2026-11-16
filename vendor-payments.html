@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RestaurantPro | Vendor Payment Lineup</title>
+<style>:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e}*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}body{margin:0;background:var(--bg);color:var(--ink)}header{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;justify-content:space-between;align-items:center}.wrap{max-width:1360px;margin:auto;padding:18px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}label{font-size:11.5px;font-weight:700;display:block;margin-bottom:3px}input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12.5px}.btn.light{background:#fff;color:var(--teal);border:1px solid var(--line)}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:4px 8px;font-size:11px}table{width:100%;border-collapse:collapse;font-size:12.5px}th,td{border-bottom:1px solid #eef2f0;padding:9px;text-align:left}.badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}.badge.pend{background:#fef3c7;color:#92400e}</style></head>
+<body>
+<header><div><strong style="font-size:18px;color:#7c3aed">Vendor Payment Lineup &amp; Schedule</strong></div><div style="display:flex;gap:8px"><button class="btn light" onclick="window.print()">Print PDF</button><a href="/index.html" class="btn light">&larr; Dashboard</a></div></header>
+<div class="wrap">
+  <div class="card"><h3 style="margin-top:0">Schedule Vendor Payment</h3>
+    <form id="vpForm" class="fgrid">
+      <div><label>Outlet Name *</label><input id="vOut" required></div>
+      <div><label>Vendor Name *</label><input id="vName" required></div>
+      <div><label>Bill No. *</label><input id="vBill" required></div>
+      <div><label>Amount (&#8377;) *</label><input id="vAmt" type="number" required></div>
+      <div><label>Payout Date *</label><input id="vDate" type="date" required></div>
+      <div><label>Priority</label><select id="vPrio"><option>Urgent</option><option>Normal</option><option>Weekly Batch</option></select></div>
+      <div style="display:flex;align-items:end"><button class="btn" style="width:100%">+ Add to Lineup</button></div>
+    </form>
+  </div>
+  <div class="card"><h3 style="margin-top:0">Scheduled Vendor Payments</h3><table><thead><tr><th>Outlet</th><th>Vendor</th><th>Bill No.</th><th>Amount</th><th>Payout Date</th><th>Priority</th><th>Status</th><th>Action</th></tr></thead><tbody id="vpBody"></tbody></table></div>
+</div>
+<script>
+const selOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet'; vOut.value = selOut === 'Head Office' ? 'Main Outlet' : selOut;
+function getVp(){ return JSON.parse(localStorage.getItem('rpVendorPayments')||'[]'); }
+vpForm.onsubmit=e=>{ e.preventDefault(); const l=getVp(); l.unshift({id:'vp-'+Date.now(),outlet:vOut.value,vendor:vName.value,bill:vBill.value,amount:Number(vAmt.value),date:vDate.value,prio:vPrio.value,status:'Scheduled'}); localStorage.setItem('rpVendorPayments',JSON.stringify(l)); vName.value='';vBill.value='';vAmt.value='';renderVp(); };
+function markPaid(id){ const l=getVp(),x=l.find(i=>i.id===id); if(x){x.status='Paid';localStorage.setItem('rpVendorPayments',JSON.stringify(l));renderVp();} }
+function delVp(id){ localStorage.setItem('rpVendorPayments',JSON.stringify(getVp().filter(i=>i.id!==id))); renderVp(); }
+function renderVp(){ const l=getVp().filter(x=>selOut==='Head Office'||x.outlet===selOut); vpBody.innerHTML=l.map(x=>'<tr><td><b>'+x.outlet+'</b></td><td>'+x.vendor+'</td><td>'+x.bill+'</td><td><b>&#8377;'+x.amount+'</b></td><td>'+x.date+'</td><td>'+x.prio+'</td><td><span class="badge '+(x.status==='Paid'?'':'pend')+'">'+x.status+'</span></td><td>'+(x.status!=='Paid'?'<button class="btn sm" onclick="markPaid(\''+x.id+'\')">Mark Paid</button> ':'')+'<button class="btn d sm" onclick="delVp(\''+x.id+'\')">Del</button></td></tr>').join('')||'<tr><td colspan="8">No payments scheduled.</td></tr>'; }
+renderVp();
+</script></body></html>
