@@ -123,6 +123,52 @@ function getChannelOrders() {
   return list;
 }
 
+
+function seedAll31OutletsDemo() {
+  const outlets = [
+    'Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam',
+    'RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat',
+    'RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka',
+    'RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur',
+    'RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida',
+    'RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim',
+    'RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh',
+    'RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'
+  ];
+  const channels = ['Swiggy', 'Zomato', 'Web'];
+  const statuses = ['Success', 'Success', 'Late Delivery', 'Restaurant Rejected', 'Customer Cancelled'];
+  const dishes = ['Masala Dosa x2, Filter Coffee x2', 'Paneer Butter Masala x1, Naan x3', 'Veg Biryani Family Pack x1', 'Chole Bhature x2, Lassi x2', 'Veg Burger x2, Cold Coffee x2'];
+  const names = ['Ramesh K.', 'Priya S.', 'Ankit V.', 'Neha G.', 'Vikram R.', 'Pooja M.', 'Suresh T.'];
+  const comps = ['', '', 'Delivery delayed by 12 mins', 'Extra chutney missing', 'Packaging slightly leaked'];
+
+  const demoList = [];
+  let seq = 1001;
+  outlets.forEach(out => {
+    channels.forEach(ch => {
+      for (let i = 0; i < 2; i++) {
+        const st = statuses[(seq + i) % statuses.length];
+        const comp = st === 'Late Delivery' ? comps[2] : (st === 'Success' && seq % 4 === 0 ? comps[3] : '');
+        demoList.push({
+          id: (ch === 'Swiggy' ? 'SWG-' : (ch === 'Zomato' ? 'ZMT-' : 'WEB-')) + seq++,
+          channel: ch,
+          date: new Date(Date.now() - Math.floor(Math.random()*86400000)).toLocaleString('en-GB'),
+          outlet: out,
+          customer: names[seq % names.length],
+          items: dishes[seq % dishes.length],
+          amount: 220 + (seq % 5) * 85,
+          status: st,
+          sla: st === 'Late Delivery' ? 'Late (+14m)' : (st === 'Success' ? 'On-Time (22m)' : 'Cancelled'),
+          complaint: comp
+        });
+      }
+    });
+  });
+
+  localStorage.setItem('rpChannelOrders', JSON.stringify(demoList));
+  setChannel(curChannel);
+  alert('? Demo Ready! Total ' + demoList.length + ' Swiggy, Zomato & Web orders added across all 31 Outlets!');
+}
+
 function setChannel(ch) {
   curChannel = ch;
   if (ch !== 'All') fCh.value = ch;
