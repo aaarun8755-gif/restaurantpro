@@ -2035,13 +2035,59 @@ setInterval(() => {
 }, 300);
 </script>
 
-<style id="rpOriginalStaffBeautify">
-  [data-section*="staff" i], #staffSection, .staff-container {
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 18px;
-    border: 1px solid #dbe5e2;
-  }
-</style>
+
+<script id="rpStaffMarketingLayout">
+setInterval(() => {
+  // Find the Staff & Payroll tab bar containing "HR Dashboard" and "Employee Master"
+  const hrTab = Array.from(document.querySelectorAll('button, a, div'))
+    .find(el => el.children.length === 0 && (el.innerText || '').trim() === 'HR Dashboard' && el.offsetParent !== null);
+  if (!hrTab) return;
+
+  const tabBar = hrTab.parentElement;
+  const mainCard = tabBar?.parentElement;
+  if (!tabBar || !mainCard || mainCard.dataset.mktStyled) return;
+
+  mainCard.dataset.mktStyled = '1';
+  mainCard.style.display = 'grid';
+  mainCard.style.gridTemplateColumns = '235px 1fr';
+  mainCard.style.gap = '18px';
+  mainCard.style.alignItems = 'start';
+  mainCard.style.background = 'transparent';
+  mainCard.style.border = '0';
+  mainCard.style.padding = '0';
+
+  // Transform top tab bar into Marketing-style Left Vertical Sidebar
+  tabBar.style.display = 'flex';
+  tabBar.style.flexDirection = 'column';
+  tabBar.style.gap = '5px';
+  tabBar.style.background = '#ffffff';
+  tabBar.style.border = '1px solid #dbe5e2';
+  tabBar.style.borderRadius = '12px';
+  tabBar.style.padding = '14px';
+  tabBar.style.position = 'sticky';
+  tabBar.style.top = '16px';
+
+  const sideTitle = document.createElement('div');
+  sideTitle.textContent = 'STAFF & PAYROLL';
+  sideTitle.style.cssText = 'font-weight:900;font-size:12.5px;color:#115e59;padding:4px 8px 10px;border-bottom:1px solid #eef2f0;margin-bottom:4px;letter-spacing:.4px';
+  tabBar.insertBefore(sideTitle, tabBar.firstChild);
+
+  Array.from(tabBar.querySelectorAll('button, a')).forEach(b => {
+    b.style.width = '100%';
+    b.style.textAlign = 'left';
+    b.style.justifyContent = 'flex-start';
+    b.style.padding = '9px 12px';
+    b.style.borderRadius = '8px';
+    b.style.fontSize = '13px';
+  });
+
+  // Wrap right-side panels cleanly in a white Marketing-style card
+  const rightPanels = Array.from(mainCard.children).filter(ch => ch !== tabBar);
+  const rightWrap = document.createElement('div');
+  rightWrap.style.cssText = 'background:#ffffff;border:1px solid #dbe5e2;border-radius:14px;padding:18px;min-width:0;overflow-x:auto';
+  mainCard.appendChild(rightWrap);
+  rightPanels.forEach(p => rightWrap.appendChild(p));
+}, 300);
+</script>
 </body>
 </html>
