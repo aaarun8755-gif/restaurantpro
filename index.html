@@ -1896,7 +1896,7 @@ setInterval(() => {
   setInterval(() => {
     if (!document.getElementById('rpProdMgmtGroup')) {
       const qrEl = Array.from(document.querySelectorAll('aside *, nav *'))
-        .find(el => el.children.length <= 2 && (el.innerText || '').trim().includes('Scan QR'));
+        .find(el => el.children.length <= 2 && ((el.innerText || '').trim().includes('Scan & Order') || (el.innerText || '').trim().includes('Scan QR') || (el.innerText || '').trim().includes('Auto Mail Management')));
       if (qrEl) {
         const target = qrEl.closest('a, button, li, div') || qrEl;
         const box = document.createElement('div');
