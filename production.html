@@ -79,11 +79,25 @@ th,td{border-bottom:1px solid #eef2f0;padding:8px 10px;text-align:left}
 
   <!-- TAB 3: PRODUCTION PREPARATION -->
   <div id="viewPreparation" style="display:none">
-    <div class="card">
-      <h3 style="margin-top:0">Daily Production Preparation &amp; Batch History</h3>
-      <table><thead><tr><th>Date &amp; Time</th><th>Outlet</th><th>Produced Item</th><th>Added to Stock (+)</th><th>Raw Materials Deducted (-)</th><th>Status</th></tr></thead><tbody id="prepBody"></tbody></table>
+  <div class="card" style="display:flex;gap:12px;align-items:end;flex-wrap:wrap">
+    <div><label>Filter Date *</label><input type="date" id="prepDateFilter" onchange="renderPreparation()"></div>
+    <div><label>Filter Outlet</label><select id="prepOutletFilter" onchange="renderPreparation()" style="min-width:220px"><option value="ALL">All Outlets (Consolidated Total)</option></select></div>
+    <button type="button" class="btn light" onclick="prepDateFilter.value='';prepOutletFilter.value='ALL';renderPreparation()">Show All Dates</button>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0;color:#115e59">Consolidated Kitchen Production Preparation (Click Total Qty to View Outlet-Wise PO Breakdown)</h3>
+    <table><thead><tr><th>Item Name (From Outlet POs)</th><th>Total Outlets Demanded</th><th>Total Required Qty (Click to Inspect)</th><th>Action</th></tr></thead><tbody id="prepBody"></tbody></table>
+  </div>
+  <div id="prepDrillModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:520px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <strong id="drillTitle" style="font-size:16px;color:#0f766e">Outlet Breakdown</strong>
+        <button type="button" class="btn d sm" onclick="prepDrillModal.style.display='none'">Close</button>
+      </div>
+      <table><thead><tr><th>PO No.</th><th>Date</th><th>Outlet Name</th><th>Demanded Qty</th></tr></thead><tbody id="drillBody"></tbody></table>
     </div>
   </div>
+</div>
 
   <!-- TAB 4: ORDERWISE CONSUMPTION REPORT -->
   <div id="viewConsumption" style="display:none">
@@ -237,6 +251,49 @@ function renderConsumption() {
   cProfitPct.textContent = (daySale > 0 ? (((daySale - dayCost) / daySale) * 100).toFixed(2) : 0) + ' %';
 }
 
+
+window._prepGroups = {};
+function renderPreparation() {
+  const pos = JSON.parse(localStorage.getItem('rpOutletPOs') || '[]');
+  const dInp = document.getElementById('prepDateFilter');
+  const oSel = document.getElementById('prepOutletFilter');
+  if (oSel) {
+    const curVal = oSel.value || 'ALL';
+    const outs = [...new Set(pos.map(x => x.fromOutlet).filter(Boolean))];
+    oSel.innerHTML = '<option value="ALL">All Outlets (Consolidated Total)</option>' + outs.map(o => '<option value="' + o + '">' + o + '</option>').join('');
+    if ([...oSel.options].some(o => o.value === curVal)) oSel.value = curVal;
+  }
+  const fDate = dInp?.value || '';
+  const fOut = oSel?.value || 'ALL';
+
+  const filtered = pos.filter(p => (!fDate || p.date === fDate) && (fOut === 'ALL' || p.fromOutlet === fOut));
+  const groups = {};
+  filtered.forEach(p => {
+    const key = p.item || 'Item';
+    if (!groups[key]) groups[key] = { item: key, totalQty: 0, entries: [] };
+    groups[key].totalQty += Number(p.reqQty || 0);
+    groups[key].entries.push(p);
+  });
+  window._prepGroups = groups;
+
+  const keys = Object.keys(groups);
+  prepBody.innerHTML = keys.map(k => {
+    const g = groups[k];
+    const uniqueOutlets = new Set(g.entries.map(e => e.fromOutlet)).size;
+    return '<tr><td><b>' + g.item + '</b></td><td>' + uniqueOutlets + ' Outlets (' + g.entries.length + ' POs)</td>' +
+      '<td><button type="button" class="btn sm" style="background:#0f766e;font-size:13px" onclick="openPrepDrill(\'' + k.replace(/'/g, "\\'") + '\')">' + g.totalQty + ' (Click for Details)</button></td>' +
+      '<td><button type="button" class="btn light sm" onclick="openPrepDrill(\'' + k.replace(/'/g, "\\'") + '\')">View Outlet Breakup</button></td></tr>';
+  }).join('') || '<tr><td colspan="4">Is date/outlet filter ke liye koi PO demand nahi hai.</td></tr>';
+}
+
+function openPrepDrill(itemKey) {
+  const g = window._prepGroups[itemKey];
+  if (!g) return;
+  drillTitle.textContent = g.item + ' ? Total: ' + g.totalQty + ' (Outlet-Wise PO Breakup)';
+  drillBody.innerHTML = g.entries.map(e => '<tr><td><b>' + e.id + '</b></td><td>' + e.date + '</td><td>' + e.fromOutlet + '</td><td><b>' + e.reqQty + '</b></td></tr>').join('');
+  prepDrillModal.style.display = 'flex';
+}
+
 function setTab(t) {
   viewMaster.style.display = t==='master'?'block':'none';
   viewExecution.style.display = t==='execution'?'block':'none';
@@ -253,8 +310,7 @@ function renderAll() {
   const recs = getRecipes();
   mastBody.innerHTML = recs.map(r => '<tr><td><b>'+r.name+'</b></td><td>'+r.name+'</td><td>'+r.outQty+' '+r.unit+'</td><td>'+r.ingredients.map(i=>i.mat+' ('+i.qty+' '+i.unit+')').join(', ')+'</td><td>'+r.auto+'</td><td><button class="btn d sm" onclick="delRec(\''+r.id+'\')">Del</button></td></tr>').join('');
   execListBody.innerHTML = recs.map(r => '<tr><td><b>'+r.name+'</b></td><td><input id="eq_'+r.id+'" type="number" value="'+r.outQty+'" style="width:85px" oninput="selectForExec(\''+r.id+'\')"></td><td>'+r.unit+'</td><td><button class="btn sm" onclick="selectForExec(\''+r.id+'\')">Select &rarr;</button></td></tr>').join('');
-  const logs = JSON.parse(localStorage.getItem('rpProdLogs') || '[]');
-  prepBody.innerHTML = logs.map(l => '<tr><td>'+l.time+'</td><td><b>'+l.outlet+'</b></td><td>'+l.item+'</td><td><span class="badge">'+l.added+'</span></td><td>'+l.rawUsed+'</td><td><span class="badge">Converted</span></td></tr>').join('') || '<tr><td colspan="6">No production batches converted yet.</td></tr>';
+  if (typeof renderPreparation === 'function') renderPreparation();
   renderConsumption();
 }
 
