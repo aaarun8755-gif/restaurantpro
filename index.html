@@ -2217,42 +2217,51 @@ setInterval(() => {
 </script>
 
 
+
+
 <script id="rpSalesDateFilter">
-setInterval(() => {
-  if (document.getElementById('rpSalesCustomRange')) return;
-  const sel = Array.from(document.querySelectorAll('select')).find(s => (s.innerText || '').includes('Last 7 days'));
-  if (!sel || !sel.parentNode) return;
+(function(){
+  let activeRange = null;
 
-  const box = document.createElement('div');
-  box.id = 'rpSalesCustomRange';
-  box.style.cssText = 'display:inline-flex;align-items:center;gap:6px;margin-right:8px;flex-wrap:wrap';
-
-  const today = new Date().toISOString().slice(0,10);
-  const weekAgo = new Date(Date.now() - 6*86400000).toISOString().slice(0,10);
-
-  box.innerHTML =
-    '<input type="date" id="rpSpFrom" value="' + weekAgo + '" style="padding:4px 7px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px">' +
-    '<span style="font-size:11.5px;color:#64748b">to</span>' +
-    '<input type="date" id="rpSpTo" value="' + today + '" style="padding:4px 7px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px">' +
-    '<button type="button" id="rpSpApply" style="background:#0f766e;color:#fff;border:0;border-radius:7px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">Filter</button>';
-
-  sel.parentNode.insertBefore(box, sel);
-
-  function parseAnyDate(raw) {
+  function parseIso(raw) {
     const s = String(raw || '').trim();
-    if (!s) return today;
-    if (/^d{4}-d{2}-d{2}/.test(s)) return s.slice(0,10);
-    const m = s.match(/(d{1,2})[/-](d{1,2})[/-](d{4})/);
-    if (m) return m[3] + '-' + m[2].padStart(2,'0') + '-' + m[1].padStart(2,'0');
-    return today;
+    if (!s) return new Date().toISOString().slice(0,10);
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+    const parts = s.split(' ')[0].split('/');
+    if (parts.length === 3 && parts[2].length === 4) return parts[2] + '-' + parts[1].padStart(2,'0') + '-' + parts[0].padStart(2,'0');
+    return new Date().toISOString().slice(0,10);
   }
 
-  function applyRange() {
-    const f = document.getElementById('rpSpFrom').value;
-    const t = document.getElementById('rpSpTo').value;
-    const out = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+  function enforceDateStats() {
+    const sel = Array.from(document.querySelectorAll('select')).find(s => (s.innerText || '').includes('Last 7 days'));
+    if (sel && !document.getElementById('rpSalesCustomRange')) {
+      const today = new Date().toISOString().slice(0,10);
+      const weekAgo = new Date(Date.now() - 6*86400000).toISOString().slice(0,10);
+      const box = document.createElement('div');
+      box.id = 'rpSalesCustomRange';
+      box.style.cssText = 'display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap';
+      box.innerHTML =
+        '<input type="date" id="rpSpFrom" value="' + weekAgo + '" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px">' +
+        '<span style="font-size:12px;color:#64748b">to</span>' +
+        '<input type="date" id="rpSpTo" value="' + today + '" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px">' +
+        '<button type="button" id="rpSpApply" style="background:#0f766e;color:#fff;border:0;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">Filter</button>';
+      sel.parentNode.insertBefore(box, sel);
+      sel.style.display = 'none';
 
-    // Collect bills from localStorage OR live DOM Recent Bills if localStorage is empty
+      const trigger = () => {
+        activeRange = { f: document.getElementById('rpSpFrom').value, t: document.getElementById('rpSpTo').value };
+        enforceDateStats();
+      };
+      document.getElementById('rpSpApply').onclick = trigger;
+      document.getElementById('rpSpFrom').onchange = trigger;
+      document.getElementById('rpSpTo').onchange = trigger;
+    }
+
+    if (!activeRange) return;
+    const { f, t } = activeRange;
+    const out = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+    const today = new Date().toISOString().slice(0,10);
+
     let allBills = JSON.parse(localStorage.getItem('rpBills') || '[]');
     if (!allBills.length) {
       allBills = [
@@ -2263,7 +2272,7 @@ setInterval(() => {
     }
 
     const filtered = allBills.filter(b => {
-      const iso = parseAnyDate(b.date);
+      const iso = parseIso(b.date);
       const matchOut = out === 'Head Office' || !b.outlet || b.outlet === out;
       return matchOut && (!f || iso >= f) && (!t || iso <= t);
     });
@@ -2274,20 +2283,19 @@ setInterval(() => {
     const cashSales = filtered.filter(x => String(x.payment||'Cash').toLowerCase().includes('cash')).reduce((s,x)=>s+Number(x.total||0),0);
     const upiSales = Math.max(0, totSales - cashSales);
 
-    // 1. Update Top 4 Cards
+    // Override Top KPI Cards continuously so React/old script does not overwrite them
     document.querySelectorAll('div').forEach(card => {
       const txt = card.innerText || '';
-      if (card.offsetHeight > 70 && card.offsetHeight < 185 && card.offsetWidth > 140 && card.offsetWidth < 370) {
+      if (card.offsetHeight > 65 && card.offsetHeight < 190 && card.offsetWidth > 140 && card.offsetWidth < 380) {
         const numEl = Array.from(card.querySelectorAll('*')).find(el => el.children.length === 0 && /^[?0-9.,]+$/.test((el.innerText || '').trim()));
         if (!numEl) return;
         if (txt.includes('Total Sales')) numEl.textContent = '?' + totSales.toFixed(1);
         else if (txt.includes('Total Orders')) numEl.textContent = String(totOrders);
         else if (txt.includes('Average Order Value')) numEl.textContent = '?' + avgVal.toFixed(1);
-        else if (txt.includes('Inventory Items')) numEl.textContent = totOrders > 0 ? '54' : '54';
       }
     });
 
-    // 2. Update Daily Snapshot
+    // Override Daily Snapshot
     const snapCard = Array.from(document.querySelectorAll('div')).find(d => (d.innerText || '').includes('Daily snapshot') && d.offsetWidth > 220 && d.offsetWidth < 460);
     if (snapCard) {
       Array.from(snapCard.querySelectorAll('*')).forEach(el => {
@@ -2300,36 +2308,34 @@ setInterval(() => {
       });
     }
 
-    // 3. Update Graph Top Total Badge
-    const graphCard = sel.closest('div')?.parentElement?.parentElement;
-    if (graphCard) {
-      const totBadge = Array.from(graphCard.querySelectorAll('*')).find(el => el.children.length === 0 && (el.innerText || '').includes('total'));
-      if (totBadge) totBadge.textContent = '?' + totSales.toFixed(1) + ' (' + f + ' to ' + t + ')';
+    // Override Graph Total Badge
+    const graphBox = document.getElementById('rpSalesCustomRange')?.closest('div')?.parentElement?.parentElement;
+    if (graphBox) {
+      const badge = Array.from(graphBox.querySelectorAll('*')).find(el => el.children.length === 0 && (el.innerText || '').includes('total'));
+      if (badge) badge.textContent = '?' + totSales.toFixed(1) + ' (' + f + ' to ' + t + ')';
     }
 
-    // 4. Update Recent Bills List
+    // Override Recent Bills
     const recCard = Array.from(document.querySelectorAll('div')).find(d => (d.innerText || '').includes('Recent bills') && d.offsetHeight > 120 && d.offsetHeight < 420);
     if (recCard) {
-      let boxEl = recCard.querySelector('#rpDateFilteredBills');
-      if (!boxEl) {
+      let listBox = recCard.querySelector('#rpDateFilteredBills');
+      if (!listBox) {
         Array.from(recCard.children).slice(1).forEach(c => c.style.display = 'none');
-        boxEl = document.createElement('div');
-        boxEl.id = 'rpDateFilteredBills';
-        recCard.appendChild(boxEl);
+        listBox = document.createElement('div');
+        listBox.id = 'rpDateFilteredBills';
+        recCard.appendChild(listBox);
       }
-      boxEl.innerHTML = filtered.slice(0, 5).map(b =>
+      listBox.innerHTML = filtered.slice(0, 5).map(b =>
         '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eef2f0;font-size:12.5px">' +
-          '<div><b>' + (b.billNo||'Bill') + '</b><br><small style="color:#64748b">' + parseAnyDate(b.date) + ' | ' + (b.payment||'Cash') + '</small></div>' +
+          '<div><b>' + (b.billNo||'Bill') + '</b><br><small style="color:#64748b">' + parseIso(b.date) + ' | ' + (b.payment||'Cash') + '</small></div>' +
           '<b style="color:#0f766e">?' + Number(b.total||0).toFixed(2) + '</b>' +
         '</div>'
       ).join('') || '<div style="padding:14px 0;font-size:12.5px;color:#64748b">No bills between ' + f + ' and ' + t + '.</div>';
     }
   }
 
-  document.getElementById('rpSpApply').onclick = applyRange;
-  document.getElementById('rpSpFrom').onchange = applyRange;
-  document.getElementById('rpSpTo').onchange = applyRange;
-}, 350);
+  setInterval(enforceDateStats, 300);
+})();
 </script>
 </body>
 </html>
