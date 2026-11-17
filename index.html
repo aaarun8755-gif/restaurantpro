@@ -1990,47 +1990,34 @@ setInterval(() => {
 }, 350);
 </script>
 
-<script id="rpMarketingAndFoodCostHook">
-(function(){
-  // 1. Direct click interceptor on entire sidebar & buttons
-  document.addEventListener('click', function(e) {
-    const path = e.composedPath ? e.composedPath() : [e.target];
-    const hitMkt = path.some(el => el && el.innerText && el.innerText.trim().includes('Marketing Management') && el.tagName !== 'BODY' && el.tagName !== 'HTML');
-    if (hitMkt) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      window.location.href = '/marketing.html';
-      return;
-    }
-    const hitFc = path.some(el => el && el.innerText && el.innerText.trim().includes('Food Cost') && el.tagName !== 'BODY' && el.tagName !== 'HTML');
-    if (hitFc) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      window.location.href = '/food-costing.html';
-    }
-  }, true);
 
-  // 2. Also bind directly to the Marketing Management sidebar element
-  setInterval(() => {
-    document.querySelectorAll('aside *, nav *').forEach(el => {
-      if (el.children.length <= 2 && (el.innerText || '').trim().includes('Marketing Management')) {
-        el.style.cursor = 'pointer';
-        el.onclick = () => { window.location.href = '/marketing.html'; };
-      }
-    });
-    if (!document.getElementById('rpFoodCostQuickBtn')) {
-      const repTitle = Array.from(document.querySelectorAll('h1,h2,h3,div')).find(x => x.children.length <= 2 && (x.innerText || '').trim() === 'Reports');
-      if (repTitle && repTitle.parentNode) {
-        const b = document.createElement('button');
-        b.id = 'rpFoodCostQuickBtn'; b.type = 'button';
-        b.textContent = 'Open Food Costing Report (Petpooja Format)';
-        b.style.cssText = 'background:#0f766e;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;font-size:12.5px;cursor:pointer;margin:8px 0';
-        b.onclick = () => window.location.href = '/food-costing.html';
-        repTitle.parentNode.insertBefore(b, repTitle.nextSibling);
-      }
+<script id="rpMarketingAndFoodCostHook">
+setInterval(() => {
+  // Sirf usi button/link par lagayein jiska khud ka exact text "Marketing Management" ho
+  document.querySelectorAll('aside a, aside button, aside li, aside div, nav a, nav button, nav li, nav div').forEach(el => {
+    if (el.children.length <= 2 && (el.innerText || '').trim() === 'Marketing Management' && !el.dataset.mktBound) {
+      el.dataset.mktBound = '1';
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.location.href = '/marketing.html';
+      }, true);
     }
-  }, 350);
-})();
+  });
+
+  if (!document.getElementById('rpFoodCostQuickBtn')) {
+    const repTitle = Array.from(document.querySelectorAll('h1,h2,h3,div')).find(x => x.children.length <= 2 && (x.innerText || '').trim() === 'Reports');
+    if (repTitle && repTitle.parentNode) {
+      const b = document.createElement('button');
+      b.id = 'rpFoodCostQuickBtn'; b.type = 'button';
+      b.textContent = 'Open Food Costing Report (Petpooja Format)';
+      b.style.cssText = 'background:#0f766e;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;font-size:12.5px;cursor:pointer;margin:8px 0';
+      b.onclick = () => window.location.href = '/food-costing.html';
+      repTitle.parentNode.insertBefore(b, repTitle.nextSibling);
+    }
+  }
+}, 350);
 </script>
 </body>
 </html>
