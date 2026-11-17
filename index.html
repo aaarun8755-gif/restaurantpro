@@ -1941,5 +1941,53 @@ setInterval(() => {
   }, 350);
 })();
 </script>
+<script id="rpLogisticsAndMgmtNav">
+setInterval(() => {
+  // 1. Add "Manage Logistics" right below "Production Management"
+  if (!document.getElementById('rpLogiMgmtGroup')) {
+    const prodBox = document.getElementById('rpProdMgmtGroup');
+    if (prodBox && prodBox.parentNode) {
+      const box = document.createElement('div');
+      box.id = 'rpLogiMgmtGroup';
+      box.style.cssText = 'margin:4px 8px';
+      box.innerHTML =
+        '<div id="rpLogiToggle" style="padding:9px 14px;font-size:13px;font-weight:700;color:#1d4ed8;background:#eff6ff;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
+          '<span>Manage Logistics</span><span>&#9662;</span>' +
+        '</div>' +
+        '<div id="rpLogiSub" style="padding-left:14px;margin-top:3px;display:none;flex-direction:column;gap:2px">' +
+          '<div onclick="location.href=\'/logistics.html?tab=create\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">1. Create Logistic</div>' +
+          '<div onclick="location.href=\'/logistics.html?tab=assign\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">2. Assign Logistic</div>' +
+          '<div onclick="location.href=\'/logistics.html?tab=report\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">3. Logistic Report</div>' +
+        '</div>';
+      prodBox.parentNode.insertBefore(box, prodBox.nextSibling);
+      document.getElementById('rpLogiToggle').onclick = () => {
+        const s = document.getElementById('rpLogiSub');
+        s.style.display = s.style.display === 'none' ? 'flex' : 'none';
+      };
+    }
+  }
+
+  // 2. Make "Management" in sidebar expand sub-options just like Production Management
+  if (!document.getElementById('rpMgmtSubMenu')) {
+    const mgmtEl = Array.from(document.querySelectorAll('aside *, nav *'))
+      .find(el => el.children.length <= 2 && (el.innerText || '').trim() === 'Management');
+    if (mgmtEl) {
+      const target = mgmtEl.closest('a, button, li, div') || mgmtEl;
+      const sub = document.createElement('div');
+      sub.id = 'rpMgmtSubMenu';
+      sub.style.cssText = 'padding-left:18px;margin:2px 8px;display:none;flex-direction:column;gap:2px';
+      sub.innerHTML =
+        '<div onclick="target.click()" style="padding:6px 10px;font-size:12px;font-weight:600;color:#334155;cursor:pointer">1. Expense Management</div>' +
+        '<div onclick="target.click()" style="padding:6px 10px;font-size:12px;font-weight:600;color:#334155;cursor:pointer">2. Item Recipes</div>' +
+        '<div onclick="target.click()" style="padding:6px 10px;font-size:12px;font-weight:600;color:#334155;cursor:pointer">3. Purchase Return</div>' +
+        '<div onclick="target.click()" style="padding:6px 10px;font-size:12px;font-weight:600;color:#334155;cursor:pointer">4. Customer &amp; Vendor</div>';
+      target.parentNode.insertBefore(sub, target.nextSibling);
+      target.addEventListener('click', () => {
+        sub.style.display = sub.style.display === 'none' ? 'flex' : 'none';
+      });
+    }
+  }
+}, 350);
+</script>
 </body>
 </html>

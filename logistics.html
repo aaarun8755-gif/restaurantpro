@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Manage Logistics</title>
+<style>
+:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e;--blue:#1d4ed8}
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.wrap{max-width:1360px;margin:auto;padding:18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:10px}
+label{font-size:11.5px;font-weight:700;display:block;margin-bottom:3px}
+input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}
+.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12.5px}
+.btn.light{background:#fff;color:#1e293b;border:1px solid #cbd5e1}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:4px 8px;font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{border-bottom:1px solid #eef2f0;padding:9px;text-align:left}
+.badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
+.badge.pend{background:#fef3c7;color:#92400e}
+</style></head>
+<body>
+<header>
+  <div><strong style="font-size:18px;color:var(--blue)" id="logiHead">Manage Logistics</strong> | <small id="outLbl" style="color:#64748b"></small></div>
+  <div style="display:flex;gap:8px"><button class="btn light" onclick="exportLogiExcel()">Export Excel</button><button class="btn light" onclick="window.print()">Print PDF</button><a href="/index.html" class="btn light">&larr; Dashboard</a></div>
+</header>
+<div class="wrap">
+  <!-- 1. CREATE LOGISTIC (ONLY WHEN TAB=CREATE) -->
+  <div id="secCreate" style="display:none">
+    <div class="card">
+      <h3 style="margin-top:0">1. Create Logistic (Register Vehicle &amp; Driver)</h3>
+      <form id="vehForm" class="fgrid">
+        <div><label>Vehicle Number *</label><input id="vNo" required placeholder="e.g. DL-01-AB-1234"></div>
+        <div><label>Vehicle Type *</label><select id="vType"><option>Insulated Van</option><option>Mini Tempo / Tata Ace</option><option>Delivery Bike</option><option>Container Truck</option></select></div>
+        <div><label>Driver Name *</label><input id="dName" required placeholder="Driver Full Name"></div>
+        <div><label>Driver Mobile *</label><input id="dPhone" required maxlength="10" placeholder="10-digit Mobile"></div>
+        <div><label>Assigned Base Outlet *</label><input id="vOut" required></div>
+        <div style="display:flex;align-items:end"><button class="btn" style="width:100%">+ Save Vehicle &amp; Driver</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Registered Logistics Fleet</h3>
+      <table><thead><tr><th>Vehicle No.</th><th>Type</th><th>Driver Name</th><th>Mobile</th><th>Base Outlet</th><th>Status</th><th>Del</th></tr></thead><tbody id="vehBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 2. ASSIGN LOGISTIC (ONLY WHEN TAB=ASSIGN) -->
+  <div id="secAssign" style="display:none">
+    <div class="card">
+      <h3 style="margin-top:0">2. Assign Logistic to Outlet Transfer / Dispatch</h3>
+      <form id="asgForm" class="fgrid">
+        <div><label>Select Vehicle &amp; Driver *</label><select id="aVeh" required></select></div>
+        <div><label>From Outlet / Kitchen *</label><input id="aFrom" required></div>
+        <div><label>To Destination Outlet *</label><input id="aTo" required placeholder="e.g. RestaurantPro - Noida"></div>
+        <div><label>PO / Dispatch Ref No. *</label><input id="aRef" required placeholder="e.g. PO00833501"></div>
+        <div><label>Dispatch Date *</label><input type="date" id="aDate" required></div>
+        <div style="display:flex;align-items:end"><button class="btn" style="width:100%">Assign &amp; Dispatch &rarr;</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Active Logistic Assignments</h3>
+      <table><thead><tr><th>Trip ID</th><th>Date</th><th>Vehicle &amp; Driver</th><th>Route (From &rarr; To)</th><th>Ref PO</th><th>Status</th><th>Update</th></tr></thead><tbody id="asgBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 3. LOGISTIC REPORT (ONLY WHEN TAB=REPORT) -->
+  <div id="secReport" style="display:none">
+    <div class="card">
+      <h3 style="margin-top:0">3. Complete Logistic &amp; Delivery Report</h3>
+      <table><thead><tr><th>Trip ID</th><th>Date</th><th>Vehicle &amp; Driver</th><th>From Outlet</th><th>To Outlet</th><th>Ref PO</th><th>Delivery Status</th></tr></thead><tbody id="repBody"></tbody></table>
+    </div>
+  </div>
+</div>
+<script>
+const p = new URLSearchParams(location.search);
+const tab = p.get('tab') || 'create';
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+const isHO = curOut === 'Head Office';
+outLbl.textContent = 'Unit: ' + curOut;
+vOut.value = isHO ? 'Main Outlet' : curOut;
+aFrom.value = isHO ? 'Main Outlet' : curOut;
+aDate.value = new Date().toISOString().slice(0,10);
+
+secCreate.style.display = tab === 'create' ? 'block' : 'none';
+secAssign.style.display = tab === 'assign' ? 'block' : 'none';
+secReport.style.display = tab === 'report' ? 'block' : 'none';
+logiHead.textContent = tab === 'create' ? '1. Create Logistic' : (tab === 'assign' ? '2. Assign Logistic' : '3. Logistic Report');
+
+function getVehs(){ return JSON.parse(localStorage.getItem('rpLogiVehicles')||'[]'); }
+function getTrips(){ return JSON.parse(localStorage.getItem('rpLogiTrips')||'[]'); }
+
+vehForm.onsubmit = e => {
+  e.preventDefault();
+  const l = getVehs(); l.unshift({ id:'v-'+Date.now(), no:vNo.value.trim(), type:vType.value, driver:dName.value.trim(), phone:dPhone.value.trim(), outlet:vOut.value.trim() });
+  localStorage.setItem('rpLogiVehicles', JSON.stringify(l)); vNo.value=''; dName.value=''; dPhone.value=''; renderAll();
+};
+function delVeh(id){ localStorage.setItem('rpLogiVehicles', JSON.stringify(getVehs().filter(x=>x.id!==id))); renderAll(); }
+
+asgForm.onsubmit = e => {
+  e.preventDefault();
+  const l = getTrips(); l.unshift({ id:'TRP-'+Math.floor(1000+Math.random()*8999), date:aDate.value, veh:aVeh.value, from:aFrom.value.trim(), to:aTo.value.trim(), ref:aRef.value.trim(), status:'In Transit' });
+  localStorage.setItem('rpLogiTrips', JSON.stringify(l)); aTo.value=''; aRef.value=''; renderAll();
+};
+function markDelivered(id){ const l=getTrips(), x=l.find(i=>i.id===id); if(x){x.status='Delivered'; localStorage.setItem('rpLogiTrips',JSON.stringify(l)); renderAll();} }
+
+function renderAll(){
+  const vs = getVehs();
+  aVeh.innerHTML = vs.map(v => '<option value="'+v.no+' ('+v.driver+')">'+v.no+' - '+v.driver+' ('+v.type+')</option>').join('') || '<option value="DL-01-VAN-01 (Ramesh)">DL-01-VAN-01 - Ramesh (Default Van)</option>';
+  vehBody.innerHTML = vs.map(v => '<tr><td><b>'+v.no+'</b></td><td>'+v.type+'</td><td>'+v.driver+'</td><td>'+v.phone+'</td><td>'+v.outlet+'</td><td><span class="badge">Active</span></td><td><button class="btn d sm" onclick="delVeh(\''+v.id+'\')">Del</button></td></tr>').join('') || '<tr><td colspan="7">No vehicles registered yet.</td></tr>';
+  const ts = getTrips().filter(t => isHO || t.from === curOut || t.to === curOut);
+  asgBody.innerHTML = ts.map(t => '<tr><td><b>'+t.id+'</b></td><td>'+t.date+'</td><td>'+t.veh+'</td><td>'+t.from+' &rarr; <b>'+t.to+'</b></td><td>'+t.ref+'</td><td><span class="badge '+(t.status==='Delivered'?'':'pend')+'">'+t.status+'</span></td><td>'+(t.status!=='Delivered'?'<button class="btn sm" onclick="markDelivered(\''+t.id+'\')">Mark Delivered</button>':'Done')+'</td></tr>').join('') || '<tr><td colspan="7">No assignments yet.</td></tr>';
+  repBody.innerHTML = ts.map(t => '<tr><td><b>'+t.id+'</b></td><td>'+t.date+'</td><td>'+t.veh+'</td><td>'+t.from+'</td><td><b>'+t.to+'</b></td><td>'+t.ref+'</td><td><span class="badge '+(t.status==='Delivered'?'':'pend')+'">'+t.status+'</span></td></tr>').join('') || '<tr><td colspan="7">No logistic report data yet.</td></tr>';
+}
+function exportLogiExcel(){ const rows=[['Trip ID','Date','Vehicle','From','To','Ref','Status'],...getTrips().map(t=>[t.id,t.date,t.veh,t.from,t.to,t.ref,t.status])]; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'})); a.download='Logistic_Report.csv'; a.click(); }
+renderAll();
+</script></body></html>
