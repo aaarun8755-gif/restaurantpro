@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RestaurantPro | Production Management</title>
+<style>:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e}*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}body{margin:0;background:var(--bg);color:var(--ink)}header{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;justify-content:space-between;align-items:center}.wrap{max-width:1200px;margin:auto;padding:20px}.tabs{display:flex;gap:8px;margin-bottom:16px}.tab{padding:9px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer}.tab.active{background:var(--teal);color:#fff}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px}.btn{border:0;border-radius:8px;padding:8px 14px;background:#fff;color:var(--teal);border:1px solid var(--line);font-weight:700;text-decoration:none}</style></head>
+<body>
+<header><div><strong style="font-size:18px;color:#115e59">Production Management Hub</strong></div><a href="/index.html" class="btn">&larr; Dashboard</a></header>
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab" id="tExec" onclick="setTab('execution')">1. Production Execution</button>
+    <button class="tab" id="tMast" onclick="setTab('master')">2. Production Master</button>
+    <button class="tab" id="tPrep" onclick="setTab('preparation')">3. Production Preparation</button>
+  </div>
+  <div class="card" id="prodContent"></div>
+</div>
+<script>
+const p = new URLSearchParams(location.search);
+function setTab(t){
+  tExec.classList.toggle('active',t==='execution');
+  tMast.classList.toggle('active',t==='master');
+  tPrep.classList.toggle('active',t==='preparation');
+  const titles = { execution: '1. Production Execution', master: '2. Production Master (BOM & Recipes)', preparation: '3. Production Preparation (Batch Planning)' };
+  prodContent.innerHTML = '<h2 style="margin-top:0;color:#0f766e">' + titles[t] + '</h2><p style="color:#475569">Module active and ready. Batayein ismein kaun-kaun se columns aur stock rules jodne hain.</p>';
+}
+setTab(p.get('tab') || 'execution');
+</script></body></html>

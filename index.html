@@ -1891,5 +1891,55 @@ setInterval(() => {
   row3.parentElement.insertBefore(row5, row3.nextSibling);
 }, 300);
 </script>
+<script id="rpPoAndProductionNav">
+(function(){
+  setInterval(() => {
+    if (!document.getElementById('rpProdMgmtGroup')) {
+      const qrEl = Array.from(document.querySelectorAll('aside *, nav *'))
+        .find(el => el.children.length <= 2 && (el.innerText || '').trim().includes('Scan QR'));
+      if (qrEl) {
+        const target = qrEl.closest('a, button, li, div') || qrEl;
+        const box = document.createElement('div');
+        box.id = 'rpProdMgmtGroup';
+        box.style.cssText = 'margin:4px 8px';
+        box.innerHTML =
+          '<div id="rpProdToggle" style="padding:9px 14px;font-size:13px;font-weight:700;color:#0f766e;background:#eef6f4;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
+            '<span>Production Management</span><span>&#9662;</span>' +
+          '</div>' +
+          '<div id="rpProdSub" style="padding-left:14px;margin-top:3px;display:flex;flex-direction:column;gap:2px">' +
+            '<div onclick="location.href=\'/production.html?tab=execution\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">1. Production Execution</div>' +
+            '<div onclick="location.href=\'/production.html?tab=master\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">2. Production Master</div>' +
+            '<div onclick="location.href=\'/production.html?tab=preparation\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">3. Production Preparation</div>' +
+          '</div>';
+        target.parentNode.insertBefore(box, target.nextSibling);
+        document.getElementById('rpProdToggle').onclick = () => {
+          const s = document.getElementById('rpProdSub');
+          s.style.display = s.style.display === 'none' ? 'flex' : 'none';
+        };
+      }
+    }
+
+    if (!document.getElementById('rpGenPoBtn')) {
+      const invBtn = Array.from(document.querySelectorAll('button, a'))
+        .find(el => {
+          const t = (el.innerText || '').trim();
+          return (t === '4. Purchase' || t === 'Purchase' || t.includes('Closing Stock')) && el.offsetParent !== null;
+        });
+      if (invBtn && invBtn.parentNode) {
+        const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+        const pos = JSON.parse(localStorage.getItem('rpOutletPOs') || '[]');
+        const pendCnt = pos.filter(p => (p.toOutlet === curOut && p.status === 'Pending Supply') || (p.fromOutlet === curOut && p.status === 'Dispatched - Ticket Pending')).length;
+        const btn = document.createElement('button');
+        btn.id = 'rpGenPoBtn';
+        btn.type = 'button';
+        btn.innerHTML = 'Generate PO / Transfer' + (pendCnt ? ' <span style="background:#dc2626;color:#fff;padding:1px 6px;border-radius:10px;font-size:11px">' + pendCnt + '</span>' : '');
+        btn.style.cssText = 'background:#0f766e;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;font-size:12.5px;cursor:pointer;margin-left:8px';
+        btn.onclick = () => { location.href = '/po-transfer.html'; };
+        invBtn.parentNode.insertBefore(btn, invBtn.nextSibling);
+      }
+    }
+  }, 350);
+})();
+</script>
 </body>
 </html>
