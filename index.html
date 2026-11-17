@@ -1991,33 +1991,33 @@ setInterval(() => {
 </script>
 
 
+
 <script id="rpMarketingAndFoodCostHook">
 setInterval(() => {
-  // Sirf usi button/link par lagayein jiska khud ka exact text "Marketing Management" ho
-  document.querySelectorAll('aside a, aside button, aside li, aside div, nav a, nav button, nav li, nav div').forEach(el => {
-    if (el.children.length <= 2 && (el.innerText || '').trim() === 'Marketing Management' && !el.dataset.mktBound) {
-      el.dataset.mktBound = '1';
-      el.style.cursor = 'pointer';
-      el.addEventListener('click', function(e) {
+  // Sirf asli <button> ya <a> par hi lagayein, kisi outer <div> par nahi
+  document.querySelectorAll('aside button, aside a, nav button, nav a').forEach(btn => {
+    if ((btn.innerText || '').trim() === 'Marketing Management' && !btn.dataset.mktExact) {
+      btn.dataset.mktExact = '1';
+      btn.onclick = function(e) {
         e.preventDefault();
         e.stopPropagation();
         window.location.href = '/marketing.html';
-      }, true);
+      };
     }
   });
 
   if (!document.getElementById('rpFoodCostQuickBtn')) {
-    const repTitle = Array.from(document.querySelectorAll('h1,h2,h3,div')).find(x => x.children.length <= 2 && (x.innerText || '').trim() === 'Reports');
+    const repTitle = Array.from(document.querySelectorAll('h1,h2,h3')).find(x => (x.innerText || '').trim() === 'Reports');
     if (repTitle && repTitle.parentNode) {
       const b = document.createElement('button');
       b.id = 'rpFoodCostQuickBtn'; b.type = 'button';
       b.textContent = 'Open Food Costing Report (Petpooja Format)';
       b.style.cssText = 'background:#0f766e;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;font-size:12.5px;cursor:pointer;margin:8px 0';
-      b.onclick = () => window.location.href = '/food-costing.html';
+      b.onclick = () => { window.location.href = '/food-costing.html'; };
       repTitle.parentNode.insertBefore(b, repTitle.nextSibling);
     }
   }
-}, 350);
+}, 400);
 </script>
 </body>
 </html>
