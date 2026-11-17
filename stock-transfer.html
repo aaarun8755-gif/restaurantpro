@@ -25,7 +25,7 @@ td{border-bottom:1px solid #eef2f0;padding:9px 10px}
 </style></head>
 <body>
 <header>
-  <div><strong style="font-size:18px;color:#115e59">Transfer &amp; PO Challan Management</strong> | <small id="curOutLbl" style="color:#64748b"></small></div>
+  <div><strong style="font-size:18px;color:#115e59">Stock Transfer Challan Management</strong> | <small id="curOutLbl" style="color:#64748b"></small></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
     <button class="btn" onclick="openAddTransfer()">+ Create New</button>
     <button class="btn light" onclick="exportTrExcel()">Export Excel</button>
@@ -128,8 +128,8 @@ const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
 const isHO = curOut === 'Head Office';
 curOutLbl.textContent = 'Active Unit: ' + curOut;
 let trMode = 'Restaurant', payType = 'Unpaid';
-function getPOs() { return JSON.parse(localStorage.getItem('rpOutletPOs') || '[]'); }
-function savePOs(l) { localStorage.setItem('rpOutletPOs', JSON.stringify(l)); }
+function getPOs() { return JSON.parse(localStorage.getItem('rpStockTransfers') || '[]'); }
+function savePOs(l) { localStorage.setItem('rpStockTransfers', JSON.stringify(l)); }
 
 function adjustStock(outName, item, delta) {
   ['rpInventoryStock::' + outName, 'rpInventoryStock'].forEach(k => {
@@ -177,7 +177,7 @@ function saveTransfer() {
   const summaryItem = rows.length === 1 ? (rows[0].mat + ' (' + rows[0].qty + ' ' + rows[0].unit + ')') : (rows[0].mat + ' + ' + (rows.length-1) + ' items');
   if (chkUpdStock.checked) rows.forEach(r => adjustStock(fromOut, r.mat, -r.qty));
   const list = getPOs();
-  list.unshift({ id: trPoRef.value || ('PO00' + Math.floor(100000 + Math.random()*899999)), challanNo: trChallanNo.value.trim(), date: trDate.value, poType: trMode, fromOutlet: fromOut, toOutlet: toOut, item: summaryItem, itemsList: rows, reqQty: rows.reduce((s,x)=>s+x.qty,0), finalQty: rows.reduce((s,x)=>s+x.qty,0), rate: rows[0].price, total, paymentStatus: payType, createdBy: 'Manager (' + fromOut + ')', status: trMode === 'Restaurant' ? 'Dispatched - Ticket Pending' : 'Saved' });
+  list.unshift({ id: trPoRef.value || ('TRN-' + Math.floor(100000 + Math.random()*899999)), challanNo: trChallanNo.value.trim(), date: trDate.value, poType: trMode, fromOutlet: fromOut, toOutlet: toOut, item: summaryItem, itemsList: rows, reqQty: rows.reduce((s,x)=>s+x.qty,0), finalQty: rows.reduce((s,x)=>s+x.qty,0), rate: rows[0].price, total, paymentStatus: payType, createdBy: 'Manager (' + fromOut + ')', status: trMode === 'Restaurant' ? 'Dispatched - Ticket Pending' : 'Saved' });
   savePOs(list); closeAddTransfer(); alert('Transfer Challan Saved & Stock Updated!');
 }
 
