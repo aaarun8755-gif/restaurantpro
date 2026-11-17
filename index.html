@@ -2337,5 +2337,20 @@ setInterval(() => {
   setInterval(enforceDateStats, 300);
 })();
 </script>
+<script id="rpAiAssistantHook">
+setInterval(() => {
+  document.querySelectorAll('aside button, aside a, nav button, nav a, div').forEach(el => {
+    if (el.children.length <= 2 && (el.innerText || '').trim().includes('Ask Me Anything AI') && !el.dataset.aiBound) {
+      el.dataset.aiBound = '1';
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/ai-assistant.html';
+      }, true);
+    }
+  });
+}, 350);
+</script>
 </body>
 </html>
