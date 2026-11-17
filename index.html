@@ -2352,5 +2352,21 @@ setInterval(() => {
   });
 }, 350);
 </script>
+<script id="rpAutoMailHook">
+setInterval(() => {
+  document.querySelectorAll('aside button, aside a, nav button, nav a, div').forEach(el => {
+    const t = (el.innerText || '').trim();
+    if (el.children.length <= 2 && (t.includes('Auto Mail') || t.includes('Auto-Mail')) && !el.dataset.mailBound) {
+      el.dataset.mailBound = '1';
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/automail-hub.html';
+      }, true);
+    }
+  });
+}, 350);
+</script>
 </body>
 </html>
