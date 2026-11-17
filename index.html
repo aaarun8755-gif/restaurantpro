@@ -2215,5 +2215,45 @@ setInterval(() => {
   });
 }, 350);
 </script>
+<script id="rpSalesDateFilter">
+setInterval(() => {
+  if (document.getElementById('rpSalesCustomRange')) return;
+  const sel = Array.from(document.querySelectorAll('select')).find(s => (s.innerText || '').includes('Last 7 days'));
+  if (!sel || !sel.parentNode) return;
+
+  const box = document.createElement('div');
+  box.id = 'rpSalesCustomRange';
+  box.style.cssText = 'display:inline-flex;align-items:center;gap:6px;margin-right:8px;flex-wrap:wrap';
+
+  const today = new Date().toISOString().slice(0,10);
+  const weekAgo = new Date(Date.now() - 6*86400000).toISOString().slice(0,10);
+
+  box.innerHTML =
+    '<input type="date" id="rpSpFrom" value="' + weekAgo + '" title="From Date" style="padding:4px 7px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px">' +
+    '<span style="font-size:11.5px;color:#64748b">to</span>' +
+    '<input type="date" id="rpSpTo" value="' + today + '" title="To Date" style="padding:4px 7px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px">' +
+    '<button type="button" id="rpSpApply" style="background:#0f766e;color:#fff;border:0;border-radius:7px;padding:5px 10px;font-size:11.5px;font-weight:700;cursor:pointer">Filter</button>';
+
+  sel.parentNode.insertBefore(box, sel);
+
+  document.getElementById('rpSpApply').onclick = () => {
+    const f = document.getElementById('rpSpFrom').value;
+    const t = document.getElementById('rpSpTo').value;
+    const out = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+    const bills = JSON.parse(localStorage.getItem('rpBills') || '[]').filter(b => {
+      const d = (b.date || '').slice(0,10);
+      const matchOut = out === 'Head Office' || !b.outlet || b.outlet === out;
+      return matchOut && (!f || !d || d >= f) && (!t || !d || d <= t);
+    });
+    const sum = bills.reduce((s, x) => s + Number(x.total || 0), 0);
+    const card = sel.closest('div')?.parentElement?.parentElement;
+    if (card) {
+      const totBadge = Array.from(card.querySelectorAll('*')).find(el => el.children.length === 0 && (el.innerText || '').includes('total'));
+      if (totBadge && sum > 0) totBadge.textContent = '?' + sum.toFixed(1) + ' (' + f + ' to ' + t + ')';
+    }
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+}, 350);
+</script>
 </body>
 </html>
