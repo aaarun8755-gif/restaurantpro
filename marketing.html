@@ -32,6 +32,10 @@ input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:
     font-size: 14.5px !important;
   }
 </style>
+<style id="rpCambriaAndSide">
+  *, body, input, select, button, table, th, td, h1, h2, h3, div, span { font-family: Cambria, Georgia, serif !important; }
+  .side, .side * { font-size: 14.5px !important; }
+</style>
 </head>
 <body>
 <aside class="side">
@@ -77,11 +81,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:
     <div class="card"><small>5th Visit Rate (Last 12 Months)</small><strong style="color:#0f766e">69.2%</strong><span style="font-size:11px;color:#64748b">Customers making 5th repeat visit</span></div>
   </div>
 
-  <!-- CAMPAIGN LAUNCHER & LOGS -->
-  <div class="card">
-    <h3 style="margin-top:0" id="secTitle">Active Marketing &amp; WhatsApp Campaigns</h3>
-    <div id="campList" style="font-size:13px;color:#334155"></div>
-  </div>
+  <div id="mktDynamicBody"></div></div>
 </div>
 
 <div id="campModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:center;justify-content:center">
@@ -99,10 +99,27 @@ input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:
 <script>
 const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
 outSub.textContent = 'Outlet: ' + curOut + ' | Quick snapshot of your customer marketing performance';
+
+window.MKT_DATA = {
+  'Dashboard': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Active Marketing &amp; WhatsApp Campaigns</h3><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fafc;text-align:left"><th style="padding:9px">Campaign</th><th style="padding:9px">Channel</th><th style="padding:9px">Audience</th><th style="padding:9px">Revenue</th><th style="padding:9px">Status</th></tr></thead><tbody><tr><td style="padding:9px"><b>Festive Sweets Blast</b></td><td style="padding:9px">WhatsApp</td><td style="padding:9px">1,240 Customers</td><td style="padding:9px;color:#0f766e;font-weight:700">&#8377;14,850</td><td style="padding:9px">Active</td></tr><tr><td style="padding:9px"><b>Auto E-Bill + Feedback</b></td><td style="padding:9px">SMS + WhatsApp</td><td style="padding:9px">412 Verified Bills</td><td style="padding:9px;color:#0f766e;font-weight:700">&#8377;8,420</td><td style="padding:9px">Running</td></tr></tbody></table></div>',
+  'Advertisements': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0;color:#115e59">Paid Ads &amp; ROI Tracker (Meta / Google)</h3><button class="btn" onclick="openCampModal()">+ New Ad</button></div><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fafc;text-align:left"><th style="padding:9px">Platform</th><th style="padding:9px">Campaign</th><th style="padding:9px">Spend</th><th style="padding:9px">Sales</th><th style="padding:9px">ROI %</th></tr></thead><tbody><tr><td style="padding:9px"><b>Instagram / FB</b></td><td style="padding:9px">Kaju Katli Gift Box</td><td style="padding:9px">&#8377;4,000</td><td style="padding:9px"><b>&#8377;11,400</b></td><td style="padding:9px;color:#0f766e;font-weight:700">185%</td></tr><tr><td style="padding:9px"><b>Google Ads</b></td><td style="padding:9px">Best Sweets Near Me</td><td style="padding:9px">&#8377;3,500</td><td style="padding:9px"><b>&#8377;8,900</b></td><td style="padding:9px;color:#0f766e;font-weight:700">154%</td></tr></tbody></table></div>',
+  'Customers': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">CRM Customer Directory</h3><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fafc;text-align:left"><th style="padding:9px">Name</th><th style="padding:9px">Mobile</th><th style="padding:9px">Visits</th><th style="padding:9px">Total Spend</th><th style="padding:9px">Favorite</th></tr></thead><tbody><tr><td style="padding:9px"><b>Rahul Sharma</b></td><td style="padding:9px">9811456721</td><td style="padding:9px">9</td><td style="padding:9px"><b>&#8377;6,450</b></td><td style="padding:9px">Kaju Katli, Dosa</td></tr><tr><td style="padding:9px"><b>Sneha Gupta</b></td><td style="padding:9px">9876543210</td><td style="padding:9px">5</td><td style="padding:9px"><b>&#8377;3,120</b></td><td style="padding:9px">Navratan Mixture</td></tr></tbody></table></div>',
+  'WhatsApp Campaigns': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0;color:#115e59">WhatsApp Broadcast Campaigns</h3><button class="btn" onclick="openCampModal()">+ Send Blast</button></div><div id="campList" style="font-size:13px"></div></div>',
+  'TRM Campaigns': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Auto TRM Triggers</h3><p style="font-size:13px">1. <b>30-Day Win-Back:</b> Auto 20% Off WhatsApp sent (42 converted)<br>2. <b>Birthday Wish:</b> Free Gulab Jamun Box coupon sent (19 converted)</p></div>'
+};
+
+Object.assign(window.MKT_DATA, {
+  'E-bill': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Digital WhatsApp E-Bills</h3><p style="font-size:13px"><b>#INV-8841</b> | Mobile: 9811456721 | &#8377;640 (Delivered)<br><b>#INV-8840</b> | Mobile: 9876543210 | &#8377;1,120 (Delivered)</p></div>',
+  'Feedback': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Customer Feedback (4.7 / 5 Avg)</h3><p style="font-size:13px"><b>Amit Verma (5.0 ?):</b> "Fresh Motichoor Ladoo & fast service!"<br><b>Neha Singh (4.5 ?):</b> "Great Navratan Mixture packing."</p></div>',
+  'Loyalty': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Loyalty Points (1 Pt = &#8377;1)</h3><p style="font-size:13px">5% cashback points credited on every order above &#8377;300. <b>Rahul Sharma:</b> 300 Pts Available.</p></div>',
+  'Referral': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Refer &amp; Earn (&#8377;100 Bonus)</h3><p style="font-size:13px"><b>Referrals Sent:</b> 84 | <b>New Joined:</b> 31 | <b>Referral Revenue:</b> &#8377;18,600</p></div>',
+  'Reputation': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Online Reputation (Zomato 4.4 ? | Swiggy 4.3 ?)</h3><p style="font-size:13px">All Zomato &amp; Swiggy reviews synced and auto-replied.</p></div>',
+  'Conversations': '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Live WhatsApp Chat (66 Unread)</h3><div id="chatBox" style="background:#f8fafc;padding:10px;border-radius:8px;margin-bottom:8px;font-size:13px"><b>Customer (9811456721):</b> Is 2 Kg Kaju Katli gift box available today?</div><div style="display:flex;gap:8px"><input id="chatInp" placeholder="Type reply..." style="margin:0"><button class="btn" onclick="if(chatInp.value){chatBox.innerHTML+=\'<div style=margin-top:6px;color:#0f766e><b>You:</b> \'+chatInp.value+\'</div>\';chatInp.value=\'\';}">Send</button></div></div>'
+});
 function showMktSec(name, el) {
   document.querySelectorAll('.sitem').forEach(x => x.classList.remove('active'));
   el.classList.add('active');
-  secTitle.textContent = name + ' ? Overview & Active Records';
+  mktDynamicBody.innerHTML = window.MKT_DATA[name] || window.MKT_DATA['Dashboard']; if(name==='WhatsApp Campaigns' && typeof renderCamps==='function') mktDynamicBody.innerHTML = window.MKT_DATA['Dashboard']; if(typeof renderCamps==='function') renderCamps();
 }
 function openCampModal() { campModal.style.display = 'flex'; }
 function saveCamp() {
