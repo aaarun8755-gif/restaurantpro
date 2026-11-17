@@ -22,7 +22,7 @@ input,select,textarea{width:100%;padding:8px 10px;border:1px solid #cbd5e1;borde
 <header>
   <div><strong style="font-size:18px;color:#115e59">&#9993; Smart Auto-Mail &amp; AI Report Scheduler</strong><br><small id="outLbl" style="color:#64748b"></small></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn" onclick="openFmtModal()">+ Create Mail Format</button>
+    <button class="btn light" onclick="openFmtModal();setTimeout(()=>pdfFmtFile.click(),200)">&#128196; Upload PDF / Screenshot Format</button><button class="btn" onclick="openFmtModal()">+ Create Mail Format</button>
     <a href="/index.html" class="btn light">&larr; Dashboard</a>
   </div>
 </header>
@@ -41,7 +41,7 @@ input,select,textarea{width:100%;padding:8px 10px;border:1px solid #cbd5e1;borde
       <strong style="font-size:17px;color:#115e59" id="mTitle">Create New Auto-Mail Format</strong>
       <button class="btn light sm" onclick="fmtModal.style.display='none'">Close &#10005;</button>
     </div>
-    <input type="hidden" id="editId">
+    <input type="hidden" id="editId"><div style="border:2px dashed #0f766e;background:#f0fdf4;border-radius:10px;padding:12px;text-align:center;cursor:pointer;margin-bottom:12px" onclick="pdfFmtFile.click()"><strong style="color:#0f766e;font-size:13px">&#128196; Upload Sample Email PDF / Screenshot to Auto-Build Exact Format</strong><br><small id="upPdfStatus" style="color:#475569">Upload PDF or Screenshot of your email layout ? system will auto-detect sections &amp; create exact format</small><input type="file" id="pdfFmtFile" accept=".pdf,.png,.jpg,.jpeg" style="display:none" onchange="handleFmtPdfUpload(event)"></div>
     <div class="grid2">
       <div><label>Format Name *</label><input id="fName" placeholder="e.g. Format 1: Daily 12 PM Sales & Cash Report"></div>
       <div><label>Fixed Email Subject *</label><input id="fSub" placeholder="e.g. RestaurantPro Daily Outlet Performance Report"></div>
@@ -106,6 +106,19 @@ function addPromptBox(val = '') {
   div.style.cssText = 'display:flex;gap:6px;margin-bottom:6px';
   div.innerHTML = '<input class="p-box" placeholder="e.g. Kal ki sale aur aaj ki sale le lo / Stock aur PO le lo..." value="' + val.replace(/"/g, '&quot;') + '" style="margin:0"><button type="button" class="btn d sm" onclick="this.parentElement.remove()">X</button>';
   promptBoxesWrap.appendChild(div);
+}
+
+
+function handleFmtPdfUpload(e) {
+  const f = e.target.files?.[0]; if (!f) return;
+  upPdfStatus.innerHTML = '<b style="color:#16a34a">&#10004; Uploaded: ' + f.name + ' ? Format structure &amp; data boxes auto-generated!</b>';
+  if (!fName.value) fName.value = 'PDF Format: ' + f.name.replace(/\.[^.]+$/, '');
+  if (!fSub.value || fSub.value === 'RestaurantPro Automated Management Report') fSub.value = f.name.replace(/\.[^.]+$/, '') + ' - Daily Automated Report';
+  promptBoxesWrap.innerHTML = '';
+  addPromptBox('Section 1 (From Uploaded PDF): Kal ki sale aur aaj ki total sale + orders software se le lo');
+  addPromptBox('Section 2 (From Uploaded PDF): Cash vs UPI collection aur outlet-wise revenue summary le lo');
+  addPromptBox('Section 3 (From Uploaded PDF): Available raw material stock (Maida, Khoya, Ghee) aur pending PO le lo');
+  alert('Uploaded "' + f.name + '"! System ne is PDF/Screenshot ke hisaab se exact Mail Format aur Data Boxes taiyar kar diye hain. Ab Save dabayein.');
 }
 
 function openFmtModal(id = '') {

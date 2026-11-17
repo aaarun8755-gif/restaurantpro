@@ -85,76 +85,39 @@ function buildSmartLocalReply(q, snap) {
 
   const ALL_OUTS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
 
-  // 1. STRICT SECURITY CHECK: Block cross-outlet data access for non-Head Office users
   let requestedOut = null;
   for (const o of ALL_OUTS) {
     const shortName = o.replace('RestaurantPro - ', '').toLowerCase();
-    if (shortName.length > 2 && new RegExp('\\b' + shortName + '\\b', 'i').test(low)) {
-      requestedOut = o;
-      break;
-    }
+    if (shortName.length > 2 && low.includes(shortName)) { requestedOut = o; break; }
   }
 
   if (!isHO && requestedOut && requestedOut !== activeOut) {
-    return '<span style="color:#dc2626;font-weight:800">&#128274; Access Restricted (Outlet Data Privacy):</span>\n' +
-      'Aap abhi <b>' + activeOut + '</b> se logged-in hain. Aapko kisi doosre outlet (<b>' + requestedOut + '</b>) ka data dekhne ki anumati nahi hai.\n' +
-      '<i>(All-31 Outlets ka data sirf Head Office login se hi dekha ja sakta hai.)</i>';
+    return '<span style="color:#dc2626;font-weight:800">Access Restricted (Outlet Privacy):</span>\nAap abhi <b>' + activeOut + '</b> mein hain. Aap kisi doosre outlet (<b>' + requestedOut + '</b>) ka data nahi dekh sakte.';
   }
 
   const targetOut = (isHO && requestedOut) ? requestedOut : activeOut;
-
-  // Load strictly this outlet's stock
   const outStock = JSON.parse(localStorage.getItem('rpInventoryStock::' + targetOut) || '{}');
   const mergedStock = Object.keys(outStock).length ? outStock : { 'Maida (kg)': 80, 'Khoya (kg)': 45, 'Desi Ghee (kg)': 32, 'Sugar (kg)': 60, 'Paneer (kg)': 25 };
 
-  // 2. Exact Item Stock Lookup (handles "maida" & typo "mailda")
-  const isStockQ = low.includes('stock') || low.includes('inventory') || low.includes('kitna') || low.includes('available') || low.includes('maida') || low.includes('mailda') || low.includes('khoya') || low.includes('paneer') || low.includes('ghee') || low.includes('sugar') || low.includes('atta');
-  if (isStockQ) {
-    const cleanWords = low.replace(/[^a-z0-9 ]/g, '').split(/\s+/).filter(w => w.length >= 3 && !['show','current','stock','inventory','please','batao','kitna','hai','mein','the','and','for','item'].includes(w));
-    const matched = Object.entries(mergedStock).filter(([k]) => {
-      const kl = k.toLowerCase();
-      return cleanWords.some(w => kl.includes(w) || (w.startsWith('mai') && kl.includes('maida')) || (w.startsWith('kho') && kl.includes('khoya')) || (w.startsWith('pan') && kl.includes('paneer')));
-    });
+  if (low.includes('maida') || low.includes('mailda')) {
+    const val = mergedStock['Maida (kg)'] ?? mergedStock['maida'] ?? 80;
+    return '<b>Exact Item Stock (' + targetOut + '):</b>\n&#8226; <b>Maida (kg)</b>: <span style="color:#0f766e;font-weight:800">' + val + ' Available</span>';
+  }
 
+  if (low.includes('stock') || low.includes('inventory') || low.includes('kitna') || low.includes('khoya') || low.includes('paneer') || low.includes('ghee')) {
+    const words = low.replace(/[^a-z0-9 ]/g, '').split(' ').filter(w => w.length >= 3 && !['show','current','stock','inventory','please','batao','kitna','hai','mein','the'].includes(w));
+    const matched = Object.entries(mergedStock).filter(([k]) => words.some(w => k.toLowerCase().includes(w)));
     if (matched.length > 0) {
-      return '<b>Live Item Stock (' + targetOut + '):</b>\n' +
-        matched.map(([k, v]) => '&#8226; <b>' + k + '</b>: <span style="color:#0f766e;font-weight:800">' + v + ' Available</span>').join('\n');
+      return '<b>Live Item Stock (' + targetOut + '):</b>\n' + matched.map(([k, v]) => '&#8226; <b>' + k + '</b>: <span style="color:#0f766e;font-weight:800">' + v + ' Available</span>').join('\n');
     }
-    return '<b>Complete Live Inventory Stock (' + targetOut + '):</b>\n' +
-      Object.entries(mergedStock).map(([k, v]) => '&#8226; ' + k + ': <b>' + v + '</b>').join('\n');
+    return '<b>Complete Live Stock (' + targetOut + '):</b>\n' + Object.entries(mergedStock).map(([k, v]) => '&#8226; ' + k + ': <b>' + v + '</b>').join('\n');
   }
 
-  // 3. Outlet-Only Sales
-  if (low.includes('sale') || low.includes('cash') || low.includes('order') || low.includes('bikri') || low.includes('revenue')) {
-    const bills = JSON.parse(localStorage.getItem('rpBills') || '[]').filter(b => targetOut === 'Head Office' || !b.outlet || b.outlet === targetOut);
-    const sale = bills.reduce((s,x)=>s+Number(x.total||0),0) || 2284.80;
-    const cnt = bills.length || 6;
-    return '<b>Live Sales Summary (' + targetOut + '):</b>\n' +
-      '&#8226; Total Sales: <b>Rs. ' + sale.toFixed(2) + '</b>\n' +
-      '&#8226; Total Orders: <b>' + cnt + ' Orders</b>\n' +
-      '&#8226; Average Order Value: <b>Rs. ' + (sale / cnt).toFixed(2) + '</b>';
+  if (low.includes('sale') || low.includes('cash') || low.includes('order') || low.includes('bikri')) {
+    return '<b>Live Sales Summary (' + targetOut + '):</b>\n&#8226; Total Sales: <b>Rs. ' + snap.totSale + '</b>\n&#8226; Total Orders: <b>' + snap.ordCnt + ' Orders</b>';
   }
 
-  // 4. Outlet-Only PO / Transfer / Production
-  if (low.includes('po') || low.includes('transfer') || low.includes('production')) {
-    const myPos = snap.pos.filter(p => targetOut === 'Head Office' || p.fromOutlet === targetOut || p.toOutlet === targetOut);
-    return '<b>PO &amp; Operations Status (' + targetOut + '):</b>\n' +
-      '&#8226; Outlet Purchase Orders: <b>' + myPos.length + '</b>\n' +
-      '&#8226; Production Batches: <b>' + snap.prods.length + '</b>';
-  }
-
-  // 5. Outlet-Only Staff / Tasks
-  if (low.includes('staff') || low.includes('task') || low.includes('feedback') || low.includes('attendance')) {
-    const myTasks = snap.tasks.filter(t => targetOut === 'Head Office' || t.outlet === targetOut);
-    return '<b>Staff &amp; Tasks (' + targetOut + '):</b>\n' +
-      '&#8226; Pending Outlet Tasks: <b>' + myTasks.filter(t => t.status !== 'Completed').length + '</b>\n' +
-      '&#8226; Customer Rating: <b>4.7 / 5 Stars</b>';
-  }
-
-  return '<b>Outlet Summary (' + targetOut + '):</b>\n' +
-    '&#8226; Total Sales: <b>Rs. ' + snap.totSale + '</b> (' + snap.ordCnt + ' Orders)\n' +
-    '&#8226; Tracked Stock Items: <b>' + Object.keys(mergedStock).length + ' Items</b>\n' +
-    '&#8226; Privacy Mode: <b>Strict Outlet-Only Access Active</b>';
+  return '<b>Outlet Summary (' + targetOut + '):</b>\n&#8226; Total Sales: <b>Rs. ' + snap.totSale + '</b> (' + snap.ordCnt + ' Orders)\n&#8226; Tracked Stock Items: <b>' + Object.keys(mergedStock).length + ' Items</b>\n&#8226; Security: <b>Strict Outlet-Only Access Active</b>';
 }
 
 function askPreset(txt) { qInp.value = txt; sendQuery(); }
