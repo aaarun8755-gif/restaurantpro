@@ -133,4 +133,33 @@ function renderCamps() {
   campList.innerHTML = l.map(c => '<div style="padding:8px 0;border-bottom:1px solid #eef2f0"><b>'+c.date+'</b> ? <span style="color:#0f766e;font-weight:700">'+c.type+'</span>: '+c.msg+' ('+c.reach+')</div>').join('') || '<div>1. <b>Auto E-Bill + Feedback Campaign</b> ? Active (412 Valid Numbers)<br>2. <b>5th Visit Loyalty Reward</b> ? Active (69.2% Retention)</div>';
 }
 renderCamps();
-</script></body></html>
+</script><script id="rpLiveFeedbackLoyaltySync">
+(function(){
+  const fbs = JSON.parse(localStorage.getItem('rpCustFeedbacks') || '[]');
+  const fbTotal = 24 + fbs.length;
+  const avgStar = fbs.length ? (fbs.reduce((s,x)=>s+Number(x.rating||5),0)/fbs.length).toFixed(1) : '4.7';
+  const loyPts = 8420 + (fbs.length * 50);
+  const loyUsers = 185 + fbs.length;
+  document.querySelectorAll('.card').forEach(c => {
+    const t = c.innerText || '';
+    if (t.includes('Feedback Received')) c.innerHTML = '<small>Feedback Received</small><strong>' + fbTotal + '</strong><span style="font-size:11.5px;color:#0f766e">' + avgStar + ' / 5 Avg Rating (Live Synced)</span>';
+    if (t.includes('Loyalty Points')) c.innerHTML = '<small>Loyalty Points &amp; Revenue</small><strong>' + loyUsers + ' Active | &#8377;' + loyPts.toLocaleString('en-IN') + '</strong><span style="font-size:11.5px;color:#0f766e">+50 Pts auto-credited on feedback</span>';
+  });
+  const origShow = window.showMktSec;
+  window.showMktSec = function(name, el) {
+    if (origShow) origShow(name, el);
+    const liveFbs = JSON.parse(localStorage.getItem('rpCustFeedbacks') || '[]');
+    const liveEb = JSON.parse(localStorage.getItem('rpMarketingEbills') || '[]');
+    if (name === 'Feedback' && liveFbs.length) {
+      mktDynamicBody.innerHTML = '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Live Customer Ratings &amp; Feedback (' + fbTotal + ')</h3><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fafc;text-align:left"><th style="padding:9px">Customer</th><th style="padding:9px">Rating</th><th style="padding:9px">Comment</th><th style="padding:9px">Reward</th></tr></thead><tbody>' + liveFbs.map(f => '<tr><td style="padding:9px"><b>' + f.name + '</b> (' + (f.outlet||'Outlet') + ')</td><td style="padding:9px;color:#ea580c;font-weight:700">' + f.rating + '.0 / 5 &#9733;</td><td style="padding:9px">"' + f.note + '" (#' + f.bill + ')</td><td style="padding:9px;color:#0f766e;font-weight:700">+50 Loyalty Pts</td></tr>').join('') + '</tbody></table></div>';
+    }
+    if (name === 'Loyalty' && liveFbs.length) {
+      mktDynamicBody.innerHTML = '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Live Loyalty Members</h3><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fafc;text-align:left"><th style="padding:9px">Customer</th><th style="padding:9px">Bill</th><th style="padding:9px">Points</th><th style="padding:9px">Coupon</th></tr></thead><tbody>' + liveFbs.map(f => '<tr><td style="padding:9px"><b>' + f.name + '</b></td><td style="padding:9px">#' + f.bill + '</td><td style="padding:9px;color:#0f766e;font-weight:700">+50 Pts</td><td style="padding:9px">LOYAL50</td></tr>').join('') + '</tbody></table></div>';
+    }
+    if (name === 'E-bill' && liveEb.length) {
+      mktDynamicBody.innerHTML = '<div style="background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px"><h3 style="margin-top:0;color:#115e59">Live POS WhatsApp PDF E-Bills</h3><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#f8fafc;text-align:left"><th style="padding:9px">Bill</th><th style="padding:9px">Customer</th><th style="padding:9px">Amount</th><th style="padding:9px">Status</th></tr></thead><tbody>' + liveEb.map(b => '<tr><td style="padding:9px"><b>#' + b.billNo + '</b></td><td style="padding:9px">' + b.custName + ' (' + b.phone + ')</td><td style="padding:9px">&#8377;' + b.total + '</td><td style="padding:9px;color:#0f766e;font-weight:700">Sent (' + b.time + ')</td></tr>').join('') + '</tbody></table></div>';
+    }
+  };
+})();
+</script>
+</body></html>
