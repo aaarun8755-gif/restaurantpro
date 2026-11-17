@@ -2143,5 +2143,44 @@ setInterval(() => {
   });
 }, 300);
 </script>
+<script id="rpPosWhatsAppEbill">
+(function(){
+  // POS ke Save / Print / Settle Bill click par Customer Name + Mobile capture karke Paper Print ke saath WhatsApp E-Bill bhejein
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const t = (btn.innerText || '').trim().toLowerCase();
+    if (!(t.includes('settle') || t.includes('print bill') || t.includes('save & print') || t === 'print')) return;
+
+    setTimeout(() => {
+      // POS screen se Customer Name, Phone aur Total nikalein
+      const inputs = Array.from(document.querySelectorAll('input'));
+      const phoneInp = inputs.find(i => (i.placeholder || '').toLowerCase().includes('phone') || (i.placeholder || '').toLowerCase().includes('mobile') || i.type === 'tel');
+      const nameInp = inputs.find(i => (i.placeholder || '').toLowerCase().includes('customer') || (i.placeholder || '').toLowerCase().includes('name'));
+      const phone = (phoneInp?.value || '').replace(/\D/g, '').slice(-10);
+      const custName = (nameInp?.value || 'Valued Guest').trim();
+      const outlet = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+
+      // Recent bill amount from rpBills
+      const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
+      const lastBill = bills || {};
+      const billNo = lastBill.billNo || ('INV-' + Math.floor(1000 + Math.random()*8999));
+      const total = lastBill.total || '0';
+      const itemSummary = (lastBill.items || []).map(i => i.name + ' x' + i.qty).join(', ') || 'Fresh Order';
+
+      if (phone.length === 10) {
+        // Save to Marketing E-Bill & CRM Log
+        const ebills = JSON.parse(localStorage.getItem('rpMarketingEbills') || '[]');
+        ebills.unshift({ billNo, custName, phone, total, outlet, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+        localStorage.setItem('rpMarketingEbills', JSON.stringify(ebills.slice(0, 100)));
+
+        // Open instant WhatsApp E-Bill after paper print dialog
+        const msg = 'Thank you ' + custName + '! Your Digital E-Bill from ' + outlet + ' (RestaurantPro)\nBill No: #' + billNo + '\nItems: ' + itemSummary + '\nTotal Paid: Rs. ' + total + '\nRate your experience: https://onrender.com';
+        window.open('https://wa.me' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+      }
+    }, 500);
+  }, true);
+})();
+</script>
 </body>
 </html>
