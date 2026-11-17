@@ -2036,40 +2036,34 @@ setInterval(() => {
 </script>
 
 
+
 <script id="rpStaffMarketingLayout">
 setInterval(() => {
-  // Find the Staff & Payroll tab bar containing "HR Dashboard" and "Employee Master"
   const hrTab = Array.from(document.querySelectorAll('button, a, div'))
     .find(el => el.children.length === 0 && (el.innerText || '').trim() === 'HR Dashboard' && el.offsetParent !== null);
   if (!hrTab) return;
 
   const tabBar = hrTab.parentElement;
   const mainCard = tabBar?.parentElement;
-  if (!tabBar || !mainCard || mainCard.dataset.mktStyled) return;
+  if (!tabBar || !mainCard || mainCard.dataset.mktExactLook) return;
 
-  mainCard.dataset.mktStyled = '1';
-  mainCard.style.display = 'grid';
-  mainCard.style.gridTemplateColumns = '235px 1fr';
-  mainCard.style.gap = '18px';
-  mainCard.style.alignItems = 'start';
-  mainCard.style.background = 'transparent';
-  mainCard.style.border = '0';
-  mainCard.style.padding = '0';
+  mainCard.dataset.mktExactLook = '1';
 
-  // Transform top tab bar into Marketing-style Left Vertical Sidebar
-  tabBar.style.display = 'flex';
-  tabBar.style.flexDirection = 'column';
-  tabBar.style.gap = '5px';
-  tabBar.style.background = '#ffffff';
-  tabBar.style.border = '1px solid #dbe5e2';
-  tabBar.style.borderRadius = '12px';
-  tabBar.style.padding = '14px';
-  tabBar.style.position = 'sticky';
-  tabBar.style.top = '16px';
+  // Hide old boxy top banner ("RestaurantPro / Staff & Payroll") so it looks clean like Marketing Automation
+  const prevBanner = mainCard.previousElementSibling;
+  if (prevBanner && (prevBanner.innerText || '').includes('Staff & Payroll')) {
+    prevBanner.style.display = 'none';
+  }
+
+  // Full-bleed clean Marketing Automation 2-column layout
+  mainCard.style.cssText = 'display:grid;grid-template-columns:230px 1fr;gap:22px;align-items:start;background:#f4f7f6;border:0;padding:0;margin:0;width:100%';
+
+  // Left Vertical Sidebar matching Marketing Automation
+  tabBar.style.cssText = 'display:flex;flex-direction:column;gap:4px;background:#ffffff;border-right:1px solid #dbe5e2;padding:16px 12px;min-height:86vh;position:sticky;top:0;border-radius:12px';
 
   const sideTitle = document.createElement('div');
   sideTitle.textContent = 'STAFF & PAYROLL';
-  sideTitle.style.cssText = 'font-weight:900;font-size:12.5px;color:#115e59;padding:4px 8px 10px;border-bottom:1px solid #eef2f0;margin-bottom:4px;letter-spacing:.4px';
+  sideTitle.style.cssText = 'font-weight:900;font-size:13px;color:#115e59;padding:4px 10px 12px;border-bottom:1px solid #eef2f0;margin-bottom:6px;letter-spacing:.3px';
   tabBar.insertBefore(sideTitle, tabBar.firstChild);
 
   Array.from(tabBar.querySelectorAll('button, a')).forEach(b => {
@@ -2079,14 +2073,40 @@ setInterval(() => {
     b.style.padding = '9px 12px';
     b.style.borderRadius = '8px';
     b.style.fontSize = '13px';
+    b.style.fontWeight = '600';
+    b.style.border = '0';
   });
 
-  // Wrap right-side panels cleanly in a white Marketing-style card
+  // Add bottom "<- Back to Dashboard" button inside left sidebar just like "<- Back to Billing"
+  const backBtn = document.createElement('button');
+  backBtn.type = 'button';
+  backBtn.innerHTML = '&larr; Back to Dashboard';
+  backBtn.style.cssText = 'margin-top:auto;width:100%;padding:9px 12px;border-radius:8px;border:1px solid #dbe5e2;background:#fff;color:#0f766e;font-weight:700;font-size:12.5px;cursor:pointer;text-align:center';
+  backBtn.onclick = () => {
+    const dashBtn = Array.from(document.querySelectorAll('button, a')).find(x => (x.innerText || '').trim() === 'Dashboard' && !tabBar.contains(x));
+    if (dashBtn) dashBtn.click(); else location.reload();
+  };
+  tabBar.appendChild(backBtn);
+
+  // Clean unboxed right workspace (no outer box wrapper!)
   const rightPanels = Array.from(mainCard.children).filter(ch => ch !== tabBar);
   const rightWrap = document.createElement('div');
-  rightWrap.style.cssText = 'background:#ffffff;border:1px solid #dbe5e2;border-radius:14px;padding:18px;min-width:0;overflow-x:auto';
+  rightWrap.style.cssText = 'padding:6px 4px;min-width:0;overflow-x:auto';
   mainCard.appendChild(rightWrap);
   rightPanels.forEach(p => rightWrap.appendChild(p));
+
+  // Style KPI stat cards with colored top accent borders & bold numbers like Marketing Automation
+  const colors = ['#f59e0b', '#3b82f6', '#10b981', '#f97316', '#ef4444', '#ec4899'];
+  let cIdx = 0;
+  rightWrap.querySelectorAll('div').forEach(card => {
+    if (card.children.length >= 2 && card.children.length <= 4 && card.offsetHeight > 65 && card.offsetHeight < 135 && card.offsetWidth > 130 && card.offsetWidth < 340) {
+      card.style.background = '#ffffff';
+      card.style.border = '1px solid #dbe5e2';
+      card.style.borderTop = '4px solid ' + colors[cIdx++ % colors.length];
+      card.style.borderRadius = '12px';
+      card.style.padding = '14px 16px';
+    }
+  });
 }, 300);
 </script>
 </body>
