@@ -61,25 +61,59 @@ td{border-bottom:1px solid #eef2f0;padding:8px 10px}
 
 <!-- CREATE NEW PO MODAL (SUPPLIER OR OUTLET) -->
 <div class="modal" id="createPoModal">
-  <div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:500px">
-    <h3 style="margin-top:0;color:#115e59">+ Create Purchase Order (Supplier or Outlet)</h3>
+  <div style="background:#fff;border-radius:14px;padding:22px;width:96%;max-width:1180px;max-height:92vh;overflow:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:10px;margin-bottom:14px">
+      <strong style="font-size:18px;color:#115e59">Add Purchase Order (Multi-Item Supplier / Outlet / Kitchen)</strong>
+      <button type="button" class="btn light sm" onclick="createPoModal.style.display='none'">Close &#10005;</button>
+    </div>
     <form id="poForm">
-      <label>PO Raise To *</label>
-      <select id="poTargetType" onchange="toggleTargetType()" style="font-weight:700">
-        <option value="Supplier">Supplier (External Vendor)</option>
-        <option value="Outlet">Outlet (Another RestaurantPro Unit)</option>
-      </select>
-      <div id="supInputWrap" style="margin-top:8px"><label>Supplier / Vendor Name *</label><input id="poSupName" placeholder="e.g. Tamanna Traders / Metro Cash & Carry"></div>
-      <div id="outInputWrap" style="display:none;margin-top:8px"><label>Select Supplier Outlet *</label><select id="poSupplierOutlet"></select></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <div><label>Raw Material Name *</label><input id="poItem" required placeholder="e.g. Maida (kg)"></div>
-        <div><label>Quantity *</label><input id="poQty" type="number" step="0.01" required placeholder="50"></div>
-        <div><label>Rate per Unit (&#8377;) *</label><input id="poRate" type="number" step="0.01" required placeholder="45"></div>
-        <div><label>GST %</label><select id="poGst"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option></select></div>
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:#f8fafc;padding:10px 14px;border-radius:10px;margin-bottom:14px">
+        <strong style="font-size:13px">Raise PO To:</strong>
+        <label style="display:inline-flex;align-items:center;gap:5px;margin:0;cursor:pointer"><input type="radio" name="poMode" value="Supplier" checked onchange="onPoModeChange()" style="width:auto"> Supplier</label>
+        <label style="display:inline-flex;align-items:center;gap:5px;margin:0;cursor:pointer"><input type="radio" name="poMode" value="Outlet" onchange="onPoModeChange()" style="width:auto"> Restaurant / Outlet</label>
+        <label style="display:inline-flex;align-items:center;gap:5px;margin:0;cursor:pointer"><input type="radio" name="poMode" value="Kitchen" onchange="onPoModeChange()" style="width:auto"> Central Kitchen</label>
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:14px">
+        <div>
+          <label id="targetLabel">Select Supplier (Auto-Loaded) *</label>
+          <select id="poTargetSelect" onchange="if(this.value==='__NEW__'){const n=prompt('Enter New Supplier Name:');if(n){const o=document.createElement('option');o.value=n;o.textContent=n;this.insertBefore(o,this.lastChild);this.value=n;}else{this.selectedIndex=0;}}"></select>
+        </div>
+        <div><label>Delivery Date *</label><input type="date" id="poDelDate" required></div>
+        <div><label>Delivery Time</label><input type="time" id="poDelTime" value="10:00"></div>
+        <div><label>PO Number</label><input id="poAutoNo" readonly style="background:#f1f5f9;font-weight:700"></div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="font-size:13px;color:#0f766e">Order Items List</strong>
+        <button type="button" class="btn sm" onclick="addPoItemRow()">+ Add New Row</button>
+      </div>
+
+      <div style="overflow-x:auto">
+        <table style="min-width:920px">
+          <thead><tr><th>#</th><th style="width:24%">Raw Material *</th><th>Qty *</th><th>Unit *</th><th>Price (&#8377;) *</th><th>Amount (&#8377;)</th><th>CGST %</th><th>SGST %</th><th>IGST %</th><th>Del</th></tr></thead>
+          <tbody id="poItemsRows"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-top:16px;padding-top:14px;border-top:1px solid #e2e8f0">
+        <div>
+          <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">
+            <input type="checkbox" id="poCanEdit" checked style="width:auto"> Recipient can edit the invoice
+          </label>
+        </div>
+        <div style="min-width:290px;background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #cbd5e1;font-size:13px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Sub Total:</span><b id="poSubTot">&#8377;0.00</b></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span>+ Delivery Charges (&#8377;):</span><input type="number" id="poDelChg" value="0" oninput="recalcBigPo()" style="width:90px;padding:4px 6px;text-align:right"></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Total Tax (CGST+SGST+IGST):</span><b id="poTaxTot">&#8377;0.00</b></div>
+          <hr style="border:0;border-top:1px solid #cbd5e1;margin:6px 0">
+          <div style="display:flex;justify-content:space-between;font-size:16px;color:#0f766e"><strong>Grand Total:</strong><strong id="poGrandTot">&#8377;0.00</strong></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
         <button type="button" class="btn light" onclick="createPoModal.style.display='none'">Cancel</button>
-        <button class="btn">Generate PO &rarr;</button>
+        <button class="btn teal" style="padding:10px 20px;font-size:13.5px">Save &amp; Generate PO &rarr;</button>
       </div>
     </form>
   </div>
@@ -110,7 +144,75 @@ curOutLbl.textContent = 'Active Unit: ' + curOut;
 poSupplierOutlet.innerHTML = OUTLETS.filter(o => o !== curOut).map(o => '<option value="' + o + '">' + o + '</option>').join('');
 
 function toggleTargetType() { const isSup = poTargetType.value === 'Supplier'; supInputWrap.style.display = isSup ? 'block' : 'none'; outInputWrap.style.display = isSup ? 'none' : 'block'; }
-function openCreateModal() { createPoModal.style.display = 'flex'; }
+
+function getAllSavedSuppliers() {
+  const base = ['Tamanna Traders', 'Aarvi Horeca Solutions', 'Brij Mohan Dairy', 'Ajay Kumar Vijay Kumar', 'Metro Cash & Carry'];
+  const fromAuto = JSON.parse(localStorage.getItem('rpAutoPurchases') || '[]').map(x => x.vendor).filter(Boolean);
+  const fromVp = JSON.parse(localStorage.getItem('rpVendorPayments') || '[]').map(x => x.vendor).filter(Boolean);
+  const fromPos = getPOs().filter(x => x.poType === 'Supplier').map(x => x.toOutlet).filter(Boolean);
+  return [...new Set([...base, ...fromAuto, ...fromVp, ...fromPos])];
+}
+
+function onPoModeChange() {
+  const mode = document.querySelector('input[name="poMode"]:checked')?.value || 'Supplier';
+  if (mode === 'Supplier') {
+    targetLabel.textContent = 'Select Supplier (Auto-Loaded) *';
+    const sups = getAllSavedSuppliers();
+    poTargetSelect.innerHTML = sups.map(s => '<option value="' + s + '">' + s + '</option>').join('') + '<option value="__NEW__">+ Add New Supplier...</option>';
+  } else if (mode === 'Outlet') {
+    targetLabel.textContent = 'Select Restaurant / Outlet *';
+    poTargetSelect.innerHTML = OUTLETS.filter(o => o !== curOut).map(o => '<option value="' + o + '">' + o + '</option>').join('');
+  } else {
+    targetLabel.textContent = 'Select Central Kitchen *';
+    poTargetSelect.innerHTML = '<option value="Central Sweets & Namkeen Kitchen">Central Sweets &amp; Namkeen Kitchen</option><option value="Main Outlet">Main Outlet Kitchen</option>';
+  }
+}
+
+function addPoItemRow(mat='', qty='', unit='KG', price='') {
+  const tr = document.createElement('tr');
+  tr.className = 'po-item-row';
+  const idx = document.querySelectorAll('.po-item-row').length + 1;
+  tr.innerHTML = '<td class="r-idx">' + idx + '</td>' +
+    '<td><input class="r-mat" required placeholder="Select / Type Raw Material" value="' + mat + '"></td>' +
+    '<td><input class="r-qty" type="number" step="0.01" required placeholder="0" value="' + qty + '" oninput="recalcBigPo()"></td>' +
+    '<td><select class="r-unit"><option '+(unit==='KG'?'selected':'')+'>KG</option><option '+(unit==='Piece'?'selected':'')+'>Piece</option><option '+(unit==='Litre'?'selected':'')+'>Litre</option><option '+(unit==='Box'?'selected':'')+'>Box</option></select></td>' +
+    '<td><input class="r-price" type="number" step="0.01" required placeholder="0.00" value="' + price + '" oninput="recalcBigPo()"></td>' +
+    '<td><input class="r-amt" readonly style="background:#f8fafc;font-weight:700" value="0.00"></td>' +
+    '<td><input class="r-cgst" type="number" step="0.1" value="0" oninput="recalcBigPo()" style="width:65px"></td>' +
+    '<td><input class="r-sgst" type="number" step="0.1" value="0" oninput="recalcBigPo()" style="width:65px"></td>' +
+    '<td><input class="r-igst" type="number" step="0.1" value="0" oninput="recalcBigPo()" style="width:65px"></td>' +
+    '<td><button type="button" class="btn light sm" style="color:#dc2626" onclick="this.closest(\'tr\').remove();recalcBigPo()">X</button></td>';
+  poItemsRows.appendChild(tr);
+  recalcBigPo();
+}
+
+function recalcBigPo() {
+  let sub = 0, tax = 0;
+  document.querySelectorAll('.po-item-row').forEach((tr, i) => {
+    tr.querySelector('.r-idx').textContent = i + 1;
+    const q = Number(tr.querySelector('.r-qty').value || 0);
+    const p = Number(tr.querySelector('.r-price').value || 0);
+    const amt = +(q * p).toFixed(2);
+    tr.querySelector('.r-amt').value = amt.toFixed(2);
+    const gPct = Number(tr.querySelector('.r-cgst').value || 0) + Number(tr.querySelector('.r-sgst').value || 0) + Number(tr.querySelector('.r-igst').value || 0);
+    sub += amt;
+    tax += +(amt * gPct / 100).toFixed(2);
+  });
+  const del = Number(poDelChg?.value || 0);
+  poSubTot.textContent = 'Rs. ' + sub.toFixed(2);
+  poTaxTot.textContent = 'Rs. ' + tax.toFixed(2);
+  poGrandTot.textContent = 'Rs. ' + (sub + tax + del).toFixed(2);
+}
+
+function openCreateModal() {
+  onPoModeChange();
+  poDelDate.value = new Date().toISOString().slice(0,10);
+  poAutoNo.value = 'PO00' + Math.floor(1000000 + Math.random()*8999999);
+  poItemsRows.innerHTML = '';
+  addPoItemRow(); addPoItemRow(); addPoItemRow();
+  createPoModal.style.display = 'flex';
+}
+
 function openProjModal() { renderProj(); projModal.style.display = 'flex'; }
 function getPOs() { return JSON.parse(localStorage.getItem('rpOutletPOs') || '[]'); }
 function savePOs(l) { localStorage.setItem('rpOutletPOs', JSON.stringify(l)); }
@@ -125,14 +227,46 @@ function adjustStock(outName, item, delta) {
 
 poForm.onsubmit = e => {
   e.preventDefault();
-  const isSup = poTargetType.value === 'Supplier';
-  const targetName = isSup ? (poSupName.value.trim() || 'Approved Supplier') : poSupplierOutlet.value;
-  const q = Number(poQty.value), r = Number(poRate.value), g = Number(poGst.value || 0);
-  const sub = q * r, gstAmt = +(sub * g / 100).toFixed(2);
+  const mode = document.querySelector('input[name="poMode"]:checked')?.value || 'Supplier';
+  const targetName = poTargetSelect.value;
+  const rows = Array.from(document.querySelectorAll('.po-item-row')).map(tr => ({
+    mat: tr.querySelector('.r-mat').value.trim(),
+    qty: Number(tr.querySelector('.r-qty').value || 0),
+    unit: tr.querySelector('.r-unit').value,
+    price: Number(tr.querySelector('.r-price').value || 0),
+    amt: Number(tr.querySelector('.r-amt').value || 0)
+  })).filter(x => x.mat && x.qty > 0);
+  if (!rows.length) return alert('Kam se kam 1 Raw Material aur Quantity bharein.');
+
+  const sub = rows.reduce((s,x)=>s+x.amt,0);
+  const del = Number(poDelChg.value || 0);
+  const grand = Number(poGrandTot.textContent.replace(/[^0-9.]/g,'')) || (sub + del);
+  const tax = +(grand - sub - del).toFixed(2);
+  const summaryItem = rows.length === 1 ? rows.mat : (rows.mat + ' + ' + (rows.length-1) + ' more items');
+  const totalQty = rows.reduce((s,x)=>s+x.qty,0);
+
   const list = getPOs();
-  list.unshift({ id: 'PO00' + Math.floor(100000 + Math.random()*899999), date: new Date().toISOString().slice(0,10), poType: isSup ? 'Supplier' : 'Outlet', fromOutlet: isHO ? 'Main Outlet' : curOut, toOutlet: targetName, item: poItem.value.trim(), reqQty: q, finalQty: q, rate: r, gstAmt, total: +(sub + gstAmt).toFixed(2), createdBy: 'Unit Manager (' + curOut + ')', status: isSup ? 'PO Sent to Supplier' : 'Pending Supply' });
-  savePOs(list); createPoModal.style.display = 'none'; poSupName.value=''; poItem.value=''; poQty.value=''; poRate.value=''; renderAll();
-  alert('PO Generated for ' + targetName + '!');
+  list.unshift({
+    id: poAutoNo.value,
+    date: poDelDate.value || new Date().toISOString().slice(0,10),
+    poType: mode,
+    fromOutlet: isHO ? 'Main Outlet' : curOut,
+    toOutlet: targetName,
+    item: summaryItem,
+    itemsList: rows,
+    reqQty: totalQty,
+    finalQty: totalQty,
+    rate: rows.price,
+    gstAmt: tax,
+    total: +grand.toFixed(2),
+    canEdit: poCanEdit.checked,
+    createdBy: 'Unit Manager (' + curOut + ')',
+    status: mode === 'Supplier' ? 'PO Sent to Supplier' : 'Pending Supply'
+  });
+  savePOs(list);
+  createPoModal.style.display = 'none';
+  renderAll();
+  alert('Multi-Item PO (' + poAutoNo.value + ') Generated for ' + targetName + '!');
 };
 
 function receiveSupplierPO(id) {
