@@ -1992,20 +1992,35 @@ setInterval(() => {
 
 
 
+
 <script id="rpMarketingAndFoodCostHook">
 setInterval(() => {
-  // Sirf asli <button> ya <a> par hi lagayein, kisi outer <div> par nahi
+  // 1. Sidebar button par capture-phase click lagayein
   document.querySelectorAll('aside button, aside a, nav button, nav a').forEach(btn => {
-    if ((btn.innerText || '').trim() === 'Marketing Management' && !btn.dataset.mktExact) {
+    if ((btn.innerText || '').trim().includes('Marketing Management') && !btn.dataset.mktExact) {
       btn.dataset.mktExact = '1';
-      btn.onclick = function(e) {
+      btn.addEventListener('click', function(e) {
         e.preventDefault();
-        e.stopPropagation();
+        e.stopImmediatePropagation();
         window.location.href = '/marketing.html';
-      };
+      }, true);
     }
   });
 
+  // 2. Agar purana Marketing section khule bhi, to wahan seedha Marketing Dashboard button dikhayein
+  if (!document.getElementById('rpMktDirectBtn')) {
+    const mktHead = Array.from(document.querySelectorAll('h1,h2,h3')).find(x => (x.innerText || '').trim().includes('Marketing'));
+    if (mktHead && mktHead.parentNode) {
+      const mb = document.createElement('button');
+      mb.id = 'rpMktDirectBtn'; mb.type = 'button';
+      mb.textContent = 'Open Marketing Automation Dashboard (Petpooja View) ->';
+      mb.style.cssText = 'background:#0f766e;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;margin:8px 0';
+      mb.onclick = () => { window.location.href = '/marketing.html'; };
+      mktHead.parentNode.insertBefore(mb, mktHead.nextSibling);
+    }
+  }
+
+  // 3. Reports section mein Food Costing Report button
   if (!document.getElementById('rpFoodCostQuickBtn')) {
     const repTitle = Array.from(document.querySelectorAll('h1,h2,h3')).find(x => (x.innerText || '').trim() === 'Reports');
     if (repTitle && repTitle.parentNode) {
@@ -2017,7 +2032,7 @@ setInterval(() => {
       repTitle.parentNode.insertBefore(b, repTitle.nextSibling);
     }
   }
-}, 400);
+}, 300);
 </script>
 </body>
 </html>
