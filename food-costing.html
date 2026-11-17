@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Food Costing Report</title>
+<style>
+:root{--bg:#f4f7f6;--ink:#1e293b;--line:#dbe5e2;--teal:#0f766e;--blue:#2563eb}
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.wrap{max-width:1440px;margin:auto;padding:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
+label{font-size:11.5px;font-weight:700;color:#475569;display:block;margin-bottom:3px}
+input,select{padding:7px 10px;border:1px solid #cbd5e1;border-radius:7px;font-size:12.5px;width:100%}
+.btn{border:0;border-radius:7px;padding:8px 14px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12px}
+.btn.light{background:#fff;color:#1e293b;border:1px solid #cbd5e1}
+table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+th{background:#f8fafc;color:#334155;padding:10px;text-align:left;border-bottom:2px solid var(--line)}
+td{border-bottom:1px solid #eef2f0;padding:9px 10px}
+.pos{color:#0f766e;font-weight:700}.neg{color:#dc2626;font-weight:700}
+</style></head>
+<body>
+<header>
+  <div><strong style="font-size:18px;color:#115e59">Food Costing Report</strong> | <small id="outLbl" style="color:#64748b"></small></div>
+  <div style="display:flex;gap:8px"><button class="btn light" onclick="exportFcExcel()">Export Excel</button><button class="btn light" onclick="window.print()">Print PDF</button><a href="/index.html" class="btn light">&larr; Dashboard</a></div>
+</header>
+<div class="wrap">
+  <div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end">
+    <div><label>Menu Item</label><input id="fcItem" placeholder="Search Item..." oninput="renderFc()"></div>
+    <div><label>Category</label><select id="fcCat" onchange="renderFc()"><option value="ALL">All Categories</option><option>Chinese</option><option>Main Course</option><option>Snacks</option><option>Sweets</option></select></div>
+    <div><label>Order Type</label><select id="fcType" onchange="renderFc()"><option value="ALL">All</option><option>Dine In</option><option>Delivery</option><option>Takeaway</option></select></div>
+    <div><label>From Date</label><input type="date" id="fcFrom" onchange="renderFc()"></div>
+    <div><label>To Date</label><input type="date" id="fcTo" onchange="renderFc()"></div>
+    <div style="display:flex;gap:6px"><button class="btn" onclick="renderFc()">Search</button><button class="btn light" onclick="fcItem.value='';fcCat.value='ALL';fcType.value='ALL';renderFc()">Clear</button></div>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>Item</th><th>Selling Quantity</th><th>Selling Addon Qty</th><th>Selling Price &#8377;</th><th>Selling Amount &#8377;</th><th>Purchase Price &#8377;</th><th>Purchase Amount &#8377;</th><th>Gross Margin %</th><th>Food Cost %</th></tr></thead>
+      <tbody id="fcBody"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+outLbl.textContent = curOut;
+const BASE_FC = [
+  { item: 'Chilly Paneer (Half Plate)', cat: 'Chinese', type: 'Dine In', qty: 17, addon: 0, sellPrice: 149.66, purPrice: 49.948 },
+  { item: 'Chilly Garlic Noodles (250gms)', cat: 'Chinese', type: 'Delivery', qty: 2, addon: 0, sellPrice: 110.00, purPrice: 13.960 },
+  { item: 'Paneer Tikka', cat: 'Main Course', type: 'Dine In', qty: 1, addon: 0, sellPrice: 199.00, purPrice: 40.24 },
+  { item: 'Samosa (Aloo)', cat: 'Snacks', type: 'Takeaway', qty: 12, addon: 0, sellPrice: 29.33, purPrice: 10.944 },
+  { item: 'Desi Ghee Gulab Jamun (2 Pc)', cat: 'Sweets', type: 'Dine In', qty: 28, addon: 0, sellPrice: 70.00, purPrice: 18.50 }
+];
+function renderFc() {
+  const q = (fcItem.value || '').toLowerCase(), cat = fcCat.value, tp = fcType.value;
+  const rows = BASE_FC.filter(r => (!q || r.item.toLowerCase().includes(q)) && (cat === 'ALL' || r.cat === cat) && (tp === 'ALL' || r.type === tp));
+  fcBody.innerHTML = rows.map(r => {
+    const sellAmt = +(r.qty * r.sellPrice).toFixed(2);
+    const purAmt = +(r.qty * r.purPrice).toFixed(3);
+    const gm = sellAmt > 0 ? (((sellAmt - purAmt) / sellAmt) * 100).toFixed(3) : 0;
+    const fc = sellAmt > 0 ? ((purAmt / sellAmt) * 100).toFixed(3) : 0;
+    return '<tr><td><b>'+r.item+'</b></td><td>'+r.qty+'</td><td>'+r.addon+'</td><td>'+r.sellPrice.toFixed(2)+'</td><td><b>'+sellAmt.toFixed(2)+'</b></td><td>'+r.purPrice.toFixed(3)+'</td><td>'+purAmt.toFixed(3)+'</td><td class="'+(gm>=0?'pos':'neg')+'">'+gm+'</td><td><b>'+fc+'</b></td></tr>';
+  }).join('') || '<tr><td colspan="9">No records found.</td></tr>';
+}
+function exportFcExcel(){ const rows=[['Item','Sell Qty','Addon','Sell Price','Sell Amt','Purchase Price','Purchase Amt','Gross Margin %','Food Cost %'],...BASE_FC.map(r=>{const sa=r.qty*r.sellPrice,pa=r.qty*r.purPrice;return [r.item,r.qty,r.addon,r.sellPrice,sa.toFixed(2),r.purPrice,pa.toFixed(2),(((sa-pa)/sa)*100).toFixed(2),((pa/sa)*100).toFixed(2)];})]; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'})); a.download='Food_Costing_Report.csv'; a.click(); }
+renderFc();
+</script></body></html>

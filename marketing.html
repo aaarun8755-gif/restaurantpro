@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Marketing Automation Dashboard</title>
+<style>
+:root{--bg:#f4f7f6;--ink:#1e293b;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59}
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+.side{width:230px;background:#fff;border-right:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:4px}
+.sitem{padding:9px 12px;border-radius:8px;font-size:13px;font-weight:600;color:#475569;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.sitem.active,.sitem:hover{background:#eef6f4;color:#0f766e}
+.badge-new{background:#dbeafe;color:#1d4ed8;font-size:10px;padding:2px 6px;border-radius:6px;font-weight:700}
+.main{flex:1;padding:20px;max-width:1280px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:14px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-bottom:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+.card small{color:#64748b;font-weight:700;font-size:12px;display:block}
+.card strong{font-size:24px;display:block;margin:8px 0 4px}
+.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12.5px}
+.btn.light{background:#fff;color:#0f766e;border:1px solid var(--line)}
+input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;margin:4px 0 10px}
+@media(max-width:850px){body{flex-direction:column}.side{width:100%;flex-direction:row;overflow-x:auto}}
+</style></head>
+<body>
+<aside class="side">
+  <div style="font-weight:900;color:#115e59;padding:6px 10px 12px;border-bottom:1px solid #eef2f0">MARKETING AUTOMATION</div>
+  <div class="sitem active" onclick="showMktSec('Dashboard',this)">Dashboard</div>
+  <div class="sitem" onclick="showMktSec('Advertisements',this)">Advertisements</div>
+  <div class="sitem" onclick="showMktSec('Customers',this)">Customers</div>
+  <div class="sitem" onclick="showMktSec('WhatsApp Campaigns',this)">WhatsApp Campaigns</div>
+  <div class="sitem" onclick="showMktSec('TRM Campaigns',this)">TRM Campaigns</div>
+  <div class="sitem" onclick="showMktSec('E-bill',this)">E-bill</div>
+  <div class="sitem" onclick="showMktSec('Feedback',this)">Feedback</div>
+  <div class="sitem" onclick="showMktSec('Loyalty',this)">Loyalty <span class="badge-new">New</span></div>
+  <div class="sitem" onclick="showMktSec('Referral',this)">Referral <span class="badge-new">New</span></div>
+  <div class="sitem" onclick="showMktSec('Reputation',this)">Reputation</div>
+  <div class="sitem" onclick="showMktSec('Conversations',this)">Conversations <span class="badge-new">66</span></div>
+  <a href="/index.html" class="btn light" style="margin-top:auto;text-align:center">&larr; Back to Billing</a>
+</aside>
+<div class="main">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+    <div><h2 style="margin:0;color:#115e59" id="mktGreeting">Good Afternoon, Here's How You're Doing Today</h2><small style="color:#64748b" id="outSub"></small></div>
+    <button class="btn" onclick="openCampModal()">+ Launch WhatsApp / SMS Campaign</button>
+  </div>
+
+  <!-- TOP 3 KPI CARDS -->
+  <div class="grid3">
+    <div class="card" style="border-top:4px solid #f59e0b"><small>Advertisement ROI</small><strong id="mRoi">142.5%</strong><span style="font-size:11.5px;color:#0f766e">+18% incremental revenue</span></div>
+    <div class="card" style="border-top:4px solid #3b82f6"><small>Customer Visits (Today)</small><strong id="mVisits">48</strong><span style="font-size:11.5px;color:#64748b">vs 39 customer visits yesterday</span></div>
+    <div class="card" style="border-top:4px solid #10b981"><small>Est. WhatsApp Revenue</small><strong id="mWaRev">&#8377;14,850</strong><span style="font-size:11.5px;color:#0f766e">32 visits converted via WhatsApp</span></div>
+  </div>
+
+  <!-- MIDDLE 3 KPI CARDS -->
+  <div class="grid3">
+    <div class="card" style="border-top:4px solid #f97316"><small>Feedback Received</small><strong>24</strong><span style="font-size:11.5px;color:#64748b">4.7 / 5 Avg Rating</span></div>
+    <div class="card" style="border-top:4px solid #ef4444"><small>Reputation (Online Ratings)</small><strong>4.4 Zomato &nbsp;|&nbsp; 4.3 Swiggy</strong><span style="font-size:11.5px;color:#64748b">Live aggregator review score</span></div>
+    <div class="card" style="border-top:4px solid #ec4899"><small>Loyalty Points &amp; Revenue</small><strong>185 Active &nbsp;|&nbsp; &#8377;8,420</strong><span style="font-size:11.5px;color:#0f766e">Repeat loyalty redemptions</span></div>
+  </div>
+
+  <!-- BOTTOM 4 METRICS -->
+  <div class="grid4">
+    <div class="card"><small>Valid Numbers (Last 30 days)</small><strong style="color:#0f766e">68.40% (412)</strong><span style="font-size:11px;color:#64748b">Valid mobile numbers captured</span></div>
+    <div class="card"><small>Top Dishes by Sales (30 days)</small><strong style="font-size:16px">1. Kaju Katli<br>2. Masala Dosa</strong></div>
+    <div class="card"><small>Customer Growth (Last 30 days)</small><strong style="font-size:16px;color:#2563eb">New: 33.3% | Returning: 66.7%</strong></div>
+    <div class="card"><small>5th Visit Rate (Last 12 Months)</small><strong style="color:#0f766e">69.2%</strong><span style="font-size:11px;color:#64748b">Customers making 5th repeat visit</span></div>
+  </div>
+
+  <!-- CAMPAIGN LAUNCHER & LOGS -->
+  <div class="card">
+    <h3 style="margin-top:0" id="secTitle">Active Marketing &amp; WhatsApp Campaigns</h3>
+    <div id="campList" style="font-size:13px;color:#334155"></div>
+  </div>
+</div>
+
+<div id="campModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:440px">
+    <h3 style="margin-top:0;color:#115e59">Launch New Campaign</h3>
+    <label>Campaign Channel</label><select id="cType"><option>WhatsApp Festive Offer</option><option>SMS Loyalty Coupon</option><option>E-Bill Feedback Link</option></select>
+    <label>Offer Message</label><input id="cMsg" placeholder="Flat 15% Off on Sweets & Namkeen!">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+      <button class="btn light" onclick="campModal.style.display='none'">Cancel</button>
+      <button class="btn" onclick="saveCamp()">Send Campaign &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+outSub.textContent = 'Outlet: ' + curOut + ' | Quick snapshot of your customer marketing performance';
+function showMktSec(name, el) {
+  document.querySelectorAll('.sitem').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  secTitle.textContent = name + ' ? Overview & Active Records';
+}
+function openCampModal() { campModal.style.display = 'flex'; }
+function saveCamp() {
+  const l = JSON.parse(localStorage.getItem('rpMktCamps') || '[]');
+  l.unshift({ date: new Date().toLocaleDateString('en-GB'), type: cType.value, msg: cMsg.value || 'Special Festival Offer', reach: '412 Customers' });
+  localStorage.setItem('rpMktCamps', JSON.stringify(l));
+  campModal.style.display = 'none'; renderCamps();
+}
+function renderCamps() {
+  const l = JSON.parse(localStorage.getItem('rpMktCamps') || '[]');
+  campList.innerHTML = l.map(c => '<div style="padding:8px 0;border-bottom:1px solid #eef2f0"><b>'+c.date+'</b> ? <span style="color:#0f766e;font-weight:700">'+c.type+'</span>: '+c.msg+' ('+c.reach+')</div>').join('') || '<div>1. <b>Auto E-Bill + Feedback Campaign</b> ? Active (412 Valid Numbers)<br>2. <b>5th Visit Loyalty Reward</b> ? Active (69.2% Retention)</div>';
+}
+renderCamps();
+</script></body></html>

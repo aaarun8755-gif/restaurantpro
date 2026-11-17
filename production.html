@@ -65,7 +65,7 @@ th,td{border-bottom:1px solid #eef2f0;padding:8px 10px;text-align:left}
   <div id="viewExecution" style="display:none">
     <div class="grid2">
       <div class="card">
-        <h3 style="margin-top:0">Select Production Process &amp; Enter Quantity</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap"><h3 style="margin:0">Select Production Process &amp; Enter Quantity</h3><input id="execSearch" placeholder="Search process..." oninput="filterExecRows()" style="width:190px;margin:0"></div>
         <table><thead><tr><th>Production Name</th><th>Enter Qty</th><th>Unit</th><th>Select</th></tr></thead><tbody id="execListBody"></tbody></table>
       </div>
       <div class="card" style="background:#f8fafc">
@@ -318,5 +318,6 @@ function exportProdExcel() {
   const rows = [['Time','Outlet','Item','Added','Raw Deducted'], ...JSON.parse(localStorage.getItem('rpProdLogs')||'[]').map(l=>[l.time,l.outlet,l.item,l.added,'"'+l.rawUsed+'"'])];
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = 'Production_Report.csv'; a.click();
 }
+function filterExecRows(){ const q=(execSearch.value||"").toLowerCase(); document.querySelectorAll("#execListBody tr").forEach(tr=>{ tr.style.display=tr.innerText.toLowerCase().includes(q)?"":"none"; }); }
 setTab(p.get('tab') || 'master');
 </script></body></html>
