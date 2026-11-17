@@ -2200,5 +2200,20 @@ setInterval(() => {
   }, true);
 })();
 </script>
+<script id="rpTaskHubHook">
+setInterval(() => {
+  document.querySelectorAll('aside button, aside a, nav button, nav a').forEach(btn => {
+    const t = (btn.innerText || '').trim();
+    if (t.includes('Task Management') && !btn.dataset.taskBound) {
+      btn.dataset.taskBound = '1';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/tasks-hub.html';
+      }, true);
+    }
+  });
+}, 350);
+</script>
 </body>
 </html>

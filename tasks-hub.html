@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Tasks, Projects, Forms &amp; Checklists</title>
+<style>
+:root{--bg:#f4f7f6;--ink:#1e293b;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59}
+*{box-sizing:border-box;font-family:Cambria,Georgia,serif}
+body{margin:0;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+.side{width:230px;background:#fff;border-right:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:4px}
+.sitem{padding:9px 12px;border-radius:8px;font-size:14.5px;font-weight:700;color:#475569;cursor:pointer}
+.sitem.active,.sitem:hover{background:#eef6f4;color:#0f766e}
+.main{flex:1;padding:20px;max-width:1360px;overflow-x:auto}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.kcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.kcard small{color:#64748b;font-weight:700;font-size:12px;display:block}
+.kcard strong{font-size:24px;display:block;margin-top:4px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+label{font-size:12px;font-weight:700;display:block;margin-bottom:3px}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px;margin-bottom:8px}
+.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}
+.btn.light{background:#fff;color:#0f766e;border:1px solid var(--line)}.btn.sm{padding:4px 9px;font-size:11.5px}
+table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+th{background:#f8fafc;padding:9px;text-align:left;border-bottom:2px solid var(--line)}
+td{border-bottom:1px solid #eef2f0;padding:8px 9px}
+.badge{padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
+.badge.ong{background:#dbeafe;color:#1d4ed8}.badge.sch{background:#fef3c7;color:#b45309}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:center;justify-content:center}
+@media(max-width:850px){body{flex-direction:column}.side{width:100%;flex-direction:row;overflow-x:auto}}
+</style></head>
+<body>
+<aside class="side">
+  <div style="font-weight:900;color:#115e59;padding:6px 10px 12px;border-bottom:1px solid #eef2f0">TASKS &amp; PROJECTS</div>
+  <div class="sitem active" onclick="showTab('tHome',this)">Home</div>
+  <div class="sitem" onclick="showTab('tProj',this)">Project</div>
+  <div class="sitem" onclick="showTab('tTasks',this)">Tasks</div>
+  <div class="sitem" onclick="showTab('tTemp',this)">Browse Templates</div>
+  <div class="sitem" onclick="showTab('tIssues',this)">Issues</div>
+  <div class="sitem" onclick="showTab('tForms',this)">Forms (Builder)</div>
+  <div class="sitem" onclick="showTab('tRep',this)">Reports</div>
+  <div class="sitem" onclick="showTab('tUsers',this)">User Management</div>
+  <a href="/index.html" class="btn light" style="margin-top:auto;text-align:center">&larr; Dashboard</a>
+</aside>
+<div class="main">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+    <div><h2 style="margin:0;color:#115e59">Task, Audit &amp; Operations Hub</h2><small id="outSub" style="color:#64748b"></small></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn light" onclick="openProjModal()">+ Create Project</button>
+      <button class="btn" onclick="openTaskModal()">+ Create Task</button>
+      <button class="btn light" onclick="exportTasksExcel()">Export Excel</button>
+    </div>
+  </div>
+
+  <!-- 1. HOME DASHBOARD (PHOTO 7 & 8) -->
+  <div id="tHome" class="tsec">
+    <div class="kgrid">
+      <div class="kcard" style="border-top:4px solid #0f766e"><small>TOTAL TASKS</small><strong id="kAllT">0</strong></div>
+      <div class="kcard" style="border-top:4px solid #2563eb"><small>ONGOING / SCHEDULED</small><strong id="kOngT" style="color:#2563eb">0</strong></div>
+      <div class="kcard" style="border-top:4px solid #16a34a"><small>COMPLETED TASKS</small><strong id="kCompT" style="color:#16a34a">0</strong></div>
+      <div class="kcard" style="border-top:4px solid #dc2626"><small>OPEN ISSUES / BACKLOG</small><strong id="kIssT" style="color:#dc2626">0</strong></div>
+    </div>
+    <div class="card"><h3 style="margin-top:0">Work Allocated &amp; Employee-wise Progress</h3>
+      <table><thead><tr><th>Employee Name</th><th>Outlet / Team</th><th>Assigned</th><th>Ongoing</th><th>Completed</th><th>Points Earned</th></tr></thead><tbody id="empProgBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 2. PROJECTS (PHOTO 4, 5 & 6) -->
+  <div id="tProj" class="tsec" style="display:none">
+    <div class="grid3" id="projGrid"></div>
+  </div>
+
+  <!-- 3. TASKS LIST -->
+  <div id="tTasks" class="tsec" style="display:none">
+    <div class="card"><h3 style="margin-top:0">All Outlet Tasks &amp; Checklists</h3>
+      <table><thead><tr><th>Task ID</th><th>Title</th><th>Outlet</th><th>Assigned To</th><th>Tag</th><th>Due Date</th><th>Status</th><th>Update</th></tr></thead><tbody id="taskBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 4. BROWSE TEMPLATES (PHOTO 3) -->
+  <div id="tTemp" class="tsec" style="display:none">
+    <div class="grid3" id="tempGrid"></div>
+  </div>
+
+  <!-- 5. ISSUES TRACKER -->
+  <div id="tIssues" class="tsec" style="display:none">
+    <div class="card"><h3 style="margin-top:0">Report &amp; Track Outlet Issues</h3>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:8px;margin-bottom:10px">
+        <input id="issTitle" placeholder="Describe issue (e.g. Deep Freezer cooling low)" style="margin:0">
+        <select id="issPrio" style="margin:0"><option>High Priority</option><option>Medium</option><option>Low</option></select>
+        <input id="issUser" placeholder="Assign Staff" style="margin:0">
+        <button class="btn" onclick="addIssue()">+ Log Issue</button>
+      </div>
+      <table><thead><tr><th>Issue ID</th><th>Outlet</th><th>Issue Description</th><th>Priority</th><th>Assigned</th><th>Status</th><th>Action</th></tr></thead><tbody id="issBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 6. CUSTOM FORMS BUILDER (PHOTO 2) -->
+  <div id="tForms" class="tsec" style="display:none">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0">Create Custom Checklist Form (Email, Number, Date, File Upload)</h3><button class="btn sm" onclick="addFormCol()">+ Add Column</button></div>
+      <div id="formColsRow" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;background:#f8fafc;padding:12px;border-radius:10px">
+        <input id="fEmail" placeholder="Email ID" style="margin:0">
+        <input id="fNum" placeholder="Contact / Reading Number" style="margin:0">
+        <input id="fDate" type="date" style="margin:0">
+        <input id="fFile" type="file" style="margin:0">
+        <button class="btn" onclick="submitFormResp()">Publish &amp; Add Response</button>
+      </div>
+      <table style="margin-top:12px"><thead><tr><th>#</th><th>Email ID</th><th>Number</th><th>Date</th><th>Uploaded Proof</th></tr></thead><tbody id="formRespBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 7. REPORTS (PHOTO 1) -->
+  <div id="tRep" class="tsec" style="display:none">
+    <div class="grid3">
+      <div class="card"><strong>Outlet Tasks Report</strong><p style="font-size:12.5px;color:#64748b">Number of tasks created &amp; completed segregated by each of 31 outlets.</p><button class="btn light sm" onclick="exportTasksExcel()">Download CSV</button></div>
+      <div class="card"><strong>Outlet Issues Report</strong><p style="font-size:12.5px;color:#64748b">Number of operational issues raised and resolved per outlet.</p><button class="btn light sm" onclick="window.print()">Print PDF</button></div>
+      <div class="card"><strong>Backlog &amp; Points Report</strong><p style="font-size:12.5px;color:#64748b">Overdue tasks &amp; monthly employee checklist compliance points.</p><button class="btn light sm" onclick="window.print()">View Points</button></div>
+    </div>
+  </div>
+
+  <!-- 8. USER MANAGEMENT -->
+  <div id="tUsers" class="tsec" style="display:none">
+    <div class="card"><h3 style="margin-top:0">Task Managers &amp; Outlet Supervisors</h3><p style="font-size:13px">All 31 Outlet Managers &amp; Head Office Supervisors synced from Staff &amp; Payroll Master.</p></div>
+  </div>
+</div>
+<div class="modal" id="projModal"><div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:460px">
+  <h3 style="margin-top:0;color:#115e59">Create Project</h3>
+  <label>Project Name *</label><input id="pName" placeholder="e.g. Festive Store Audit">
+  <label>Select Project Tag *</label><select id="pTag"><option>NEW</option><option>Operations</option><option>Customer Service</option><option>Management</option><option>Store</option><option>Hotel Renovation</option></select>
+  <label>Assign User *</label><input id="pUser" placeholder="e.g. Rajesh Sharma (Manager)">
+  <label>Description</label><textarea id="pDesc" rows="2" placeholder="Project instructions..."></textarea>
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn light" onclick="projModal.style.display='none'">Cancel</button><button class="btn" onclick="saveProj()">Create Project</button></div>
+</div></div>
+
+<div class="modal" id="taskModal"><div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:460px">
+  <h3 style="margin-top:0;color:#115e59">Assign New Task</h3>
+  <label>Task Title *</label><input id="tkTitle" placeholder="e.g. Clean Roof Top Area / Stock Check">
+  <label>Tag / Category</label><select id="tkTag"><option>Operations</option><option>Stock Check</option><option>Cleaning</option><option>Safety &amp; Security</option></select>
+  <label>Assign Employee *</label><input id="tkUser" placeholder="Staff Name">
+  <label>Due Date *</label><input type="date" id="tkDate">
+  <div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn light" onclick="taskModal.style.display='none'">Cancel</button><button class="btn" onclick="saveTask()">Assign Task</button></div>
+</div></div>
+
+<script>
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+const isHO = curOut === 'Head Office';
+outSub.textContent = isHO ? 'Head Office Master View (All 31 Outlets)' : 'Active Unit: ' + curOut;
+tkDate.value = new Date().toISOString().slice(0,10);
+
+const TEMPLATES = [
+  { name: 'Signage and Marking Review', cat: 'Safety & Security', ind: 'All' },
+  { name: 'Safety and Compliance Check', cat: 'Audit', ind: 'Catering' },
+  { name: 'Security System Review', cat: 'Safety & Security', ind: 'All' },
+  { name: 'General Area Inspection', cat: 'Cleaning', ind: 'All' },
+  { name: 'Inventory Review', cat: 'Stock Check', ind: 'Logistics' },
+  { name: 'Vehicle and Equipment Checks', cat: 'Audit', ind: 'Logistics' },
+  { name: 'End-of-Day Review', cat: 'Day to Day Task', ind: 'Store' },
+  { name: 'Documentation & FSSAI Audit', cat: 'Documentation', ind: 'All' }
+];
+
+function showTab(id, el) { document.querySelectorAll('.tsec').forEach(x => x.style.display = 'none'); document.getElementById(id).style.display = 'block'; document.querySelectorAll('.sitem').forEach(x => x.classList.remove('active')); if (el) el.classList.add('active'); }
+function openProjModal(){ projModal.style.display='flex'; }
+function openTaskModal(){ taskModal.style.display='flex'; }
+
+function getTasks(){
+  let l = JSON.parse(localStorage.getItem('rpTasksList')||'[]');
+  if(!l.length){ l = [{ id:'TSK-887', title:'Fan & Exhaust Cleaning', outlet:'Main Outlet', user:'Siddharth Jagde', tag:'Cleaning', date:'2026-11-18', status:'Ongoing' }, { id:'TSK-886', title:'Clean Roof Top & Kitchen Exhaust', outlet:'RestaurantPro - Assam', user:'Ayush Kumar', tag:'Operations', date:'2026-11-18', status:'Scheduled' }, { id:'TSK-885', title:'Morning Khoya & Milk Quality Check', outlet:'RestaurantPro - Noida', user:'Rajesh Sharma', tag:'Stock Check', date:'2026-11-18', status:'Completed' }]; localStorage.setItem('rpTasksList', JSON.stringify(l)); }
+  return l;
+}
+function getProjs(){
+  let l = JSON.parse(localStorage.getItem('rpProjectsList')||'[]');
+  if(!l.length){ l = [{ id:'#244', name:'Festival Store Renovation & Branding', tag:'Store', user:'Ashwani Saxena', desc:'Diwali & wedding counter setup' }, { id:'#243', name:'New Staff Hygiene Training', tag:'Training', user:'Jyoti Ranjan', desc:'SOP & POS training batch' }, { id:'#242', name:'Monthly Sales & Audit Plan', tag:'Management', user:'Nisandh M', desc:'31 outlets stock audit' }]; localStorage.setItem('rpProjectsList', JSON.stringify(l)); }
+  return l;
+}
+function saveProj(){ if(!pName.value.trim()) return; const l = getProjs(); l.unshift({ id:'#'+Math.floor(250+Math.random()*700), name:pName.value.trim(), tag:pTag.value, user:pUser.value.trim()||'Manager', desc:pDesc.value.trim() }); localStorage.setItem('rpProjectsList', JSON.stringify(l)); projModal.style.display='none'; pName.value=''; renderAll(); }
+function saveTask(presetTitle, presetTag){ const title = presetTitle || tkTitle.value.trim(); if(!title) return; const l = getTasks(); l.unshift({ id:'TSK-'+Math.floor(100+Math.random()*899), title, outlet: isHO?'Main Outlet':curOut, user: tkUser.value.trim()||'Outlet Manager', tag: presetTag||tkTag.value, date: tkDate.value, status:'Scheduled' }); localStorage.setItem('rpTasksList', JSON.stringify(l)); taskModal.style.display='none'; tkTitle.value=''; renderAll(); if(presetTitle) alert('Template "' + presetTitle + '" assigned as a live Task!'); }
+function nextStatus(id){ const l = getTasks(), t = l.find(x=>x.id===id); if(!t) return; t.status = t.status === 'Scheduled' ? 'Ongoing' : (t.status === 'Ongoing' ? 'Completed' : 'Scheduled'); localStorage.setItem('rpTasksList', JSON.stringify(l)); renderAll(); }
+function addIssue(){ if(!issTitle.value.trim()) return; const l = JSON.parse(localStorage.getItem('rpIssuesList')||'[]'); l.unshift({ id:'ISS-'+Math.floor(100+Math.random()*899), outlet: isHO?'Main Outlet':curOut, title:issTitle.value.trim(), prio:issPrio.value, user:issUser.value.trim()||'Supervisor', status:'Open' }); localStorage.setItem('rpIssuesList', JSON.stringify(l)); issTitle.value=''; renderAll(); }
+function resolveIssue(id){ const l=JSON.parse(localStorage.getItem('rpIssuesList')||'[]'), x=l.find(i=>i.id===id); if(x){x.status='Resolved'; localStorage.setItem('rpIssuesList',JSON.stringify(l)); renderAll();} }
+
+let formCols = ['Email ID', 'Number', 'Date', 'File Upload'];
+function addFormCol(){ const c = prompt('Enter New Column Name:'); if(c){ formCols.push(c); renderCols(); } }
+function renderCols(){ formColsRow.innerHTML = formCols.map(c => '<span class="badge" style="background:#e0f2fe;color:#0369a1;padding:5px 10px">'+c+'</span>').join(''); }
+function submitFormResp(){ const l = JSON.parse(localStorage.getItem('rpFormResps')||'[]'); l.unshift({ email:fEmail.value||'staff@restaurantpro.in', num:fNum.value||'9811000000', date:fDate.value||tkDate.value, file: (fFile.files?.name || 'Proof_Attached.pdf') }); localStorage.setItem('rpFormResps', JSON.stringify(l)); fEmail.value=''; fNum.value=''; renderAll(); }
+
+function renderAll(){
+  const allT = getTasks().filter(t => isHO || t.outlet === curOut);
+  const allI = JSON.parse(localStorage.getItem('rpIssuesList')||'[]').filter(i => isHO || i.outlet === curOut);
+  kAllT.textContent = allT.length; kOngT.textContent = allT.filter(t=>t.status!=='Completed').length; kCompT.textContent = allT.filter(t=>t.status==='Completed').length; kIssT.textContent = allI.filter(i=>i.status==='Open').length;
+  empProgBody.innerHTML = allT.map(t => '<tr><td><b>'+t.user+'</b></td><td>'+t.outlet+'</td><td>1</td><td>'+(t.status!=='Completed'?1:0)+'</td><td>'+(t.status==='Completed'?1:0)+'</td><td style="color:#0f766e;font-weight:700">'+(t.status==='Completed'?'+25 Pts':'+5 Pts')+'</td></tr>').join('');
+  projGrid.innerHTML = getProjs().map(p => '<div class="card"><div style="display:flex;justify-content:space-between"><b>'+p.id+'</b><span class="badge">'+p.tag+'</span></div><h3 style="margin:8px 0 4px">'+p.name+'</h3><p style="font-size:12.5px;color:#64748b;margin:0 0 8px">'+p.desc+'</p><small>Created by: <b>'+p.user+'</b></small></div>').join('');
+  taskBody.innerHTML = allT.map(t => '<tr><td><b>'+t.id+'</b></td><td><b>'+t.title+'</b></td><td>'+t.outlet+'</td><td>'+t.user+'</td><td>'+t.tag+'</td><td>'+t.date+'</td><td><span class="badge '+(t.status==='Ongoing'?'ong':(t.status==='Scheduled'?'sch':''))+'">'+t.status+'</span></td><td><button class="btn light sm" onclick="nextStatus(\''+t.id+'\')">Change Status</button></td></tr>').join('');
+  tempGrid.innerHTML = TEMPLATES.map(tp => '<div class="card"><span class="badge" style="background:#f1f5f9;color:#334155">'+tp.cat+'</span><h3 style="margin:8px 0">'+tp.name+'</h3><small style="color:#64748b">Industry: '+tp.ind+'</small><div style="margin-top:10px"><button class="btn sm" onclick="saveTask(\''+tp.name+'\',\''+tp.cat+'\')">Use Template &rarr;</button></div></div>').join('');
+  issBody.innerHTML = allI.map(i => '<tr><td><b>'+i.id+'</b></td><td>'+i.outlet+'</td><td>'+i.title+'</td><td>'+i.prio+'</td><td>'+i.user+'</td><td><span class="badge '+(i.status==='Open'?'sch':'')+'">'+i.status+'</span></td><td>'+(i.status==='Open'?'<button class="btn sm" onclick="resolveIssue(\''+i.id+'\')">Resolve</button>':'Done')+'</td></tr>').join('') || '<tr><td colspan="7">No open issues reported.</td></tr>';
+  const resps = JSON.parse(localStorage.getItem('rpFormResps')||'[]');
+  formRespBody.innerHTML = resps.map((r,idx) => '<tr><td>'+(idx+1)+'</td><td>'+r.email+'</td><td>'+r.num+'</td><td>'+r.date+'</td><td><b>'+r.file+'</b></td></tr>').join('') || '<tr><td colspan="5">No form responses submitted yet.</td></tr>';
+}
+function exportTasksExcel(){ const rows=[['ID','Title','Outlet','Assigned','Tag','Date','Status'],...getTasks().map(t=>[t.id,t.title,t.outlet,t.user,t.tag,t.date,t.status])]; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'})); a.download='Tasks_Audit_Report.csv'; a.click(); }
+renderCols(); renderAll();
+</script></body></html>
