@@ -1,219 +1,138 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RestaurantPro | Purchase Order List &amp; PO Projection</title>
+<title>RestaurantPro | Stock Transfer &amp; PO Challan</title>
 <style>
-:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e;--blue:#2563eb}
+:root{--bg:#f4f7f6;--ink:#1e293b;--line:#dbe5e2;--blue:#2563eb;--teal:#0f766e}
 *{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
 body{margin:0;background:var(--bg);color:var(--ink)}
 header{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-.wrap{max-width:1420px;margin:auto;padding:16px}
-.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:14px}
-.kcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
-.kcard small{color:#64748b;font-weight:700;font-size:11.5px;display:block}
-.kcard strong{font-size:21px;display:block;margin-top:4px}
+.wrap{max-width:1440px;margin:auto;padding:16px}
 .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
-label{font-size:11.5px;font-weight:700;color:#334155;display:block;margin-bottom:3px}
-input,select{width:100%;padding:7px 9px;border:1px solid #cbd5e1;border-radius:7px;font-size:12.5px}
-.btn{border:0;border-radius:7px;padding:8px 14px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12px}
-.btn.teal{background:var(--teal)}.btn.light{background:#fff;color:#1e293b;border:1px solid #cbd5e1}.btn.warn{background:#ea580c}.btn.sm{padding:4px 8px;font-size:11px}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.kcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+.kcard small{color:#64748b;font-weight:700;font-size:12px;display:block}
+.kcard strong{font-size:23px;display:block;margin-top:6px}
+label{font-size:11.5px;font-weight:700;color:#475569;display:block;margin-bottom:3px}
+input,select{width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:7px;font-size:12.5px}
+.btn{border:0;border-radius:7px;padding:8px 14px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12.5px}
+.btn.teal{background:var(--teal)}.btn.light{background:#fff;color:#1e293b;border:1px solid #cbd5e1}.btn.sm{padding:4px 8px;font-size:11px}
 table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
-th{background:#f8fafc;color:#334155;padding:9px 10px;text-align:left;border-bottom:2px solid var(--line)}
-td{border-bottom:1px solid #eef2f0;padding:8px 10px}
-.badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
-.badge.pend{background:#fef3c7;color:#92400e}.badge.short{background:#fee2e2;color:#b91c1c}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center}
-</style></head>
+th{background:#f8fafc;color:#334155;padding:10px;text-align:left;border-bottom:2px solid var(--line)}
+td{border-bottom:1px solid #eef2f0;padding:9px 10px}
+.badge{padding:3px 9px;border-radius:8px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
+.badge.proc{background:#fef3c7;color:#b45309}
+@media(max-width:760px){.kgrid{grid-template-columns:1fr}}
+</style><style id="rpCambriaFont">
+  *, body, input, select, textarea, button, table, th, td, h1, h2, h3, h4, p, span, div {
+    font-family: Cambria, 'Times New Roman', Georgia, serif !important;
+  }
+</style>
+</head>
 <body>
 <header>
-  <div><strong style="font-size:17px;color:#115e59">Purchase Order List &amp; Inter-Outlet Transfer</strong> | <small id="curOutLbl" style="color:#64748b"></small></div>
+  <div><strong style="font-size:18px;color:#115e59">Transfer &amp; PO Challan Management</strong> | <small id="curOutLbl" style="color:#64748b"></small></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn light" onclick="openProjModal()">PO Projection (Auto Shortage)</button>
-    <button class="btn" onclick="openCreateModal()">+ Create New PO</button>
-    <button class="btn light" onclick="exportPoExcel()">Export Excel</button>
+    <button class="btn" onclick="openAddTransfer()">+ Create New</button>
+    <button class="btn light" onclick="exportTrExcel()">Export Excel</button>
+    <button class="btn light" onclick="window.print()">Print PDF</button>
     <a href="/index.html" class="btn light">&larr; Dashboard</a>
   </div>
 </header>
 <div class="wrap">
-  <div class="kgrid">
-    <div class="kcard"><small>TOTAL RECORDED PO AMOUNT</small><strong id="kPoTot">&#8377;0.00</strong></div>
-    <div class="kcard"><small>TOTAL PENDING / IN-TRANSIT PO</small><strong id="kPoPend" style="color:#ea580c">&#8377;0.00</strong></div>
-    <div class="kcard"><small>TOTAL TAX / GST PAID TO SUPPLIERS</small><strong id="kPoTax" style="color:#0f766e">&#8377;0.00</strong></div>
-  </div>
-
-  <!-- INCOMING OUTLET PO REQUESTS & RETURN TICKETS -->
-  <div id="alertAlertsWrap"></div>
-
-  <!-- PURCHASE ORDER LIST TABLE (PETPOOJA STYLE) -->
-  <div class="card">
-    <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:12px">
-      <div><label>Start Date</label><input type="date" id="fStart" onchange="renderAll()"></div>
-      <div><label>End Date</label><input type="date" id="fEnd" onchange="renderAll()"></div>
-      <div><label>PO Raise To</label><select id="fType" onchange="renderAll()"><option value="ALL">All (Supplier + Outlet)</option><option value="Supplier">Supplier (Vendor)</option><option value="Outlet">Outlet (Transfer)</option></select></div>
-      <div><label>PO Number / Name</label><input id="fSearch" placeholder="PO00... or Name" oninput="renderAll()"></div>
-      <button class="btn light" onclick="fStart.value='';fEnd.value='';fType.value='ALL';fSearch.value='';renderAll()">Clear</button>
+  <!-- VIEW 1: TRANSFER LIST DASHBOARD (PHOTO 1) -->
+  <div id="listView">
+    <div id="incomingBar"></div>
+    <div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end">
+      <div><label>Start Date</label><input type="date" id="fStart" onchange="renderList()"></div>
+      <div><label>End Date</label><input type="date" id="fEnd" onchange="renderList()"></div>
+      <div><label>To (Outlet / Supplier)</label><select id="fTo" onchange="renderList()"><option value="ALL">All</option></select></div>
+      <div><label>Challan No. / PO Ref</label><input id="fChallan" placeholder="Challan or PO No." oninput="renderList()"></div>
+      <div style="display:flex;gap:6px"><button class="btn" onclick="renderList()">Search</button><button class="btn light" onclick="fStart.value='';fEnd.value='';fTo.value='ALL';fChallan.value='';renderList()">Clear</button></div>
     </div>
-    <table>
-      <thead><tr><th>To (Supplier / Outlet)</th><th>Type</th><th>Date</th><th>PO Number</th><th>Item &amp; Qty</th><th>Total (&#8377;)</th><th>GST (&#8377;)</th><th>Created By</th><th>Status</th><th>Action / Next Step</th></tr></thead>
-      <tbody id="poListBody"></tbody>
-    </table>
-  </div>
-</div>
 
-<!-- CREATE NEW PO MODAL (SUPPLIER OR OUTLET) -->
-<div class="modal" id="createPoModal">
-  <div style="background:#fff;border-radius:14px;padding:22px;width:96%;max-width:1180px;max-height:92vh;overflow:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:10px;margin-bottom:14px">
-      <strong style="font-size:18px;color:#115e59">Add Purchase Order (Multi-Item Supplier / Outlet / Kitchen)</strong>
-      <button type="button" class="btn light sm" onclick="createPoModal.style.display='none'">Close &#10005;</button>
+    <div class="kgrid">
+      <div class="kcard"><small>Total transfer invoice amount recorded is</small><strong id="kTotInv">&#8377;0.000</strong></div>
+      <div class="kcard"><small>Total outstanding payment from the buyer</small><strong id="kTotOut" style="color:#ea580c">&#8377;0.000</strong></div>
     </div>
-    <form id="poForm">
-      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:#f8fafc;padding:10px 14px;border-radius:10px;margin-bottom:14px">
-        <strong style="font-size:13px">Raise PO To:</strong>
-        <label style="display:inline-flex;align-items:center;gap:5px;margin:0;cursor:pointer"><input type="radio" name="poMode" value="Supplier" checked onchange="onPoModeChange()" style="width:auto"> Supplier</label>
-        <label style="display:inline-flex;align-items:center;gap:5px;margin:0;cursor:pointer"><input type="radio" name="poMode" value="Outlet" onchange="onPoModeChange()" style="width:auto"> Restaurant / Outlet</label>
-        <label style="display:inline-flex;align-items:center;gap:5px;margin:0;cursor:pointer"><input type="radio" name="poMode" value="Kitchen" onchange="onPoModeChange()" style="width:auto"> Central Kitchen</label>
+
+    <div class="card">
+      <table>
+        <thead><tr><th>To</th><th>Challan Date</th><th>Challan No.</th><th>PO Reference No.</th><th>Total (&#8377;)</th><th>Payment</th><th>Created By</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="trListBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <!-- VIEW 2: ADD TRANSFER FORM (PHOTO 2) -->
+  <div id="addView" style="display:none">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:10px;margin-bottom:14px">
+        <strong style="font-size:17px;color:#115e59">Add Transfer</strong>
+        <button type="button" class="btn light sm" onclick="closeAddTransfer()">&larr; Back to Transfer List</button>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+        <strong style="font-size:13px">To:</strong>
+        <button type="button" class="btn light sm mode-btn" id="mSup" onclick="setTrMode('Supplier',this)">Supplier / Third Party</button>
+        <button type="button" class="btn sm mode-btn" id="mRes" onclick="setTrMode('Restaurant',this)">Restaurant (Outlet)</button>
+        <button type="button" class="btn light sm mode-btn" id="mKit" onclick="setTrMode('Kitchen',this)">Kitchen</button>
+        <button type="button" class="btn light sm" style="border-color:#2563eb;color:#2563eb" onclick="loadFromPendingPO()">Select Purchase Order &gt;</button>
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:14px">
-        <div>
-          <label id="targetLabel">Select Supplier (Auto-Loaded) *</label>
-          <select id="poTargetSelect" onchange="if(this.value==='__NEW__'){const n=prompt('Enter New Supplier Name:');if(n){const o=document.createElement('option');o.value=n;o.textContent=n;this.insertBefore(o,this.lastChild);this.value=n;}else{this.selectedIndex=0;}}"></select>
-        </div>
-        <div><label>Delivery Date *</label><input type="date" id="poDelDate" required></div>
-        <div><label>Delivery Time</label><input type="time" id="poDelTime" value="10:00"></div>
-        <div><label>PO Number</label><input id="poAutoNo" readonly style="background:#f1f5f9;font-weight:700"></div>
+        <div><label id="lblTarget">Restaurant / Outlet *</label><select id="trTarget"></select></div>
+        <div><label>Invoice Date *</label><input type="date" id="trDate" required></div>
+        <div><label>Challan No.</label><input id="trChallanNo" placeholder="Challan Number"></div>
+        <div><label>Category</label><select id="trCat"><option>All Categories</option><option>Sweets &amp; Mithai</option><option>Namkeen &amp; Snacks</option><option>Dairy &amp; Khoya</option><option>Dryfruits &amp; Packaging</option></select></div>
       </div>
 
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <strong style="font-size:13px;color:#0f766e">Order Items List</strong>
-        <button type="button" class="btn sm" onclick="addPoItemRow()">+ Add New Row</button>
+        <input type="hidden" id="trPoRef" value="">
+        <span style="font-size:12px;color:#0f766e;font-weight:700" id="poRefBadge"></span>
+        <button type="button" class="btn light sm" style="color:#2563eb;border-color:#2563eb" onclick="addTrRow()">+ Add New</button>
       </div>
 
       <div style="overflow-x:auto">
-        <table style="min-width:920px">
-          <thead><tr><th>#</th><th style="width:24%">Raw Material *</th><th>Qty *</th><th>Unit *</th><th>Price (&#8377;) *</th><th>Amount (&#8377;)</th><th>CGST %</th><th>SGST %</th><th>IGST %</th><th>Del</th></tr></thead>
-          <tbody id="poItemsRows"></tbody>
+        <table style="min-width:780px">
+          <thead><tr><th>#</th><th style="width:34%">Raw Material *</th><th>Qty *</th><th>Unit *</th><th>Price *</th><th>Amount</th><th>Action</th></tr></thead>
+          <tbody id="trRowsBody"></tbody>
         </table>
       </div>
 
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-top:16px;padding-top:14px;border-top:1px solid #e2e8f0">
-        <div>
-          <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px">
-            <input type="checkbox" id="poCanEdit" checked style="width:auto"> Recipient can edit the invoice
-          </label>
-        </div>
-        <div style="min-width:290px;background:#f8fafc;padding:12px 16px;border-radius:10px;border:1px solid #cbd5e1;font-size:13px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Sub Total:</span><b id="poSubTot">&#8377;0.00</b></div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><span>+ Delivery Charges (&#8377;):</span><input type="number" id="poDelChg" value="0" oninput="recalcBigPo()" style="width:90px;padding:4px 6px;text-align:right"></div>
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Total Tax (CGST+SGST+IGST):</span><b id="poTaxTot">&#8377;0.00</b></div>
-          <hr style="border:0;border-top:1px solid #cbd5e1;margin:6px 0">
-          <div style="display:flex;justify-content:space-between;font-size:16px;color:#0f766e"><strong>Grand Total:</strong><strong id="poGrandTot">&#8377;0.00</strong></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:16px">
+        <div style="min-width:300px;background:#f8fafc;padding:14px;border-radius:10px;border:1px solid #cbd5e1;font-size:13px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Sub Total:</span><b id="trSub">0.000</b></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Round Off:</span><b id="trRound">0.000</b></div>
+          <div style="display:flex;justify-content:space-between;font-size:15px;color:#115e59;margin-bottom:10px"><strong>Grand Total:</strong><strong id="trGrand">0.000</strong></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-weight:700">Payment Type:</span>
+            <button type="button" class="btn sm" id="payUnpaid" onclick="setPayType('Unpaid')">Unpaid</button>
+            <button type="button" class="btn light sm" id="payPaid" onclick="setPayType('Paid')">Paid</button>
+          </div>
         </div>
       </div>
 
-      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
-        <button type="button" class="btn light" onclick="createPoModal.style.display='none'">Cancel</button>
-        <button class="btn teal" style="padding:10px 20px;font-size:13.5px">Save &amp; Generate PO &rarr;</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid #e2e8f0">
+        <div style="display:flex;gap:18px;flex-wrap:wrap;font-size:13px">
+          <label style="display:inline-flex;align-items:center;gap:6px;margin:0;cursor:pointer"><input type="checkbox" id="chkUpdStock" checked style="width:auto"> Update Inventory Stock</label>
+          <label style="display:inline-flex;align-items:center;gap:6px;margin:0;cursor:pointer"><input type="checkbox" id="chkCanEdit" checked style="width:auto"> Recipient can edit the invoice</label>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn light" onclick="closeAddTransfer()">Cancel</button>
+          <button type="button" class="btn" onclick="saveTransfer()">Save Changes</button>
+        </div>
       </div>
-    </form>
+    </div>
   </div>
 </div>
-
-<!-- PO PROJECTION MODAL (PETPOOJA AUTO-SHORTAGE) -->
-<div class="modal" id="projModal">
-  <div style="background:#fff;border-radius:14px;padding:20px;width:95%;max-width:960px;max-height:86vh;overflow:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div><strong style="font-size:17px;color:#115e59">Purchase Order Projection (Shortage &amp; Festival Forecast)</strong></div>
-      <button class="btn light sm" onclick="projModal.style.display='none'">Close</button>
-    </div>
-    <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;background:#f8fafc;padding:10px;border-radius:10px;margin-bottom:12px">
-      <div><label>Increase Qty If Festival Season (%)</label><input type="number" id="festPct" value="0" oninput="renderProj()"></div>
-      <div><label>PO Raise To</label><select id="projToType"><option value="Supplier">Supplier (Vendor)</option><option value="Outlet">Outlet (Main Outlet)</option></select></div>
-      <button class="btn teal" onclick="raiseAllProjectedPOs()">Raise All Shortage POs Now</button>
-    </div>
-    <table><thead><tr><th>Raw Material</th><th>Available Qty</th><th>Projected Need</th><th>Suggested PO Qty</th><th>Est. Rate (&#8377;)</th><th>Assign Supplier / Outlet</th><th>Status</th></tr></thead><tbody id="projBody"></tbody></table>
-  </div>
+<div id="pdfModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:560px"><div id="pdfContent"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn light" onclick="pdfModal.style.display='none'">Close</button><button class="btn" onclick="window.print()">Print PDF</button></div></div>
 </div>
-
-<div class="modal" id="pdfModal"><div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:540px"><div id="pdfContent"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn light" onclick="pdfModal.style.display='none'">Close</button><button class="btn" onclick="window.print()">Print PDF</button></div></div></div>
 <script>
 const OUTLETS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
 const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
 const isHO = curOut === 'Head Office';
 curOutLbl.textContent = 'Active Unit: ' + curOut;
-poSupplierOutlet.innerHTML = OUTLETS.filter(o => o !== curOut).map(o => '<option value="' + o + '">' + o + '</option>').join('');
-
-function toggleTargetType() { const isSup = poTargetType.value === 'Supplier'; supInputWrap.style.display = isSup ? 'block' : 'none'; outInputWrap.style.display = isSup ? 'none' : 'block'; }
-
-function getAllSavedSuppliers() {
-  const base = ['Tamanna Traders', 'Aarvi Horeca Solutions', 'Brij Mohan Dairy', 'Ajay Kumar Vijay Kumar', 'Metro Cash & Carry'];
-  const fromAuto = JSON.parse(localStorage.getItem('rpAutoPurchases') || '[]').map(x => x.vendor).filter(Boolean);
-  const fromVp = JSON.parse(localStorage.getItem('rpVendorPayments') || '[]').map(x => x.vendor).filter(Boolean);
-  const fromPos = getPOs().filter(x => x.poType === 'Supplier').map(x => x.toOutlet).filter(Boolean);
-  return [...new Set([...base, ...fromAuto, ...fromVp, ...fromPos])];
-}
-
-function onPoModeChange() {
-  const mode = document.querySelector('input[name="poMode"]:checked')?.value || 'Supplier';
-  if (mode === 'Supplier') {
-    targetLabel.textContent = 'Select Supplier (Auto-Loaded) *';
-    const sups = getAllSavedSuppliers();
-    poTargetSelect.innerHTML = sups.map(s => '<option value="' + s + '">' + s + '</option>').join('') + '<option value="__NEW__">+ Add New Supplier...</option>';
-  } else if (mode === 'Outlet') {
-    targetLabel.textContent = 'Select Restaurant / Outlet *';
-    poTargetSelect.innerHTML = OUTLETS.filter(o => o !== curOut).map(o => '<option value="' + o + '">' + o + '</option>').join('');
-  } else {
-    targetLabel.textContent = 'Select Central Kitchen *';
-    poTargetSelect.innerHTML = '<option value="Central Sweets & Namkeen Kitchen">Central Sweets &amp; Namkeen Kitchen</option><option value="Main Outlet">Main Outlet Kitchen</option>';
-  }
-}
-
-function addPoItemRow(mat='', qty='', unit='KG', price='') {
-  const tr = document.createElement('tr');
-  tr.className = 'po-item-row';
-  const idx = document.querySelectorAll('.po-item-row').length + 1;
-  tr.innerHTML = '<td class="r-idx">' + idx + '</td>' +
-    '<td><input class="r-mat" required placeholder="Select / Type Raw Material" value="' + mat + '"></td>' +
-    '<td><input class="r-qty" type="number" step="0.01" required placeholder="0" value="' + qty + '" oninput="recalcBigPo()"></td>' +
-    '<td><select class="r-unit"><option '+(unit==='KG'?'selected':'')+'>KG</option><option '+(unit==='Piece'?'selected':'')+'>Piece</option><option '+(unit==='Litre'?'selected':'')+'>Litre</option><option '+(unit==='Box'?'selected':'')+'>Box</option></select></td>' +
-    '<td><input class="r-price" type="number" step="0.01" required placeholder="0.00" value="' + price + '" oninput="recalcBigPo()"></td>' +
-    '<td><input class="r-amt" readonly style="background:#f8fafc;font-weight:700" value="0.00"></td>' +
-    '<td><input class="r-cgst" type="number" step="0.1" value="0" oninput="recalcBigPo()" style="width:65px"></td>' +
-    '<td><input class="r-sgst" type="number" step="0.1" value="0" oninput="recalcBigPo()" style="width:65px"></td>' +
-    '<td><input class="r-igst" type="number" step="0.1" value="0" oninput="recalcBigPo()" style="width:65px"></td>' +
-    '<td><button type="button" class="btn light sm" style="color:#dc2626" onclick="this.closest(\'tr\').remove();recalcBigPo()">X</button></td>';
-  poItemsRows.appendChild(tr);
-  recalcBigPo();
-}
-
-function recalcBigPo() {
-  let sub = 0, tax = 0;
-  document.querySelectorAll('.po-item-row').forEach((tr, i) => {
-    tr.querySelector('.r-idx').textContent = i + 1;
-    const q = Number(tr.querySelector('.r-qty').value || 0);
-    const p = Number(tr.querySelector('.r-price').value || 0);
-    const amt = +(q * p).toFixed(2);
-    tr.querySelector('.r-amt').value = amt.toFixed(2);
-    const gPct = Number(tr.querySelector('.r-cgst').value || 0) + Number(tr.querySelector('.r-sgst').value || 0) + Number(tr.querySelector('.r-igst').value || 0);
-    sub += amt;
-    tax += +(amt * gPct / 100).toFixed(2);
-  });
-  const del = Number(poDelChg?.value || 0);
-  poSubTot.textContent = 'Rs. ' + sub.toFixed(2);
-  poTaxTot.textContent = 'Rs. ' + tax.toFixed(2);
-  poGrandTot.textContent = 'Rs. ' + (sub + tax + del).toFixed(2);
-}
-
-function openCreateModal() {
-  onPoModeChange();
-  poDelDate.value = new Date().toISOString().slice(0,10);
-  poAutoNo.value = 'PO00' + Math.floor(1000000 + Math.random()*8999999);
-  poItemsRows.innerHTML = '';
-  addPoItemRow(); addPoItemRow(); addPoItemRow();
-  createPoModal.style.display = 'flex';
-}
-
-function openProjModal() { renderProj(); projModal.style.display = 'flex'; }
+let trMode = 'Restaurant', payType = 'Unpaid';
 function getPOs() { return JSON.parse(localStorage.getItem('rpOutletPOs') || '[]'); }
 function savePOs(l) { localStorage.setItem('rpOutletPOs', JSON.stringify(l)); }
 
@@ -225,113 +144,74 @@ function adjustStock(outName, item, delta) {
   });
 }
 
-poForm.onsubmit = e => {
-  e.preventDefault();
-  const mode = document.querySelector('input[name="poMode"]:checked')?.value || 'Supplier';
-  const targetName = poTargetSelect.value;
-  const rows = Array.from(document.querySelectorAll('.po-item-row')).map(tr => ({
-    mat: tr.querySelector('.r-mat').value.trim(),
-    qty: Number(tr.querySelector('.r-qty').value || 0),
-    unit: tr.querySelector('.r-unit').value,
-    price: Number(tr.querySelector('.r-price').value || 0),
-    amt: Number(tr.querySelector('.r-amt').value || 0)
-  })).filter(x => x.mat && x.qty > 0);
-  if (!rows.length) return alert('Kam se kam 1 Raw Material aur Quantity bharein.');
-
-  const sub = rows.reduce((s,x)=>s+x.amt,0);
-  const del = Number(poDelChg.value || 0);
-  const grand = Number(poGrandTot.textContent.replace(/[^0-9.]/g,'')) || (sub + del);
-  const tax = +(grand - sub - del).toFixed(2);
-  const summaryItem = rows.length === 1 ? rows.mat : (rows.mat + ' + ' + (rows.length-1) + ' more items');
-  const totalQty = rows.reduce((s,x)=>s+x.qty,0);
-
-  const list = getPOs();
-  list.unshift({
-    id: poAutoNo.value,
-    date: poDelDate.value || new Date().toISOString().slice(0,10),
-    poType: mode,
-    fromOutlet: isHO ? 'Main Outlet' : curOut,
-    toOutlet: targetName,
-    item: summaryItem,
-    itemsList: rows,
-    reqQty: totalQty,
-    finalQty: totalQty,
-    rate: rows.price,
-    gstAmt: tax,
-    total: +grand.toFixed(2),
-    canEdit: poCanEdit.checked,
-    createdBy: 'Unit Manager (' + curOut + ')',
-    status: mode === 'Supplier' ? 'PO Sent to Supplier' : 'Pending Supply'
-  });
-  savePOs(list);
-  createPoModal.style.display = 'none';
-  renderAll();
-  alert('Multi-Item PO (' + poAutoNo.value + ') Generated for ' + targetName + '!');
-};
-
-function receiveSupplierPO(id) {
-  const list = getPOs(), p = list.find(x => x.id === id); if (!p) return;
-  adjustStock(p.fromOutlet, p.item, +p.finalQty);
-  p.status = 'Processed & Stock Added'; savePOs(list); renderAll();
-  alert('Supplier PO Received! Added to Stock.');
+function setTrMode(mode, btn) {
+  trMode = mode;
+  [mSup, mRes, mKit].forEach(b => b.className = 'btn light sm mode-btn');
+  if (btn) btn.className = 'btn sm mode-btn';
+  if (mode === 'Supplier') { lblTarget.textContent = 'Supplier / Third Party *'; trTarget.innerHTML = ['Tamanna Traders','Aarvi Horeca Solutions','Brij Mohan Dairy','Metro Cash & Carry'].map(s => '<option value="'+s+'">'+s+'</option>').join(''); }
+  else if (mode === 'Restaurant') { lblTarget.textContent = 'Restaurant (Outlet) *'; trTarget.innerHTML = OUTLETS.filter(o => o !== curOut).map(o => '<option value="'+o+'">'+o+'</option>').join(''); }
+  else { lblTarget.textContent = 'Central Kitchen *'; trTarget.innerHTML = '<option value="Central Sweets & Namkeen Kitchen">Central Sweets &amp; Namkeen Kitchen</option><option value="Main Outlet">Main Outlet Kitchen</option>'; }
 }
 
-function dispatchOutletPO(id, allowEdit) {
-  const list = getPOs(), p = list.find(x => x.id === id); if (!p) return;
-  if (allowEdit) { const nq = Number(prompt('Edit Dispatch Qty (Req: ' + p.reqQty + '):', p.reqQty)); if (!nq || nq <= 0) return; p.finalQty = nq; p.total = +(nq * p.rate + p.gstAmt).toFixed(2); }
-  adjustStock(p.toOutlet, p.item, -p.finalQty);
-  p.status = 'Dispatched - Ticket Pending'; savePOs(list); renderAll();
+function setPayType(pt) { payType = pt; payUnpaid.className = pt === 'Unpaid' ? 'btn sm' : 'btn light sm'; payPaid.className = pt === 'Paid' ? 'btn sm' : 'btn light sm'; }
+function openAddTransfer() { listView.style.display = 'none'; addView.style.display = 'block'; trDate.value = new Date().toISOString().slice(0,10); trChallanNo.value = 'CHN-' + Math.floor(10000 + Math.random()*89999); trPoRef.value = ''; poRefBadge.textContent = ''; setTrMode('Restaurant', mRes); setPayType('Unpaid'); trRowsBody.innerHTML = ''; addTrRow(); }
+function closeAddTransfer() { addView.style.display = 'none'; listView.style.display = 'block'; renderList(); }
+
+function loadFromPendingPO() {
+  const pos = getPOs().filter(p => p.status === 'Pending Supply' || p.status === 'PO Sent to Supplier');
+  if (!pos.length) return alert('Abhi koi pending Purchase Order nahi hai.');
+  const p = pos[0]; trPoRef.value = p.id; poRefBadge.textContent = 'Linked PO: ' + p.id;
+  trRowsBody.innerHTML = ''; addTrRow(p.item, p.reqQty, 'KG', p.rate);
+}
+
+function addTrRow(mat='', qty='', unit='KG', price='') {
+  const tr = document.createElement('tr'); tr.className = 'tr-item-row';
+  tr.innerHTML = '<td class="idx">1</td><td><input class="t-mat" placeholder="Raw Material" value="'+mat+'"></td><td><input class="t-qty" type="number" step="0.01" placeholder="0" value="'+qty+'" oninput="calcTr()"></td><td><select class="t-unit"><option>KG</option><option>Piece</option><option>Litre</option></select></td><td><input class="t-price" type="number" step="0.01" placeholder="0.00" value="'+price+'" oninput="calcTr()"></td><td><input class="t-amt" readonly style="background:#f8fafc;font-weight:700" value="0.000"></td><td><button type="button" class="btn light sm" style="color:#dc2626" onclick="this.closest(\'tr\').remove();calcTr()">Del</button></td>';
+  trRowsBody.appendChild(tr); calcTr();
+}
+
+function calcTr() {
+  let sub = 0;
+  document.querySelectorAll('.tr-item-row').forEach((tr, i) => { tr.querySelector('.idx').textContent = i + 1; const q = Number(tr.querySelector('.t-qty').value || 0), p = Number(tr.querySelector('.t-price').value || 0), amt = +(q * p).toFixed(3); tr.querySelector('.t-amt').value = amt.toFixed(3); sub += amt; });
+  const grand = Math.round(sub); trSub.textContent = sub.toFixed(3); trRound.textContent = (grand - sub).toFixed(3); trGrand.textContent = grand.toFixed(3);
+}
+function saveTransfer() {
+  const rows = Array.from(document.querySelectorAll('.tr-item-row')).map(tr => ({ mat: tr.querySelector('.t-mat').value.trim(), qty: Number(tr.querySelector('.t-qty').value || 0), unit: tr.querySelector('.t-unit').value, price: Number(tr.querySelector('.t-price').value || 0), amt: Number(tr.querySelector('.t-amt').value || 0) })).filter(x => x.mat && x.qty > 0);
+  if (!rows.length) return alert('Kam se kam 1 Raw Material aur Quantity dalein.');
+  const total = Number(trGrand.textContent || 0), fromOut = isHO ? 'Main Outlet' : curOut, toOut = trTarget.value;
+  const summaryItem = rows.length === 1 ? (rows[0].mat + ' (' + rows[0].qty + ' ' + rows[0].unit + ')') : (rows[0].mat + ' + ' + (rows.length-1) + ' items');
+  if (chkUpdStock.checked) rows.forEach(r => adjustStock(fromOut, r.mat, -r.qty));
+  const list = getPOs();
+  list.unshift({ id: trPoRef.value || ('PO00' + Math.floor(100000 + Math.random()*899999)), challanNo: trChallanNo.value.trim(), date: trDate.value, poType: trMode, fromOutlet: fromOut, toOutlet: toOut, item: summaryItem, itemsList: rows, reqQty: rows.reduce((s,x)=>s+x.qty,0), finalQty: rows.reduce((s,x)=>s+x.qty,0), rate: rows[0].price, total, paymentStatus: payType, createdBy: 'Manager (' + fromOut + ')', status: trMode === 'Restaurant' ? 'Dispatched - Ticket Pending' : 'Saved' });
+  savePOs(list); closeAddTransfer(); alert('Transfer Challan Saved & Stock Updated!');
 }
 
 function acceptTicket(id) {
   const list = getPOs(), p = list.find(x => x.id === id); if (!p) return;
-  adjustStock(p.fromOutlet, p.item, +p.finalQty);
-  p.status = 'Processed & Stock Added'; savePOs(list); renderAll();
-  alert('Ticket Accepted! Added to Stock.');
-}
-function renderProj() {
-  const pct = Number(festPct.value || 0);
-  const st = JSON.parse(localStorage.getItem('rpInventoryStock::' + curOut) || localStorage.getItem('rpInventoryStock') || '{}');
-  const baseItems = [{ name: 'Khoya (kg)', min: 60, rate: 280, sup: 'Tamanna Traders' }, { name: 'Maida (kg)', min: 80, rate: 40, sup: 'Aarvi Horeca Solutions' }, { name: 'Desi Ghee (kg)', min: 40, rate: 540, sup: 'Brij Mohan Dairy' }, { name: 'Kaju / Cashew (kg)', min: 30, rate: 720, sup: 'Ajay Kumar Dryfruits' }, { name: 'Dryfruit Gift Box', min: 100, rate: 35, sup: 'Metro Packaging' }];
-  window._projRows = baseItems.map(b => { const avail = Number(st[b.name] || 0), need = Math.ceil(b.min * (1 + pct/100)), sug = Math.max(0, need - avail); return { ...b, avail, need, sug }; });
-  projBody.innerHTML = window._projRows.map(r => '<tr><td><b>'+r.name+'</b></td><td style="color:'+(r.avail<r.need?'#dc2626':'#16a34a')+';font-weight:700">'+r.avail+'</td><td>'+r.need+'</td><td><b>'+r.sug+'</b></td><td>&#8377;'+r.rate+'</td><td>'+r.sup+'</td><td>'+(r.sug>0?'<span class="badge short">Shortage</span>':'<span class="badge">OK</span>')+'</td></tr>').join('');
-}
-
-function raiseAllProjectedPOs() {
-  const list = getPOs(), isSup = projToType.value === 'Supplier'; let cnt = 0;
-  (window._projRows || []).filter(r => r.sug > 0).forEach(r => {
-    cnt++;
-    list.unshift({ id: 'PO00' + Math.floor(100000 + Math.random()*899999), date: new Date().toISOString().slice(0,10), poType: isSup ? 'Supplier' : 'Outlet', fromOutlet: isHO ? 'Main Outlet' : curOut, toOutlet: isSup ? r.sup : 'Main Outlet', item: r.name, reqQty: r.sug, finalQty: r.sug, rate: r.rate, gstAmt: 0, total: +(r.sug * r.rate).toFixed(2), createdBy: 'Auto-Projection (' + curOut + ')', status: isSup ? 'PO Sent to Supplier' : 'Pending Supply' });
-  });
-  savePOs(list); projModal.style.display = 'none'; renderAll(); alert(cnt + ' Shortage Purchase Orders Raised!');
+  (p.itemsList || [{ mat: p.item, qty: p.finalQty }]).forEach(r => adjustStock(p.toOutlet, r.mat, +r.qty));
+  p.status = 'Processed'; savePOs(list); renderList(); alert('Transfer Accepted! Stock added to ' + p.toOutlet);
 }
 
 function viewPdf(id) {
   const p = getPOs().find(x => x.id === id); if (!p) return;
-  pdfContent.innerHTML = '<div style="border:2px solid #0f766e;padding:18px;border-radius:10px"><h2 style="margin:0;color:#115e59">PURCHASE ORDER / TRANSFER PDF</h2><p style="font-size:13px"><b>PO No:</b> '+p.id+' | <b>Type:</b> '+(p.poType||'Outlet')+' | <b>Date:</b> '+p.date+'<br><b>Buyer:</b> '+p.fromOutlet+'<br><b>To:</b> '+p.toOutlet+'</p><table style="width:100%;border-collapse:collapse"><tr><th style="border:1px solid #cbd5e1;padding:7px">Item</th><th style="border:1px solid #cbd5e1;padding:7px">Qty</th><th style="border:1px solid #cbd5e1;padding:7px">Rate</th><th style="border:1px solid #cbd5e1;padding:7px">Total</th></tr><tr><td style="border:1px solid #cbd5e1;padding:7px">'+p.item+'</td><td style="border:1px solid #cbd5e1;padding:7px">'+p.finalQty+'</td><td style="border:1px solid #cbd5e1;padding:7px">&#8377;'+p.rate+'</td><td style="border:1px solid #cbd5e1;padding:7px"><b>&#8377;'+p.total+'</b></td></tr></table></div>';
+  pdfContent.innerHTML = '<div style="border:2px solid #0f766e;padding:18px;border-radius:10px"><h2 style="margin:0;color:#115e59">STOCK TRANSFER CHALLAN PDF</h2><p style="font-size:13px"><b>Challan:</b> '+(p.challanNo||p.id)+' | <b>PO Ref:</b> '+p.id+' | <b>Date:</b> '+p.date+'<br><b>From:</b> '+p.fromOutlet+' &rarr; <b>To:</b> '+p.toOutlet+'</p><p><b>Items:</b> '+p.item+'<br><b>Total:</b> Rs. '+Number(p.total).toFixed(3)+' ('+(p.paymentStatus||'Unpaid')+')</p></div>';
   pdfModal.style.display = 'flex';
 }
 
-function renderAll() {
+function renderList() {
   const all = getPOs(), mine = all.filter(p => isHO || p.fromOutlet === curOut || p.toOutlet === curOut);
-  kPoTot.textContent = 'Rs. ' + mine.reduce((s,x)=>s+Number(x.total||0),0).toFixed(2);
-  kPoPend.textContent = 'Rs. ' + mine.filter(x=>!String(x.status).includes('Processed')).reduce((s,x)=>s+Number(x.total||0),0).toFixed(2);
-  kPoTax.textContent = 'Rs. ' + mine.reduce((s,x)=>s+Number(x.gstAmt||0),0).toFixed(2);
-  const inc = all.filter(p => p.status === 'Pending Supply' && (isHO || p.toOutlet === curOut)), tkt = all.filter(p => p.status === 'Dispatched - Ticket Pending' && (isHO || p.fromOutlet === curOut));
-  let alertHtml = '';
-  if (inc.length) alertHtml += '<div class="card" style="background:#fffbeb;border-color:#f59e0b"><strong style="color:#92400e">Incoming Outlet PO Requests ('+inc.length+'):</strong> ' + inc.map(p => '<span style="display:inline-block;background:#fff;padding:4px 10px;border-radius:8px;margin:4px;border:1px solid #fcd34d"><b>'+p.id+'</b> from '+p.fromOutlet+' ('+p.item+' x '+p.reqQty+') <button class="btn teal sm" onclick="dispatchOutletPO(\''+p.id+'\',false)">Accept</button> <button class="btn warn sm" onclick="dispatchOutletPO(\''+p.id+'\',true)">Edit Qty &amp; Send</button></span>').join('') + '</div>';
-  if (tkt.length) alertHtml += '<div class="card" style="background:#eff6ff;border-color:#2563eb"><strong style="color:#1d4ed8">Incoming Transfer Tickets ('+tkt.length+'):</strong> ' + tkt.map(p => '<span style="display:inline-block;background:#fff;padding:4px 10px;border-radius:8px;margin:4px;border:1px solid #93c5fd"><b>'+p.id+'</b> from '+p.toOutlet+' ('+p.item+' x '+p.finalQty+') <button class="btn sm" onclick="acceptTicket(\''+p.id+'\')">Accept Ticket &rarr; Add Stock</button></span>').join('') + '</div>';
-  alertAlertsWrap.innerHTML = alertHtml;
-  const q = (fSearch.value || '').toLowerCase();
-  const rows = mine.filter(p => (!fStart.value || p.date >= fStart.value) && (!fEnd.value || p.date <= fEnd.value) && (fType.value === 'ALL' || (p.poType||'Outlet') === fType.value) && (!q || p.id.toLowerCase().includes(q) || p.toOutlet.toLowerCase().includes(q) || p.item.toLowerCase().includes(q)));
-  poListBody.innerHTML = rows.map(p => {
-    let actBtn = '<button class="btn light sm" onclick="viewPdf(\''+p.id+'\')">PDF</button>';
-    if (p.status === 'PO Sent to Supplier') actBtn += ' <button class="btn teal sm" onclick="receiveSupplierPO(\''+p.id+'\')">Mark Received (GRN)</button>';
-    if (p.status === 'Dispatched - Ticket Pending' && (isHO || p.fromOutlet === curOut)) actBtn += ' <button class="btn sm" onclick="acceptTicket(\''+p.id+'\')">Accept Ticket</button>';
-    return '<tr><td><b>'+p.toOutlet+'</b></td><td><span class="badge" style="background:#e0f2fe;color:#0369a1">'+(p.poType||'Outlet')+'</span></td><td>'+p.date+'</td><td><b>'+p.id+'</b></td><td>'+p.item+' ('+p.finalQty+')</td><td><b>&#8377;'+p.total+'</b></td><td>&#8377;'+(p.gstAmt||0)+'</td><td>'+(p.createdBy||p.fromOutlet)+'</td><td><span class="badge '+(String(p.status).includes('Processed')?'':'pend')+'">'+p.status+'</span></td><td>'+actBtn+'</td></tr>';
-  }).join('') || '<tr><td colspan="10">No Purchase Orders found.</td></tr>';
+  const tos = [...new Set(mine.map(x => x.toOutlet).filter(Boolean))], curTo = fTo.value || 'ALL';
+  fTo.innerHTML = '<option value="ALL">All</option>' + tos.map(t => '<option value="'+t+'">'+t+'</option>').join('');
+  if ([...fTo.options].some(o => o.value === curTo)) fTo.value = curTo;
+  const tkt = all.filter(p => p.status === 'Dispatched - Ticket Pending' && (isHO || p.toOutlet === curOut));
+  incomingBar.innerHTML = tkt.length ? '<div class="card" style="background:#eff6ff;border-color:#2563eb"><strong style="color:#1d4ed8">Incoming Transfers ('+tkt.length+'):</strong> ' + tkt.map(p => '<span style="display:inline-block;background:#fff;padding:4px 10px;border-radius:8px;margin:4px;border:1px solid #93c5fd"><b>'+(p.challanNo||p.id)+'</b> from '+p.fromOutlet+' ('+p.item+') <button class="btn teal sm" onclick="acceptTicket(\''+p.id+'\')">Accept &rarr; Add Stock</button></span>').join('') + '</div>' : '';
+  const q = (fChallan.value || '').toLowerCase();
+  const rows = mine.filter(p => (!fStart.value || p.date >= fStart.value) && (!fEnd.value || p.date <= fEnd.value) && (fTo.value === 'ALL' || p.toOutlet === fTo.value) && (!q || String(p.challanNo||p.id).toLowerCase().includes(q) || p.id.toLowerCase().includes(q)));
+  kTotInv.textContent = 'Rs. ' + rows.reduce((s,x)=>s+Number(x.total||0),0).toFixed(3);
+  kTotOut.textContent = 'Rs. ' + rows.filter(x => (x.paymentStatus||'Unpaid') === 'Unpaid').reduce((s,x)=>s+Number(x.total||0),0).toFixed(3);
+  trListBody.innerHTML = rows.map(p => '<tr><td><b>'+p.toOutlet+'</b></td><td>'+p.date+'</td><td>'+(p.challanNo||'-')+'</td><td>'+p.id+'</td><td><b>'+Number(p.total||0).toFixed(3)+'</b></td><td>'+(p.paymentStatus === 'Paid' ? Number(p.total||0).toFixed(3) : '0.000')+'</td><td>'+(p.createdBy||p.fromOutlet)+'</td><td><span class="badge '+(p.status==='Processed'?'proc':'')+'">'+p.status+'</span></td><td><button class="btn light sm" onclick="viewPdf(\''+p.id+'\')">PDF</button> '+(p.status==='Dispatched - Ticket Pending'?'<button class="btn teal sm" onclick="acceptTicket(\''+p.id+'\')">Accept</button>':'')+'</td></tr>').join('') || '<tr><td colspan="9">No transfer records found. Click + Create New above.</td></tr>';
 }
 
-function exportPoExcel() { const rows=[['To','Type','Date','PO No','Item','Qty','Total','GST','Status'],...getPOs().map(p=>[p.toOutlet,p.poType||'Outlet',p.date,p.id,p.item,p.finalQty,p.total,p.gstAmt||0,p.status])]; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'})); a.download='Purchase_Order_List.csv'; a.click(); }
-renderAll();
+function exportTrExcel() { const rows=[['To','Challan Date','Challan No','PO Ref','Total','Payment','Created By','Status'],...getPOs().map(p=>[p.toOutlet,p.date,p.challanNo||'-',p.id,p.total,p.paymentStatus||'Unpaid',p.createdBy||p.fromOutlet,p.status])]; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'})); a.download='Transfer_Invoice_List.csv'; a.click(); }
+renderList();
 </script></body></html>
