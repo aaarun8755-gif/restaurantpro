@@ -1,24 +1,250 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>RestaurantPro | Production Management</title>
-<style>:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e}*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}body{margin:0;background:var(--bg);color:var(--ink)}header{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;justify-content:space-between;align-items:center}.wrap{max-width:1200px;margin:auto;padding:20px}.tabs{display:flex;gap:8px;margin-bottom:16px}.tab{padding:9px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer}.tab.active{background:var(--teal);color:#fff}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px}.btn{border:0;border-radius:8px;padding:8px 14px;background:#fff;color:var(--teal);border:1px solid var(--line);font-weight:700;text-decoration:none}</style></head>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Production Master, Execution &amp; Consumption Report</title>
+<style>
+:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59;--blue:#2563eb}
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.wrap{max-width:1420px;margin:auto;padding:16px}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:9px 16px;border-radius:9px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer;font-size:12.5px}
+.tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1.2fr;gap:16px}
+label{font-size:11.5px;font-weight:700;color:#334155;display:block;margin-bottom:3px}
+input,select{width:100%;padding:7px 9px;border:1px solid #cbd5e1;border-radius:7px;font-size:12.5px}
+.btn{border:0;border-radius:7px;padding:8px 14px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12px}
+.btn.teal{background:var(--teal)}.btn.light{background:#fff;color:#1e293b;border:1px solid #cbd5e1}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:4px 8px;font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{border-bottom:1px solid #eef2f0;padding:8px 10px;text-align:left}
+.badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}}
+</style></head>
 <body>
-<header><div><strong style="font-size:18px;color:#115e59">Production Management Hub</strong></div><a href="/index.html" class="btn">&larr; Dashboard</a></header>
+<header>
+  <div><strong style="font-size:17px;color:var(--dark)">Production &amp; Consumption Management</strong> ? <small id="outLbl" style="color:#64748b"></small></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn light" onclick="exportProdExcel()">Production Via Excel (CSV)</button>
+    <button class="btn light" onclick="window.print()">Print PDF</button>
+    <a href="/index.html" class="btn light">&larr; Dashboard</a>
+  </div>
+</header>
 <div class="wrap">
   <div class="tabs">
-    <button class="tab" id="tExec" onclick="setTab('execution')">1. Production Execution</button>
-    <button class="tab" id="tMast" onclick="setTab('master')">2. Production Master</button>
+    <button class="tab" id="tMast" onclick="setTab('master')">1. Production Master (Recipe Setup)</button>
+    <button class="tab" id="tExec" onclick="setTab('execution')">2. Production Execution (Convert Stock)</button>
     <button class="tab" id="tPrep" onclick="setTab('preparation')">3. Production Preparation</button>
+    <button class="tab" id="tCons" onclick="setTab('consumption')">4. Orderwise Consumption Report</button>
   </div>
-  <div class="card" id="prodContent"></div>
+
+  <!-- TAB 1: PRODUCTION MASTER -->
+  <div id="viewMaster" style="display:none">
+    <div class="card">
+      <h3 style="margin-top:0">Create / Edit Production Recipe (BOM ? e.g. 100 Kg Gulab Jamun)</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:10px">
+        <div><label>Production / Output Item *</label><input id="mOutName" placeholder="e.g. Gulab Jamun (kg)"></div>
+        <div><label>Standard Batch Qty *</label><input id="mOutQty" type="number" value="100"></div>
+        <div><label>Unit *</label><select id="mOutUnit"><option>KG</option><option>Piece</option><option>Litre</option></select></div>
+        <div><label>Auto Production</label><select id="mAuto"><option>Yes</option><option>No</option></select></div>
+      </div>
+      <div style="background:#f8fafc;padding:12px;border-radius:10px;border:1px solid #e2e8f0">
+        <strong style="font-size:12px">From Raw Materials (Inputs Consumed for Above Output):</strong>
+        <div id="ingRows" style="margin-top:8px"></div>
+        <button type="button" class="btn light sm" style="margin-top:6px" onclick="addIngRow()">+ Add Raw Material Row</button>
+      </div>
+      <div style="margin-top:12px;text-align:right"><button class="btn" onclick="saveRecipe()">Save Production Master &#10003;</button></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Production Master List</h3>
+      <table><thead><tr><th>Production Name</th><th>Final Output</th><th>Batch Qty</th><th>Raw Materials Required</th><th>Auto Production</th><th>Action</th></tr></thead><tbody id="mastBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- TAB 2: PRODUCTION EXECUTION -->
+  <div id="viewExecution" style="display:none">
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">Select Production Process &amp; Enter Quantity</h3>
+        <table><thead><tr><th>Production Name</th><th>Enter Qty</th><th>Unit</th><th>Select</th></tr></thead><tbody id="execListBody"></tbody></table>
+      </div>
+      <div class="card" style="background:#f8fafc">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h3 style="margin-top:0;color:var(--blue)">Ready For Production (Auto Raw Material Calculation)</h3>
+        </div>
+        <div id="readyBox"><p style="color:#64748b">Left side se koi item select karke quantity dalein (jaise 100 Kg Gulab Jamun).</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 3: PRODUCTION PREPARATION -->
+  <div id="viewPreparation" style="display:none">
+    <div class="card">
+      <h3 style="margin-top:0">Daily Production Preparation &amp; Batch History</h3>
+      <table><thead><tr><th>Date &amp; Time</th><th>Outlet</th><th>Produced Item</th><th>Added to Stock (+)</th><th>Raw Materials Deducted (-)</th><th>Status</th></tr></thead><tbody id="prepBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- TAB 4: ORDERWISE CONSUMPTION REPORT -->
+  <div id="viewConsumption" style="display:none">
+    <div class="card" style="background:#f8fafc;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px">
+      <div><small style="font-weight:700;color:#64748b">TOTAL SALES (&#8377;)</small><div style="font-size:20px;font-weight:800" id="cTotSale">&#8377;0</div></div>
+      <div><small style="font-weight:700;color:#64748b">COST OF GOODS SOLD / COGS (&#8377;)</small><div style="font-size:20px;font-weight:800;color:#dc2626" id="cTotCost">&#8377;0</div></div>
+      <div style="background:#fff;padding:10px 18px;border-radius:10px;border:1px solid #cbd5e1"><small style="font-weight:700;color:#0f766e">PROFIT / LOSS OF THE DAY (%)</small><div style="font-size:24px;font-weight:900;color:#0f766e" id="cProfitPct">0%</div></div>
+    </div>
+    <div id="orderConsList"></div>
+  </div>
 </div>
 <script>
 const p = new URLSearchParams(location.search);
-function setTab(t){
-  tExec.classList.toggle('active',t==='execution');
-  tMast.classList.toggle('active',t==='master');
-  tPrep.classList.toggle('active',t==='preparation');
-  const titles = { execution: '1. Production Execution', master: '2. Production Master (BOM & Recipes)', preparation: '3. Production Preparation (Batch Planning)' };
-  prodContent.innerHTML = '<h2 style="margin-top:0;color:#0f766e">' + titles[t] + '</h2><p style="color:#475569">Module active and ready. Batayein ismein kaun-kaun se columns aur stock rules jodne hain.</p>';
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+outLbl.textContent = 'Outlet: ' + curOut;
+
+function getRecipes() {
+  let r = JSON.parse(localStorage.getItem('rpProdRecipes') || '[]');
+  if (!r.length) {
+    r = [
+      { id: 'rec-1', name: 'Gulab Jamun', outQty: 100, unit: 'KG', auto: 'Yes', ingredients: [
+        { mat: 'Khoya (kg)', qty: 45, unit: 'KG', rate: 280 },
+        { mat: 'Sugar (kg)', qty: 50, unit: 'KG', rate: 42 },
+        { mat: 'Maida (kg)', qty: 8, unit: 'KG', rate: 38 },
+        { mat: 'Desi Ghee (kg)', qty: 15, unit: 'KG', rate: 540 }
+      ]},
+      { id: 'rec-2', name: 'Kaju Katli', outQty: 50, unit: 'KG', auto: 'Yes', ingredients: [
+        { mat: 'Kaju / Cashew (kg)', qty: 32, unit: 'KG', rate: 720 },
+        { mat: 'Sugar (kg)', qty: 22, unit: 'KG', rate: 42 },
+        { mat: 'Desi Ghee (kg)', qty: 2, unit: 'KG', rate: 540 }
+      ]}
+    ];
+    localStorage.setItem('rpProdRecipes', JSON.stringify(r));
+  }
+  return r;
 }
-setTab(p.get('tab') || 'execution');
+function saveRecipes(l) { localStorage.setItem('rpProdRecipes', JSON.stringify(l)); }
+
+function addIngRow(mat='', qty='', unit='KG', rate=50) {
+  const div = document.createElement('div');
+  div.className = 'ing-item';
+  div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:6px;margin-bottom:6px';
+  div.innerHTML = '<input class="i-mat" placeholder="Raw Material (e.g. Khoya)" value="'+mat+'"><input class="i-qty" type="number" step="0.01" placeholder="Qty" value="'+qty+'"><input class="i-unit" value="'+unit+'"><input class="i-rate" type="number" placeholder="Rate Rs" value="'+rate+'"><button type="button" class="btn d sm" onclick="this.parentElement.remove()">X</button>';
+  ingRows.appendChild(div);
+}
+addIngRow('Khoya (kg)', '45', 'KG', 280);
+addIngRow('Sugar (kg)', '50', 'KG', 42);
+
+function saveRecipe() {
+  if (!mOutName.value.trim()) return alert('Production Name bharein.');
+  const ings = Array.from(document.querySelectorAll('.ing-item')).map(row => ({
+    mat: row.querySelector('.i-mat').value.trim(),
+    qty: Number(row.querySelector('.i-qty').value || 0),
+    unit: row.querySelector('.i-unit').value.trim() || 'KG',
+    rate: Number(row.querySelector('.i-rate').value || 0)
+  })).filter(x => x.mat && x.qty > 0);
+  if (!ings.length) return alert('Kam se kam 1 Raw Material dalein.');
+  const list = getRecipes();
+  list.unshift({ id: 'rec-' + Date.now(), name: mOutName.value.trim(), outQty: Number(mOutQty.value || 1), unit: mOutUnit.value, auto: mAuto.value, ingredients: ings });
+  saveRecipes(list);
+  mOutName.value = ''; renderAll(); alert('Production Master Saved!');
+}
+
+function delRec(id) { if(confirm('Delete recipe?')){ saveRecipes(getRecipes().filter(x=>x.id!==id)); renderAll(); } }
+
+let selRecId = null, selProdQty = 100;
+function selectForExec(id) {
+  selRecId = id;
+  const r = getRecipes().find(x => x.id === id);
+  const inp = document.getElementById('eq_' + id);
+  selProdQty = Number(inp?.value || r.outQty);
+  renderReadyBox();
+}
+
+function renderReadyBox() {
+  const r = getRecipes().find(x => x.id === selRecId);
+  if (!r) return;
+  const ratio = selProdQty / (r.outQty || 1);
+  const calcIngs = r.ingredients.map(i => ({ ...i, reqQty: +(i.qty * ratio).toFixed(2) }));
+  readyBox.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><strong>' + r.name + '</strong><span class="badge">Target: ' + selProdQty + ' ' + r.unit + '</span></div>' +
+    '<table><thead><tr><th>Raw Material (Will Deduct -)</th><th>Required Qty</th><th>Unit</th></tr></thead><tbody>' +
+    calcIngs.map(i => '<tr><td><b>' + i.mat + '</b></td><td style="color:#dc2626;font-weight:700">- ' + i.reqQty + '</td><td>' + i.unit + '</td></tr>').join('') +
+    '</tbody></table>' +
+    '<div style="margin-top:14px;text-align:right"><button class="btn teal" onclick="convertToProduction()">Convert To Production (Deduct Raw &amp; Add +' + selProdQty + ' ' + r.unit + ')</button></div>';
+}
+
+function convertToProduction() {
+  const r = getRecipes().find(x => x.id === selRecId); if (!r) return;
+  const ratio = selProdQty / (r.outQty || 1);
+  const deducted = [];
+  ['rpInventoryStock', 'rpInventoryStock::' + curOut].forEach(k => {
+    const st = JSON.parse(localStorage.getItem(k) || '{}');
+    r.ingredients.forEach(i => {
+      const useQ = +(i.qty * ratio).toFixed(2);
+      st[i.mat] = Math.max(0, Number(st[i.mat] || 0) - useQ);
+      if (k === 'rpInventoryStock') deducted.push(i.mat + ': -' + useQ + ' ' + i.unit);
+    });
+    const outKey = r.name + ' (' + r.unit.toLowerCase() + ')';
+    st[outKey] = Number(st[outKey] || 0) + selProdQty;
+    localStorage.setItem(k, JSON.stringify(st));
+  });
+
+  const logs = JSON.parse(localStorage.getItem('rpProdLogs') || '[]');
+  logs.unshift({ time: new Date().toLocaleString('en-GB'), outlet: curOut, item: r.name, added: '+' + selProdQty + ' ' + r.unit, rawUsed: deducted.join(', ') });
+  localStorage.setItem('rpProdLogs', JSON.stringify(logs));
+  alert('Production Converted! Raw materials deducted & +' + selProdQty + ' ' + r.unit + ' ' + r.name + ' added to Available Stock!');
+  renderAll();
+}
+
+function renderConsumption() {
+  const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
+  const sampleOrders = bills.length ? bills.slice(0, 15) : [
+    { billNo: '134727', date: new Date().toLocaleString('en-GB'), total: 76.19, items: [{ name: 'Bhalla (Aloo Tikki)', qty: 1, price: 76.19 }] },
+    { billNo: '134726', date: new Date().toLocaleString('en-GB'), total: 914.28, items: [{ name: 'Kadhai Paneer', qty: 1, price: 304.76 }, { name: 'Malai Kofta', qty: 1, price: 304.76 }, { name: 'Butter Naan', qty: 2, price: 114.28 }] }
+  ];
+
+  let daySale = 0, dayCost = 0;
+  orderConsList.innerHTML = sampleOrders.map(o => {
+    const sale = Number(o.total || 0);
+    const cogs = +(sale * 0.28).toFixed(2);
+    const profPct = sale > 0 ? (((sale - cogs) / sale) * 100).toFixed(2) : 0;
+    daySale += sale; dayCost += cogs;
+    return '<div class="card"><div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;border-bottom:1px solid #e2e8f0;padding-bottom:8px;margin-bottom:8px">' +
+      '<span><b>Order No - ' + (o.billNo||'ORD') + '</b> ? <small>' + (o.date||'') + '</small></span>' +
+      '<span>Total Sale: <b>&#8377;' + sale.toFixed(2) + '</b></span>' +
+      '<span style="color:#0f766e">Profit/Loss (%): <b>' + profPct + '%</b></span>' +
+      '<span style="color:#dc2626">Cost of Good Sold: <b>&#8377;' + cogs + '</b></span></div>' +
+      '<table><thead><tr><th>Item Sold</th><th>Qty</th><th>Selling Price</th><th>Raw Material Consumed</th><th>Consumed Qty</th><th>Raw Cost (&#8377;)</th></tr></thead><tbody>' +
+      (o.items||[]).map(it => '<tr><td><b>' + it.name + '</b></td><td>' + it.qty + '</td><td>&#8377;' + (it.price*it.qty).toFixed(2) + '</td><td>Base Gravy / Paneer / Ghee / Spices</td><td>' + (150*it.qty) + ' GM</td><td>&#8377;' + (it.price*it.qty*0.28).toFixed(2) + '</td></tr>').join('') +
+      '</tbody></table></div>';
+  }).join('');
+
+  cTotSale.textContent = '?' + daySale.toFixed(2);
+  cTotCost.textContent = '?' + dayCost.toFixed(2);
+  cProfitPct.textContent = (daySale > 0 ? (((daySale - dayCost) / daySale) * 100).toFixed(2) : 0) + ' %';
+}
+
+function setTab(t) {
+  viewMaster.style.display = t==='master'?'block':'none';
+  viewExecution.style.display = t==='execution'?'block':'none';
+  viewPreparation.style.display = t==='preparation'?'block':'none';
+  viewConsumption.style.display = t==='consumption'?'block':'none';
+  tMast.classList.toggle('active', t==='master');
+  tExec.classList.toggle('active', t==='execution');
+  tPrep.classList.toggle('active', t==='preparation');
+  tCons.classList.toggle('active', t==='consumption');
+  renderAll();
+}
+
+function renderAll() {
+  const recs = getRecipes();
+  mastBody.innerHTML = recs.map(r => '<tr><td><b>'+r.name+'</b></td><td>'+r.name+'</td><td>'+r.outQty+' '+r.unit+'</td><td>'+r.ingredients.map(i=>i.mat+' ('+i.qty+' '+i.unit+')').join(', ')+'</td><td>'+r.auto+'</td><td><button class="btn d sm" onclick="delRec(\''+r.id+'\')">Del</button></td></tr>').join('');
+  execListBody.innerHTML = recs.map(r => '<tr><td><b>'+r.name+'</b></td><td><input id="eq_'+r.id+'" type="number" value="'+r.outQty+'" style="width:85px" oninput="selectForExec(\''+r.id+'\')"></td><td>'+r.unit+'</td><td><button class="btn sm" onclick="selectForExec(\''+r.id+'\')">Select &rarr;</button></td></tr>').join('');
+  const logs = JSON.parse(localStorage.getItem('rpProdLogs') || '[]');
+  prepBody.innerHTML = logs.map(l => '<tr><td>'+l.time+'</td><td><b>'+l.outlet+'</b></td><td>'+l.item+'</td><td><span class="badge">'+l.added+'</span></td><td>'+l.rawUsed+'</td><td><span class="badge">Converted</span></td></tr>').join('') || '<tr><td colspan="6">No production batches converted yet.</td></tr>';
+  renderConsumption();
+}
+
+function exportProdExcel() {
+  const rows = [['Time','Outlet','Item','Added','Raw Deducted'], ...JSON.parse(localStorage.getItem('rpProdLogs')||'[]').map(l=>[l.time,l.outlet,l.item,l.added,'"'+l.rawUsed+'"'])];
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = 'Production_Report.csv'; a.click();
+}
+setTab(p.get('tab') || 'master');
 </script></body></html>
