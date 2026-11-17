@@ -2109,5 +2109,26 @@ setInterval(() => {
   });
 }, 300);
 </script>
+
+<script id="rpStockTransferHook">
+setInterval(() => {
+  // Alag se bana extra button hata dein
+  const extra = document.getElementById('rpOpenTransferBtn');
+  if (extra) extra.remove();
+
+  // Seedhe Inventory ke "2. Transfer" tab par Petpooja-style Transfer Dashboard (/stock-transfer.html) lagayein
+  document.querySelectorAll('button, a').forEach(btn => {
+    const t = (btn.innerText || '').trim();
+    if ((t === '2. Transfer' || t === 'Transfer') && !btn.dataset.trBound) {
+      btn.dataset.trBound = '1';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/stock-transfer.html';
+      }, true);
+    }
+  });
+}, 300);
+</script>
 </body>
 </html>
