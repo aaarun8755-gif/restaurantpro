@@ -2143,42 +2143,60 @@ setInterval(() => {
   });
 }, 300);
 </script>
+
 <script id="rpPosWhatsAppEbill">
 (function(){
-  // POS ke Save / Print / Settle Bill click par Customer Name + Mobile capture karke Paper Print ke saath WhatsApp E-Bill bhejein
+  // 1. Current Bill mein "Customer name" box ke theek neeche 10-digit Customer Mobile box add karein
+  setInterval(() => {
+    const custInp = Array.from(document.querySelectorAll('input')).find(i => (i.placeholder || '').trim() === 'Customer name');
+    if (custInp && !document.getElementById('rpPosCustPhone')) {
+      const wrap = custInp.parentElement;
+      if (wrap && wrap.parentElement) {
+        const phoneBox = document.createElement('div');
+        phoneBox.style.cssText = 'grid-column: 1 / -1; margin-top: 6px;';
+        phoneBox.innerHTML = '<label style="font-size:11.5px;font-weight:700;display:block;margin-bottom:3px;color:#0f766e">Customer Mobile (For Instant WhatsApp E-Bill &amp; Feedback Link)</label>' +
+          '<input id="rpPosCustPhone" type="tel" maxlength="10" placeholder="Enter 10-digit WhatsApp mobile number" style="width:100%;padding:8px 10px;border:1px solid #0f766e;border-radius:8px;font-size:13px">';
+        wrap.parentElement.insertBefore(phoneBox, wrap.nextSibling);
+      }
+    }
+  }, 300);
+
+  // 2. "Complete Bill" click par Paper Print ke saath WhatsApp E-Bill + Feedback Link bhejein
   document.addEventListener('click', function(e) {
     const btn = e.target.closest('button');
     if (!btn) return;
     const t = (btn.innerText || '').trim().toLowerCase();
-    if (!(t.includes('settle') || t.includes('print bill') || t.includes('save & print') || t === 'print')) return;
+    if (!t.includes('complete bill')) return;
+
+    const custInp = Array.from(document.querySelectorAll('input')).find(i => (i.placeholder || '').trim() === 'Customer name');
+    const phoneInp = document.getElementById('rpPosCustPhone');
+    const custName = (custInp?.value || 'Valued Guest').trim();
+    const phone = (phoneInp?.value || '').replace(/\D/g, '').slice(-10);
 
     setTimeout(() => {
-      // POS screen se Customer Name, Phone aur Total nikalein
-      const inputs = Array.from(document.querySelectorAll('input'));
-      const phoneInp = inputs.find(i => (i.placeholder || '').toLowerCase().includes('phone') || (i.placeholder || '').toLowerCase().includes('mobile') || i.type === 'tel');
-      const nameInp = inputs.find(i => (i.placeholder || '').toLowerCase().includes('customer') || (i.placeholder || '').toLowerCase().includes('name'));
-      const phone = (phoneInp?.value || '').replace(/\D/g, '').slice(-10);
-      const custName = (nameInp?.value || 'Valued Guest').trim();
       const outlet = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
-
-      // Recent bill amount from rpBills
       const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
-      const lastBill = bills || {};
+      const lastBill = bills[0] || {};
       const billNo = lastBill.billNo || ('INV-' + Math.floor(1000 + Math.random()*8999));
-      const total = lastBill.total || '0';
-      const itemSummary = (lastBill.items || []).map(i => i.name + ' x' + i.qty).join(', ') || 'Fresh Order';
+      const total = lastBill.total || '0.00';
+      const itemsTxt = (lastBill.items || []).map(i => i.name + ' x' + i.qty).join(', ') || 'Restaurant Order';
 
       if (phone.length === 10) {
-        // Save to Marketing E-Bill & CRM Log
         const ebills = JSON.parse(localStorage.getItem('rpMarketingEbills') || '[]');
         ebills.unshift({ billNo, custName, phone, total, outlet, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
         localStorage.setItem('rpMarketingEbills', JSON.stringify(ebills.slice(0, 100)));
 
-        // Open instant WhatsApp E-Bill after paper print dialog
-        const msg = 'Thank you ' + custName + '! Your Digital E-Bill from ' + outlet + ' (RestaurantPro)\nBill No: #' + billNo + '\nItems: ' + itemSummary + '\nTotal Paid: Rs. ' + total + '\nRate your experience: https://onrender.com';
+        const feedbackUrl = 'https://onrender.com' + billNo;
+        const msg = 'Thank you ' + custName + '! Your Digital E-Bill from ' + outlet + ' (RestaurantPro)\n' +
+          'Bill No: #' + billNo + '\n' +
+          'Items: ' + itemsTxt + '\n' +
+          'Grand Total: Rs. ' + total + '\n\n' +
+          'Share your 5-Star Feedback & Claim Loyalty Points: ' + feedbackUrl;
+
         window.open('https://wa.me' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+        if (phoneInp) phoneInp.value = '';
       }
-    }, 500);
+    }, 450);
   }, true);
 })();
 </script>
