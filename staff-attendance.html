@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Staff &amp; Attendance Management</title>
+<style>
+:root{--bg:#f4f7f6;--ink:#1e293b;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59}
+*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+.side{width:235px;background:#fff;border-right:1px solid var(--line);padding:14px;display:flex;flex-direction:column;gap:4px}
+.sitem{padding:9px 12px;border-radius:8px;font-size:13px;font-weight:600;color:#475569;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.sitem.active,.sitem:hover{background:#eef6f4;color:#0f766e}
+.main{flex:1;padding:20px;max-width:1320px;overflow-x:auto}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px}
+.kcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.kcard small{color:#64748b;font-weight:700;font-size:11.5px;display:block}
+.kcard strong{font-size:22px;display:block;margin-top:5px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}
+label{font-size:11.5px;font-weight:700;display:block;margin-bottom:3px}
+input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}
+.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12.5px}
+.btn.light{background:#fff;color:#0f766e;border:1px solid var(--line)}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:4px 8px;font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+th{background:#f8fafc;color:#334155;padding:9px 10px;text-align:left;border-bottom:2px solid var(--line)}
+td{border-bottom:1px solid #eef2f0;padding:8px 10px}
+.badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
+.badge.abs{background:#fee2e2;color:#b91c1c}.badge.half{background:#fef3c7;color:#92400e}
+@media(max-width:850px){body{flex-direction:column}.side{width:100%;flex-direction:row;overflow-x:auto}}
+</style></head>
+<body>
+<aside class="side">
+  <div style="font-weight:900;color:#115e59;padding:6px 10px 12px;border-bottom:1px solid #eef2f0">STAFF &amp; ATTENDANCE</div>
+  <div class="sitem active" onclick="showSec('secAtt',this)">Daily Attendance</div>
+  <div class="sitem" onclick="showSec('secStaff',this)">Staff Directory &amp; Add</div>
+  <div class="sitem" onclick="showSec('secShift',this)">Shift &amp; Roster</div>
+  <div class="sitem" onclick="showSec('secPayroll',this)">Salary &amp; Payroll</div>
+  <div class="sitem" onclick="showSec('secLeave',this)">Leave &amp; Overtime</div>
+  <a href="/index.html" class="btn light" style="margin-top:auto;text-align:center">&larr; Back to Dashboard</a>
+</aside>
+<div class="main">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+    <div><h2 style="margin:0;color:#115e59">Staff &amp; Attendance Command Center</h2><small id="outLbl" style="color:#64748b"></small></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <select id="hoOutFilter" onchange="renderAll()" style="display:none;width:auto;min-width:210px"><option value="ALL">All 31 Outlets (Master)</option></select>
+      <button class="btn light" onclick="exportStaffExcel()">Export Excel</button>
+      <button class="btn light" onclick="window.print()">Print PDF</button>
+    </div>
+  </div>
+
+  <div class="kgrid">
+    <div class="kcard" style="border-top:4px solid #0f766e"><small>TOTAL ACTIVE STAFF</small><strong id="kTotStaff">0</strong></div>
+    <div class="kcard" style="border-top:4px solid #16a34a"><small>PRESENT TODAY</small><strong id="kPres" style="color:#16a34a">0</strong></div>
+    <div class="kcard" style="border-top:4px solid #dc2626"><small>ABSENT / ON LEAVE</small><strong id="kAbs" style="color:#dc2626">0</strong></div>
+    <div class="kcard" style="border-top:4px solid #2563eb"><small>EST. MONTHLY PAYROLL</small><strong id="kPay" style="color:#2563eb">&#8377;0</strong></div>
+  </div>
+
+  <!-- 1. DAILY ATTENDANCE -->
+  <div id="secAtt" class="sec-box">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <h3 style="margin:0">Today's Live Attendance &amp; Punch In/Out</h3>
+        <input type="date" id="attDate" onchange="renderAll()" style="width:auto">
+      </div>
+      <table><thead><tr><th>Emp ID</th><th>Staff Name</th><th>Role</th><th>Outlet</th><th>Shift</th><th>Punch In</th><th>Status</th><th>Mark Attendance</th></tr></thead><tbody id="attBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 2. STAFF DIRECTORY & ADD -->
+  <div id="secStaff" class="sec-box" style="display:none">
+    <div class="card">
+      <h3 style="margin-top:0">Add New Staff Member</h3>
+      <form id="addStaffForm" class="fgrid">
+        <div><label>Full Name *</label><input id="sName" required placeholder="Employee Name"></div>
+        <div><label>Role / Designation *</label><select id="sRole"><option>Outlet Manager</option><option>Head Chef / Halwai</option><option>Cashier / POS</option><option>Captain / Steward</option><option>Kitchen Helper</option><option>Delivery Rider</option></select></div>
+        <div><label>Mobile Number *</label><input id="sPhone" maxlength="10" required placeholder="10-digit Mobile"></div>
+        <div><label>Shift Timing</label><select id="sShift"><option>Morning (08:00 - 17:00)</option><option>Evening (14:00 - 23:00)</option><option>Full Day (10:00 - 21:00)</option></select></div>
+        <div><label>Monthly Salary (&#8377;) *</label><input id="sSal" type="number" required placeholder="18000"></div>
+        <div style="display:flex;align-items:end"><button class="btn" style="width:100%">+ Register Staff</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Staff Master List</h3>
+      <table><thead><tr><th>Emp ID</th><th>Name</th><th>Role</th><th>Mobile</th><th>Outlet</th><th>Shift</th><th>Monthly Salary</th><th>Del</th></tr></thead><tbody id="staffBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 3. SHIFT & ROSTER -->
+  <div id="secShift" class="sec-box" style="display:none">
+    <div class="card"><h3 style="margin-top:0">Weekly Shift &amp; Duty Roster</h3>
+      <table><thead><tr><th>Emp ID</th><th>Name</th><th>Role</th><th>Outlet</th><th>Assigned Shift</th><th>Weekly Off</th></tr></thead><tbody id="shiftBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 4. SALARY & PAYROLL -->
+  <div id="secPayroll" class="sec-box" style="display:none">
+    <div class="card"><h3 style="margin-top:0">Monthly Salary &amp; Attendance Payroll Sheet</h3>
+      <table><thead><tr><th>Emp ID</th><th>Name</th><th>Role</th><th>Base Salary</th><th>Present Days</th><th>Net Payable (&#8377;)</th><th>Status</th></tr></thead><tbody id="payBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- 5. LEAVE & OVERTIME -->
+  <div id="secLeave" class="sec-box" style="display:none">
+    <div class="card"><h3 style="margin-top:0">Leave &amp; Overtime Tracker</h3>
+      <form id="lvForm" class="fgrid" style="margin-bottom:12px">
+        <div><label>Staff Name *</label><input id="lName" required placeholder="Employee Name"></div>
+        <div><label>Type *</label><select id="lType"><option>Casual Leave</option><option>Sick Leave</option><option>Overtime (+4 Hrs)</option></select></div>
+        <div><label>Date *</label><input type="date" id="lDate" required></div>
+        <div><label>Reason</label><input id="lReason" placeholder="Reason..."></div>
+        <div style="display:flex;align-items:end"><button class="btn" style="width:100%">Submit Entry</button></div>
+      </form>
+      <table><thead><tr><th>Date</th><th>Outlet</th><th>Staff</th><th>Type</th><th>Reason</th><th>Status</th></tr></thead><tbody id="lvBody"></tbody></table>
+    </div>
+  </div>
+</div>
+<script>
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+const isHO = curOut === 'Head Office';
+outLbl.textContent = isHO ? 'Head Office Master Control (All 31 Outlets)' : 'Active Unit: ' + curOut;
+if (isHO) hoOutFilter.style.display = 'inline-block';
+attDate.value = new Date().toISOString().slice(0,10);
+lDate.value = attDate.value;
+
+function showSec(id, el) {
+  document.querySelectorAll('.sec-box').forEach(x => x.style.display = 'none');
+  document.getElementById(id).style.display = 'block';
+  document.querySelectorAll('.sitem').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function getStaff() {
+  let l = JSON.parse(localStorage.getItem('rpStaffList') || '[]');
+  if (!l.length) {
+    l = [
+      { id: 'EMP-101', name: 'Rajesh Sharma', role: 'Outlet Manager', phone: '9811223344', outlet: 'Main Outlet', shift: 'Morning (08:00 - 17:00)', salary: 32000, off: 'Tuesday' },
+      { id: 'EMP-102', name: 'Suresh Halwai', role: 'Head Chef / Halwai', phone: '9811223355', outlet: 'RestaurantPro - Assam', shift: 'Morning (08:00 - 17:00)', salary: 26000, off: 'Wednesday' },
+      { id: 'EMP-103', name: 'Pooja Verma', role: 'Cashier / POS', phone: '9811223366', outlet: 'RestaurantPro - Noida', shift: 'Evening (14:00 - 23:00)', salary: 18500, off: 'Thursday' },
+      { id: 'EMP-104', name: 'Amit Kumar', role: 'Captain / Steward', phone: '9811223377', outlet: 'RestaurantPro - Karnataka', shift: 'Full Day (10:00 - 21:00)', salary: 16000, off: 'Monday' }
+    ];
+    localStorage.setItem('rpStaffList', JSON.stringify(l));
+  }
+  return l;
+}
+function saveStaff(l) { localStorage.setItem('rpStaffList', JSON.stringify(l)); }
+function getAtt() { return JSON.parse(localStorage.getItem('rpStaffAtt') || '{}'); }
+function saveAtt(a) { localStorage.setItem('rpStaffAtt', JSON.stringify(a)); }
+
+addStaffForm.onsubmit = e => {
+  e.preventDefault();
+  const l = getStaff();
+  l.unshift({ id: 'EMP-' + Math.floor(200 + Math.random()*799), name: sName.value.trim(), role: sRole.value, phone: sPhone.value.trim(), outlet: isHO ? 'Main Outlet' : curOut, shift: sShift.value, salary: Number(sSal.value), off: 'Wednesday' });
+  saveStaff(l); sName.value=''; sPhone.value=''; sSal.value=''; renderAll();
+  alert('Staff Member Added!');
+};
+
+function delStaff(id) { if(confirm('Remove staff?')){ saveStaff(getStaff().filter(x=>x.id!==id)); renderAll(); } }
+
+function markAtt(empId, status) {
+  const a = getAtt();
+  const key = attDate.value + '_' + empId;
+  a[key] = { status, time: status === 'Present' ? new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '-' };
+  saveAtt(a); renderAll();
+}
+
+lvForm.onsubmit = e => {
+  e.preventDefault();
+  const l = JSON.parse(localStorage.getItem('rpStaffLeaves') || '[]');
+  l.unshift({ date: lDate.value, outlet: curOut, name: lName.value.trim(), type: lType.value, reason: lReason.value.trim() || '-', status: 'Approved' });
+  localStorage.setItem('rpStaffLeaves', JSON.stringify(l)); lName.value=''; lReason.value=''; renderAll();
+};
+
+function renderAll() {
+  const all = getStaff();
+  if (isHO) {
+    const curVal = hoOutFilter.value || 'ALL';
+    const outs = [...new Set(all.map(x => x.outlet))];
+    hoOutFilter.innerHTML = '<option value="ALL">All Outlets (' + all.length + ' Staff)</option>' + outs.map(o => '<option value="' + o + '">' + o + '</option>').join('');
+    if ([...hoOutFilter.options].some(o => o.value === curVal)) hoOutFilter.value = curVal;
+  }
+  const fOut = isHO ? hoOutFilter.value : curOut;
+  const rows = all.filter(s => fOut === 'ALL' || s.outlet === fOut);
+  const attMap = getAtt();
+
+  let pres = 0, abs = 0;
+  attBody.innerHTML = rows.map(s => {
+    const rec = attMap[attDate.value + '_' + s.id] || { status: 'Present', time: '09:05 AM' };
+    if (rec.status === 'Present') pres++; else abs++;
+    const cls = rec.status === 'Present' ? '' : (rec.status === 'Half Day' ? 'half' : 'abs');
+    return '<tr><td><b>'+s.id+'</b></td><td><b>'+s.name+'</b></td><td>'+s.role+'</td><td>'+s.outlet+'</td><td>'+s.shift+'</td><td>'+rec.time+'</td><td><span class="badge '+cls+'">'+rec.status+'</span></td><td><button class="btn sm" onclick="markAtt(\''+s.id+'\',\'Present\')">P</button> <button class="btn light sm" onclick="markAtt(\''+s.id+'\',\'Half Day\')">HD</button> <button class="btn d sm" onclick="markAtt(\''+s.id+'\',\'Absent\')">A</button></td></tr>';
+  }).join('') || '<tr><td colspan="8">No staff found for this outlet. Add staff in Staff Directory tab.</td></tr>';
+
+  kTotStaff.textContent = rows.length;
+  kPres.textContent = pres;
+  kAbs.textContent = abs;
+  kPay.textContent = 'Rs. ' + rows.reduce((sum,x)=>sum+Number(x.salary||0),0).toLocaleString('en-IN');
+
+  staffBody.innerHTML = rows.map(s => '<tr><td><b>'+s.id+'</b></td><td>'+s.name+'</td><td>'+s.role+'</td><td>'+s.phone+'</td><td>'+s.outlet+'</td><td>'+s.shift+'</td><td><b>&#8377;'+s.salary+'</b></td><td><button class="btn d sm" onclick="delStaff(\''+s.id+'\')">Del</button></td></tr>').join('');
+  shiftBody.innerHTML = rows.map(s => '<tr><td><b>'+s.id+'</b></td><td>'+s.name+'</td><td>'+s.role+'</td><td>'+s.outlet+'</td><td><span class="badge">'+s.shift+'</span></td><td>'+s.off+'</td></tr>').join('');
+  payBody.innerHTML = rows.map(s => '<tr><td><b>'+s.id+'</b></td><td>'+s.name+'</td><td>'+s.role+'</td><td>&#8377;'+s.salary+'</td><td>26 / 30</td><td><b>&#8377;'+Math.round(s.salary*26/30)+'</b></td><td><span class="badge">Ready</span></td></tr>').join('');
+  const lvs = JSON.parse(localStorage.getItem('rpStaffLeaves') || '[]').filter(x => fOut === 'ALL' || x.outlet === fOut);
+  lvBody.innerHTML = lvs.map(x => '<tr><td>'+x.date+'</td><td>'+x.outlet+'</td><td><b>'+x.name+'</b></td><td>'+x.type+'</td><td>'+x.reason+'</td><td><span class="badge">'+x.status+'</span></td></tr>').join('') || '<tr><td colspan="6">No leave or overtime records yet.</td></tr>';
+}
+
+function exportStaffExcel() { const rows=[['Emp ID','Name','Role','Phone','Outlet','Shift','Salary'],...getStaff().map(s=>[s.id,s.name,s.role,s.phone,s.outlet,s.shift,s.salary])]; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'})); a.download='Staff_Attendance_Report.csv'; a.click(); }
+renderAll();
+</script></body></html>

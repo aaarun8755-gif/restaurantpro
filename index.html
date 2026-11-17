@@ -2034,5 +2034,20 @@ setInterval(() => {
   }
 }, 300);
 </script>
+<script id="rpStaffSidebarHook">
+setInterval(() => {
+  document.querySelectorAll('aside button, aside a, nav button, nav a').forEach(btn => {
+    const t = (btn.innerText || '').trim();
+    if ((t.includes('Staff & Attendance') || t.includes('Staff &amp; Attendance')) && !btn.dataset.staffBound) {
+      btn.dataset.staffBound = '1';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/staff-attendance.html';
+      }, true);
+    }
+  });
+}, 350);
+</script>
 </body>
 </html>
