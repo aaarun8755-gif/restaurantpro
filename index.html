@@ -2186,7 +2186,7 @@ setInterval(() => {
         ebills.unshift({ billNo, custName, phone, total, outlet, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
         localStorage.setItem('rpMarketingEbills', JSON.stringify(ebills.slice(0, 100)));
 
-        const feedbackUrl = 'https://onrender.com' + billNo;
+        const feedbackUrl = 'https://onrender.com' + encodeURIComponent(billNo) + '&outlet=' + encodeURIComponent(outlet) + '&name=' + encodeURIComponent(custName);
         const msg = 'Thank you ' + custName + '! Your Digital E-Bill from ' + outlet + ' (RestaurantPro)\n' +
           'Bill No: #' + billNo + '\n' +
           'Items: ' + itemsTxt + '\n' +
