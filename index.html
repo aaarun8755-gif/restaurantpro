@@ -2034,20 +2034,14 @@ setInterval(() => {
   }
 }, 300);
 </script>
-<script id="rpStaffSidebarHook">
-setInterval(() => {
-  document.querySelectorAll('aside button, aside a, nav button, nav a').forEach(btn => {
-    const t = (btn.innerText || '').trim();
-    if ((t.includes('Staff & Attendance') || t.includes('Staff &amp; Attendance')) && !btn.dataset.staffBound) {
-      btn.dataset.staffBound = '1';
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        window.location.href = '/staff-attendance.html';
-      }, true);
-    }
-  });
-}, 350);
-</script>
+
+<style id="rpOriginalStaffBeautify">
+  [data-section*="staff" i], #staffSection, .staff-container {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 18px;
+    border: 1px solid #dbe5e2;
+  }
+</style>
 </body>
 </html>
