@@ -1,116 +1,203 @@
 <!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RestaurantPro | Inter-Outlet PO &amp; Stock Transfer</title>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Purchase Order List &amp; PO Projection</title>
 <style>
-:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59}
+:root{--bg:#f4f7f6;--ink:#132a25;--line:#dbe5e2;--teal:#0f766e;--blue:#2563eb}
 *{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
 body{margin:0;background:var(--bg);color:var(--ink)}
-header{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-.wrap{max-width:1380px;margin:auto;padding:18px}
-.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+header{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.wrap{max-width:1420px;margin:auto;padding:16px}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:14px}
+.kcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.kcard small{color:#64748b;font-weight:700;font-size:11.5px;display:block}
+.kcard strong{font-size:21px;display:block;margin-top:4px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
 label{font-size:11.5px;font-weight:700;color:#334155;display:block;margin-bottom:3px}
-input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}
-.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12.5px}
-.btn.light{background:#fff;color:var(--teal);border:1px solid var(--line)}.btn.warn{background:#ea580c}.btn.sm{padding:5px 9px;font-size:11.5px}
-table{width:100%;border-collapse:collapse;font-size:12.5px}
-th,td{border-bottom:1px solid #eef2f0;padding:9px 10px;text-align:left}
+input,select{width:100%;padding:7px 9px;border:1px solid #cbd5e1;border-radius:7px;font-size:12.5px}
+.btn{border:0;border-radius:7px;padding:8px 14px;background:var(--blue);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12px}
+.btn.teal{background:var(--teal)}.btn.light{background:#fff;color:#1e293b;border:1px solid #cbd5e1}.btn.warn{background:#ea580c}.btn.sm{padding:4px 8px;font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+th{background:#f8fafc;color:#334155;padding:9px 10px;text-align:left;border-bottom:2px solid var(--line)}
+td{border-bottom:1px solid #eef2f0;padding:8px 10px}
 .badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
-.badge.pend{background:#fef3c7;color:#92400e}
+.badge.pend{background:#fef3c7;color:#92400e}.badge.short{background:#fee2e2;color:#b91c1c}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center}
-</style>
-</head>
+</style></head>
 <body>
 <header>
-  <div><strong style="font-size:18px;color:var(--dark)">Inter-Outlet Purchase Order (PO) &amp; Stock Transfer</strong><br><small id="curOutLbl" style="color:#64748b"></small></div>
-  <div style="display:flex;gap:8px"><button class="btn" onclick="openCreateModal()">+ Create New PO</button><a href="/index.html" class="btn light">&larr; Dashboard</a></div>
+  <div><strong style="font-size:17px;color:#115e59">Purchase Order List &amp; Inter-Outlet Transfer</strong> | <small id="curOutLbl" style="color:#64748b"></small></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn light" onclick="openProjModal()">PO Projection (Auto Shortage)</button>
+    <button class="btn" onclick="openCreateModal()">+ Create New PO</button>
+    <button class="btn light" onclick="exportPoExcel()">Export Excel</button>
+    <a href="/index.html" class="btn light">&larr; Dashboard</a>
+  </div>
 </header>
 <div class="wrap">
-  <div class="card" style="border-color:#f59e0b;background:#fffbeb">
-    <h3 style="margin-top:0;color:#92400e">1. Incoming PO Requests (Approve / Edit Qty &amp; Dispatch from Your Raw Material)</h3>
-    <table><thead><tr><th>PO No.</th><th>Date</th><th>From Outlet</th><th>Raw Material</th><th>Req Qty</th><th>Rate (&#8377;)</th><th>Total (&#8377;)</th><th>Action</th></tr></thead><tbody id="inPoBody"></tbody></table>
+  <div class="kgrid">
+    <div class="kcard"><small>TOTAL RECORDED PO AMOUNT</small><strong id="kPoTot">&#8377;0.00</strong></div>
+    <div class="kcard"><small>TOTAL PENDING / IN-TRANSIT PO</small><strong id="kPoPend" style="color:#ea580c">&#8377;0.00</strong></div>
+    <div class="kcard"><small>TOTAL TAX / GST PAID TO SUPPLIERS</small><strong id="kPoTax" style="color:#0f766e">&#8377;0.00</strong></div>
   </div>
-  <div class="card" style="border-color:#2563eb;background:#eff6ff">
-    <h3 style="margin-top:0;color:#1d4ed8">2. Receiving Tickets (Accept Ticket to Add Stock &amp; Purchase Bill + PDF)</h3>
-    <table><thead><tr><th>PO No.</th><th>Supplier Outlet</th><th>Raw Material</th><th>Dispatched Qty</th><th>Rate (&#8377;)</th><th>Final Bill (&#8377;)</th><th>PDF</th><th>Final Accept</th></tr></thead><tbody id="ticketBody"></tbody></table>
-  </div>
+
+  <!-- INCOMING OUTLET PO REQUESTS & RETURN TICKETS -->
+  <div id="alertAlertsWrap"></div>
+
+  <!-- PURCHASE ORDER LIST TABLE (PETPOOJA STYLE) -->
   <div class="card">
-    <h3 style="margin-top:0">3. Complete Transfer &amp; Purchase PDF Ledger</h3>
-    <table><thead><tr><th>PO No.</th><th>Date</th><th>Buyer Outlet</th><th>Supplier Outlet</th><th>Item</th><th>Req Qty</th><th>Final Qty</th><th>Amount (&#8377;)</th><th>Status</th><th>PDF</th></tr></thead><tbody id="histBody"></tbody></table>
+    <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap;margin-bottom:12px">
+      <div><label>Start Date</label><input type="date" id="fStart" onchange="renderAll()"></div>
+      <div><label>End Date</label><input type="date" id="fEnd" onchange="renderAll()"></div>
+      <div><label>PO Raise To</label><select id="fType" onchange="renderAll()"><option value="ALL">All (Supplier + Outlet)</option><option value="Supplier">Supplier (Vendor)</option><option value="Outlet">Outlet (Transfer)</option></select></div>
+      <div><label>PO Number / Name</label><input id="fSearch" placeholder="PO00... or Name" oninput="renderAll()"></div>
+      <button class="btn light" onclick="fStart.value='';fEnd.value='';fType.value='ALL';fSearch.value='';renderAll()">Clear</button>
+    </div>
+    <table>
+      <thead><tr><th>To (Supplier / Outlet)</th><th>Type</th><th>Date</th><th>PO Number</th><th>Item &amp; Qty</th><th>Total (&#8377;)</th><th>GST (&#8377;)</th><th>Created By</th><th>Status</th><th>Action / Next Step</th></tr></thead>
+      <tbody id="poListBody"></tbody>
+    </table>
   </div>
 </div>
+
+<!-- CREATE NEW PO MODAL (SUPPLIER OR OUTLET) -->
 <div class="modal" id="createPoModal">
-  <div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:480px">
-    <h3 style="margin-top:0;color:var(--dark)">Create Purchase Order (PO)</h3>
+  <div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:500px">
+    <h3 style="margin-top:0;color:#115e59">+ Create Purchase Order (Supplier or Outlet)</h3>
     <form id="poForm">
-      <label>1. Select Supplier Outlet *</label><select id="poSupplier" required></select>
-      <label style="margin-top:8px">2. Raw Material Name *</label><input id="poItem" required placeholder="e.g. Maida (kg), Paneer (kg)">
-      <label style="margin-top:8px">3. Required Quantity *</label><input id="poQty" type="number" step="0.01" required placeholder="50">
-      <label style="margin-top:8px">4. Rate per Unit (&#8377;) *</label><input id="poRate" type="number" step="0.01" required placeholder="45">
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button type="button" class="btn light" onclick="createPoModal.style.display='none'">Cancel</button><button class="btn">Send PO Request &rarr;</button></div>
+      <label>PO Raise To *</label>
+      <select id="poTargetType" onchange="toggleTargetType()" style="font-weight:700">
+        <option value="Supplier">Supplier (External Vendor)</option>
+        <option value="Outlet">Outlet (Another RestaurantPro Unit)</option>
+      </select>
+      <div id="supInputWrap" style="margin-top:8px"><label>Supplier / Vendor Name *</label><input id="poSupName" placeholder="e.g. Tamanna Traders / Metro Cash & Carry"></div>
+      <div id="outInputWrap" style="display:none;margin-top:8px"><label>Select Supplier Outlet *</label><select id="poSupplierOutlet"></select></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <div><label>Raw Material Name *</label><input id="poItem" required placeholder="e.g. Maida (kg)"></div>
+        <div><label>Quantity *</label><input id="poQty" type="number" step="0.01" required placeholder="50"></div>
+        <div><label>Rate per Unit (&#8377;) *</label><input id="poRate" type="number" step="0.01" required placeholder="45"></div>
+        <div><label>GST %</label><select id="poGst"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18">18%</option></select></div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+        <button type="button" class="btn light" onclick="createPoModal.style.display='none'">Cancel</button>
+        <button class="btn">Generate PO &rarr;</button>
+      </div>
     </form>
   </div>
 </div>
-<div class="modal" id="pdfModal"><div style="background:#fff;border-radius:14px;padding:22px;width:92%;max-width:560px"><div id="pdfContent"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="btn light" onclick="pdfModal.style.display='none'">Close</button><button class="btn" onclick="window.print()">Print / Save PDF</button></div></div></div>
+
+<!-- PO PROJECTION MODAL (PETPOOJA AUTO-SHORTAGE) -->
+<div class="modal" id="projModal">
+  <div style="background:#fff;border-radius:14px;padding:20px;width:95%;max-width:960px;max-height:86vh;overflow:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div><strong style="font-size:17px;color:#115e59">Purchase Order Projection (Shortage &amp; Festival Forecast)</strong></div>
+      <button class="btn light sm" onclick="projModal.style.display='none'">Close</button>
+    </div>
+    <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;background:#f8fafc;padding:10px;border-radius:10px;margin-bottom:12px">
+      <div><label>Increase Qty If Festival Season (%)</label><input type="number" id="festPct" value="0" oninput="renderProj()"></div>
+      <div><label>PO Raise To</label><select id="projToType"><option value="Supplier">Supplier (Vendor)</option><option value="Outlet">Outlet (Main Outlet)</option></select></div>
+      <button class="btn teal" onclick="raiseAllProjectedPOs()">Raise All Shortage POs Now</button>
+    </div>
+    <table><thead><tr><th>Raw Material</th><th>Available Qty</th><th>Projected Need</th><th>Suggested PO Qty</th><th>Est. Rate (&#8377;)</th><th>Assign Supplier / Outlet</th><th>Status</th></tr></thead><tbody id="projBody"></tbody></table>
+  </div>
+</div>
+
+<div class="modal" id="pdfModal"><div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:540px"><div id="pdfContent"></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn light" onclick="pdfModal.style.display='none'">Close</button><button class="btn" onclick="window.print()">Print PDF</button></div></div></div>
 <script>
 const OUTLETS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
 const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
 const isHO = curOut === 'Head Office';
-curOutLbl.textContent = 'Current Active Outlet: ' + curOut;
-poSupplier.innerHTML = OUTLETS.filter(o => o !== curOut).map(o => '<option value="' + o + '">' + o + '</option>').join('');
+curOutLbl.textContent = 'Active Unit: ' + curOut;
+poSupplierOutlet.innerHTML = OUTLETS.filter(o => o !== curOut).map(o => '<option value="' + o + '">' + o + '</option>').join('');
+
+function toggleTargetType() { const isSup = poTargetType.value === 'Supplier'; supInputWrap.style.display = isSup ? 'block' : 'none'; outInputWrap.style.display = isSup ? 'none' : 'block'; }
 function openCreateModal() { createPoModal.style.display = 'flex'; }
+function openProjModal() { renderProj(); projModal.style.display = 'flex'; }
 function getPOs() { return JSON.parse(localStorage.getItem('rpOutletPOs') || '[]'); }
 function savePOs(l) { localStorage.setItem('rpOutletPOs', JSON.stringify(l)); }
 
-function adjustOutletStock(outletName, itemName, delta) {
-  ['rpInventoryStock::' + outletName, 'rpInventoryStock'].forEach(k => {
-    const st = JSON.parse(localStorage.getItem(k) || '{}');
-    st[itemName] = Math.max(0, Number(st[itemName] || 0) + Number(delta));
-    localStorage.setItem(k, JSON.stringify(st));
+function adjustStock(outName, item, delta) {
+  ['rpInventoryStock::' + outName, 'rpInventoryStock'].forEach(k => {
+    const s = JSON.parse(localStorage.getItem(k) || '{}');
+    s[item] = Math.max(0, Number(s[item] || 0) + Number(delta));
+    localStorage.setItem(k, JSON.stringify(s));
   });
 }
 
 poForm.onsubmit = e => {
   e.preventDefault();
-  const list = getPOs(), q = Number(poQty.value), r = Number(poRate.value);
-  list.unshift({ id: 'PO-' + Math.floor(10000 + Math.random()*89999), date: new Date().toISOString().slice(0,10), fromOutlet: isHO ? 'Main Outlet' : curOut, toOutlet: poSupplier.value, item: poItem.value.trim(), reqQty: q, finalQty: q, rate: r, total: +(q * r).toFixed(2), status: 'Pending Supply' });
-  savePOs(list); createPoModal.style.display = 'none'; poItem.value = ''; poQty.value = ''; poRate.value = ''; renderAll();
-  alert('PO Sent to ' + poSupplier.value + '!');
+  const isSup = poTargetType.value === 'Supplier';
+  const targetName = isSup ? (poSupName.value.trim() || 'Approved Supplier') : poSupplierOutlet.value;
+  const q = Number(poQty.value), r = Number(poRate.value), g = Number(poGst.value || 0);
+  const sub = q * r, gstAmt = +(sub * g / 100).toFixed(2);
+  const list = getPOs();
+  list.unshift({ id: 'PO00' + Math.floor(100000 + Math.random()*899999), date: new Date().toISOString().slice(0,10), poType: isSup ? 'Supplier' : 'Outlet', fromOutlet: isHO ? 'Main Outlet' : curOut, toOutlet: targetName, item: poItem.value.trim(), reqQty: q, finalQty: q, rate: r, gstAmt, total: +(sub + gstAmt).toFixed(2), createdBy: 'Unit Manager (' + curOut + ')', status: isSup ? 'PO Sent to Supplier' : 'Pending Supply' });
+  savePOs(list); createPoModal.style.display = 'none'; poSupName.value=''; poItem.value=''; poQty.value=''; poRate.value=''; renderAll();
+  alert('PO Generated for ' + targetName + '!');
 };
 
-function dispatchPO(id, allowEdit) {
+function receiveSupplierPO(id) {
   const list = getPOs(), p = list.find(x => x.id === id); if (!p) return;
-  if (allowEdit) {
-    const nq = Number(prompt('Edit Dispatch Qty for ' + p.item + ' (Req: ' + p.reqQty + '):', p.reqQty));
-    if (!nq || nq <= 0) return;
-    p.finalQty = nq; p.total = +(nq * p.rate).toFixed(2);
-  }
-  adjustOutletStock(p.toOutlet, p.item, -p.finalQty);
+  adjustStock(p.fromOutlet, p.item, +p.finalQty);
+  p.status = 'Processed & Stock Added'; savePOs(list); renderAll();
+  alert('Supplier PO Received! Added to Stock.');
+}
+
+function dispatchOutletPO(id, allowEdit) {
+  const list = getPOs(), p = list.find(x => x.id === id); if (!p) return;
+  if (allowEdit) { const nq = Number(prompt('Edit Dispatch Qty (Req: ' + p.reqQty + '):', p.reqQty)); if (!nq || nq <= 0) return; p.finalQty = nq; p.total = +(nq * p.rate + p.gstAmt).toFixed(2); }
+  adjustStock(p.toOutlet, p.item, -p.finalQty);
   p.status = 'Dispatched - Ticket Pending'; savePOs(list); renderAll();
-  alert('Dispatched! Deducted from ' + p.toOutlet + ' stock & Return Ticket sent to ' + p.fromOutlet + '.');
 }
 
 function acceptTicket(id) {
   const list = getPOs(), p = list.find(x => x.id === id); if (!p) return;
-  adjustOutletStock(p.fromOutlet, p.item, +p.finalQty);
-  p.status = 'Completed & Added to Stock'; savePOs(list);
-  const pur = JSON.parse(localStorage.getItem('rpAutoPurchases') || '[]');
-  pur.unshift({ id: p.id, date: p.date, outlet: p.fromOutlet, billNo: p.id, vendor: 'Transfer: ' + p.toOutlet, material: p.item, qty: p.finalQty, rate: p.rate, gst: 0, gstAmt: 0, total: p.total, fileName: p.id + '.pdf', fileData: '' });
-  localStorage.setItem('rpAutoPurchases', JSON.stringify(pur));
-  renderAll(); alert('Ticket Accepted! Added to ' + p.fromOutlet + ' Stock & Purchase Ledger + PDF.');
+  adjustStock(p.fromOutlet, p.item, +p.finalQty);
+  p.status = 'Processed & Stock Added'; savePOs(list); renderAll();
+  alert('Ticket Accepted! Added to Stock.');
+}
+function renderProj() {
+  const pct = Number(festPct.value || 0);
+  const st = JSON.parse(localStorage.getItem('rpInventoryStock::' + curOut) || localStorage.getItem('rpInventoryStock') || '{}');
+  const baseItems = [{ name: 'Khoya (kg)', min: 60, rate: 280, sup: 'Tamanna Traders' }, { name: 'Maida (kg)', min: 80, rate: 40, sup: 'Aarvi Horeca Solutions' }, { name: 'Desi Ghee (kg)', min: 40, rate: 540, sup: 'Brij Mohan Dairy' }, { name: 'Kaju / Cashew (kg)', min: 30, rate: 720, sup: 'Ajay Kumar Dryfruits' }, { name: 'Dryfruit Gift Box', min: 100, rate: 35, sup: 'Metro Packaging' }];
+  window._projRows = baseItems.map(b => { const avail = Number(st[b.name] || 0), need = Math.ceil(b.min * (1 + pct/100)), sug = Math.max(0, need - avail); return { ...b, avail, need, sug }; });
+  projBody.innerHTML = window._projRows.map(r => '<tr><td><b>'+r.name+'</b></td><td style="color:'+(r.avail<r.need?'#dc2626':'#16a34a')+';font-weight:700">'+r.avail+'</td><td>'+r.need+'</td><td><b>'+r.sug+'</b></td><td>&#8377;'+r.rate+'</td><td>'+r.sup+'</td><td>'+(r.sug>0?'<span class="badge short">Shortage</span>':'<span class="badge">OK</span>')+'</td></tr>').join('');
+}
+
+function raiseAllProjectedPOs() {
+  const list = getPOs(), isSup = projToType.value === 'Supplier'; let cnt = 0;
+  (window._projRows || []).filter(r => r.sug > 0).forEach(r => {
+    cnt++;
+    list.unshift({ id: 'PO00' + Math.floor(100000 + Math.random()*899999), date: new Date().toISOString().slice(0,10), poType: isSup ? 'Supplier' : 'Outlet', fromOutlet: isHO ? 'Main Outlet' : curOut, toOutlet: isSup ? r.sup : 'Main Outlet', item: r.name, reqQty: r.sug, finalQty: r.sug, rate: r.rate, gstAmt: 0, total: +(r.sug * r.rate).toFixed(2), createdBy: 'Auto-Projection (' + curOut + ')', status: isSup ? 'PO Sent to Supplier' : 'Pending Supply' });
+  });
+  savePOs(list); projModal.style.display = 'none'; renderAll(); alert(cnt + ' Shortage Purchase Orders Raised!');
 }
 
 function viewPdf(id) {
   const p = getPOs().find(x => x.id === id); if (!p) return;
-  pdfContent.innerHTML = '<div style="border:2px solid #0f766e;padding:20px;border-radius:10px"><h2 style="margin:0;color:#115e59">STOCK TRANSFER &amp; PURCHASE PDF</h2><p style="font-size:13px"><b>PO No:</b> ' + p.id + ' | <b>Date:</b> ' + p.date + '<br><b>Supplier (Stock -):</b> ' + p.toOutlet + '<br><b>Receiver (Stock +):</b> ' + p.fromOutlet + '</p><table style="width:100%;border-collapse:collapse;margin-top:10px"><tr><th style="border:1px solid #cbd5e1;padding:8px">Item</th><th style="border:1px solid #cbd5e1;padding:8px">Req Qty</th><th style="border:1px solid #cbd5e1;padding:8px">Accepted Qty</th><th style="border:1px solid #cbd5e1;padding:8px">Rate</th><th style="border:1px solid #cbd5e1;padding:8px">Total</th></tr><tr><td style="border:1px solid #cbd5e1;padding:8px">' + p.item + '</td><td style="border:1px solid #cbd5e1;padding:8px">' + p.reqQty + '</td><td style="border:1px solid #cbd5e1;padding:8px"><b>' + p.finalQty + '</b></td><td style="border:1px solid #cbd5e1;padding:8px">&#8377;' + p.rate + '</td><td style="border:1px solid #cbd5e1;padding:8px"><b>&#8377;' + p.total + '</b></td></tr></table><p style="margin-top:12px;font-size:12px;color:#0f766e"><b>Status:</b> ' + p.status + '</p></div>';
+  pdfContent.innerHTML = '<div style="border:2px solid #0f766e;padding:18px;border-radius:10px"><h2 style="margin:0;color:#115e59">PURCHASE ORDER / TRANSFER PDF</h2><p style="font-size:13px"><b>PO No:</b> '+p.id+' | <b>Type:</b> '+(p.poType||'Outlet')+' | <b>Date:</b> '+p.date+'<br><b>Buyer:</b> '+p.fromOutlet+'<br><b>To:</b> '+p.toOutlet+'</p><table style="width:100%;border-collapse:collapse"><tr><th style="border:1px solid #cbd5e1;padding:7px">Item</th><th style="border:1px solid #cbd5e1;padding:7px">Qty</th><th style="border:1px solid #cbd5e1;padding:7px">Rate</th><th style="border:1px solid #cbd5e1;padding:7px">Total</th></tr><tr><td style="border:1px solid #cbd5e1;padding:7px">'+p.item+'</td><td style="border:1px solid #cbd5e1;padding:7px">'+p.finalQty+'</td><td style="border:1px solid #cbd5e1;padding:7px">&#8377;'+p.rate+'</td><td style="border:1px solid #cbd5e1;padding:7px"><b>&#8377;'+p.total+'</b></td></tr></table></div>';
   pdfModal.style.display = 'flex';
 }
 
 function renderAll() {
-  const all = getPOs();
-  inPoBody.innerHTML = all.filter(p => p.status === 'Pending Supply' && (isHO || p.toOutlet === curOut)).map(p => '<tr><td><b>'+p.id+'</b></td><td>'+p.date+'</td><td><b>'+p.fromOutlet+'</b></td><td>'+p.item+'</td><td>'+p.reqQty+'</td><td>&#8377;'+p.rate+'</td><td><b>&#8377;'+p.total+'</b></td><td><button class="btn sm" onclick="dispatchPO(\''+p.id+'\',false)">Accept &amp; Dispatch</button> <button class="btn warn sm" onclick="dispatchPO(\''+p.id+'\',true)">Edit Qty &amp; Dispatch</button></td></tr>').join('') || '<tr><td colspan="8">No pending PO requests.</td></tr>';
-  ticketBody.innerHTML = all.filter(p => p.status === 'Dispatched - Ticket Pending' && (isHO || p.fromOutlet === curOut)).map(p => '<tr><td><b>'+p.id+'</b></td><td>'+p.toOutlet+'</td><td>'+p.item+'</td><td><b>'+p.finalQty+'</b> (Req: '+p.reqQty+')</td><td>&#8377;'+p.rate+'</td><td><b>&#8377;'+p.total+'</b></td><td><button class="btn light sm" onclick="viewPdf(\''+p.id+'\')">PDF</button></td><td><button class="btn sm" onclick="acceptTicket(\''+p.id+'\')">Accept Ticket &rarr; Add Stock</button></td></tr>').join('') || '<tr><td colspan="8">No receiving tickets pending.</td></tr>';
-  histBody.innerHTML = all.filter(p => isHO || p.fromOutlet === curOut || p.toOutlet === curOut).map(p => '<tr><td><b>'+p.id+'</b></td><td>'+p.date+'</td><td>'+p.fromOutlet+'</td><td>'+p.toOutlet+'</td><td>'+p.item+'</td><td>'+p.reqQty+'</td><td><b>'+p.finalQty+'</b></td><td><b>&#8377;'+p.total+'</b></td><td><span class="badge '+(p.status.includes('Completed')?'':'pend')+'">'+p.status+'</span></td><td><button class="btn light sm" onclick="viewPdf(\''+p.id+'\')">PDF</button></td></tr>').join('') || '<tr><td colspan="10">No transfer records yet.</td></tr>';
+  const all = getPOs(), mine = all.filter(p => isHO || p.fromOutlet === curOut || p.toOutlet === curOut);
+  kPoTot.textContent = 'Rs. ' + mine.reduce((s,x)=>s+Number(x.total||0),0).toFixed(2);
+  kPoPend.textContent = 'Rs. ' + mine.filter(x=>!String(x.status).includes('Processed')).reduce((s,x)=>s+Number(x.total||0),0).toFixed(2);
+  kPoTax.textContent = 'Rs. ' + mine.reduce((s,x)=>s+Number(x.gstAmt||0),0).toFixed(2);
+  const inc = all.filter(p => p.status === 'Pending Supply' && (isHO || p.toOutlet === curOut)), tkt = all.filter(p => p.status === 'Dispatched - Ticket Pending' && (isHO || p.fromOutlet === curOut));
+  let alertHtml = '';
+  if (inc.length) alertHtml += '<div class="card" style="background:#fffbeb;border-color:#f59e0b"><strong style="color:#92400e">Incoming Outlet PO Requests ('+inc.length+'):</strong> ' + inc.map(p => '<span style="display:inline-block;background:#fff;padding:4px 10px;border-radius:8px;margin:4px;border:1px solid #fcd34d"><b>'+p.id+'</b> from '+p.fromOutlet+' ('+p.item+' x '+p.reqQty+') <button class="btn teal sm" onclick="dispatchOutletPO(\''+p.id+'\',false)">Accept</button> <button class="btn warn sm" onclick="dispatchOutletPO(\''+p.id+'\',true)">Edit Qty &amp; Send</button></span>').join('') + '</div>';
+  if (tkt.length) alertHtml += '<div class="card" style="background:#eff6ff;border-color:#2563eb"><strong style="color:#1d4ed8">Incoming Transfer Tickets ('+tkt.length+'):</strong> ' + tkt.map(p => '<span style="display:inline-block;background:#fff;padding:4px 10px;border-radius:8px;margin:4px;border:1px solid #93c5fd"><b>'+p.id+'</b> from '+p.toOutlet+' ('+p.item+' x '+p.finalQty+') <button class="btn sm" onclick="acceptTicket(\''+p.id+'\')">Accept Ticket &rarr; Add Stock</button></span>').join('') + '</div>';
+  alertAlertsWrap.innerHTML = alertHtml;
+  const q = (fSearch.value || '').toLowerCase();
+  const rows = mine.filter(p => (!fStart.value || p.date >= fStart.value) && (!fEnd.value || p.date <= fEnd.value) && (fType.value === 'ALL' || (p.poType||'Outlet') === fType.value) && (!q || p.id.toLowerCase().includes(q) || p.toOutlet.toLowerCase().includes(q) || p.item.toLowerCase().includes(q)));
+  poListBody.innerHTML = rows.map(p => {
+    let actBtn = '<button class="btn light sm" onclick="viewPdf(\''+p.id+'\')">PDF</button>';
+    if (p.status === 'PO Sent to Supplier') actBtn += ' <button class="btn teal sm" onclick="receiveSupplierPO(\''+p.id+'\')">Mark Received (GRN)</button>';
+    if (p.status === 'Dispatched - Ticket Pending' && (isHO || p.fromOutlet === curOut)) actBtn += ' <button class="btn sm" onclick="acceptTicket(\''+p.id+'\')">Accept Ticket</button>';
+    return '<tr><td><b>'+p.toOutlet+'</b></td><td><span class="badge" style="background:#e0f2fe;color:#0369a1">'+(p.poType||'Outlet')+'</span></td><td>'+p.date+'</td><td><b>'+p.id+'</b></td><td>'+p.item+' ('+p.finalQty+')</td><td><b>&#8377;'+p.total+'</b></td><td>&#8377;'+(p.gstAmt||0)+'</td><td>'+(p.createdBy||p.fromOutlet)+'</td><td><span class="badge '+(String(p.status).includes('Processed')?'':'pend')+'">'+p.status+'</span></td><td>'+actBtn+'</td></tr>';
+  }).join('') || '<tr><td colspan="10">No Purchase Orders found.</td></tr>';
 }
+
+function exportPoExcel() { const rows=[['To','Type','Date','PO No','Item','Qty','Total','GST','Status'],...getPOs().map(p=>[p.toOutlet,p.poType||'Outlet',p.date,p.id,p.item,p.finalQty,p.total,p.gstAmt||0,p.status])]; const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')],{type:'text/csv'})); a.download='Purchase_Order_List.csv'; a.click(); }
 renderAll();
 </script></body></html>
