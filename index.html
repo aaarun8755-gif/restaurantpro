@@ -2385,17 +2385,43 @@ setInterval(() => {
   });
 }, 350);
 </script>
+
 <script id="rpDocTrackerHook">
-document.addEventListener('click', function(e) {
-  const card = e.target.closest('div, button, a, li');
-  if (!card) return;
-  const txt = (card.innerText || '').trim();
-  if ((txt.startsWith('Document Tracker') || txt === 'Document Tracker') && card.offsetHeight < 180) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    window.location.href = '/document-tracker.html';
-  }
-}, true);
+(function(){
+  // 1. "+ Add Document" ya "Document Tracker" card par click hote hi seedha /document-tracker.html kholein
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button, a');
+    if (btn) {
+      const bt = (btn.innerText || '').trim();
+      if (bt.includes('Add Document') || bt === 'Document Tracker') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/document-tracker.html';
+        return;
+      }
+    }
+    const card = e.target.closest('div');
+    if (card && card.offsetHeight > 45 && card.offsetHeight < 160 && card.offsetWidth < 460) {
+      const ct = (card.innerText || '').trim();
+      if (ct.startsWith('Document Tracker')) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/document-tracker.html';
+      }
+    }
+  }, true);
+
+  // 2. Purane Document Tracker page ke andar bhi seedha button dikhayein
+  setInterval(() => {
+    const addDocBtn = Array.from(document.querySelectorAll('button, a')).find(b => (b.innerText || '').trim().includes('Add Document'));
+    if (addDocBtn && !addDocBtn.dataset.dtBound) {
+      addDocBtn.dataset.dtBound = '1';
+      addDocBtn.textContent = '+ Open Bills & Expense Dispatch Form';
+      addDocBtn.style.background = '#b91c1c';
+      addDocBtn.onclick = (ev) => { ev.preventDefault(); window.location.href = '/document-tracker.html'; };
+    }
+  }, 300);
+})();
 </script>
 </body>
 </html>
