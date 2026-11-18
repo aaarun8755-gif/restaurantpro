@@ -117,7 +117,20 @@ function setDtTab(t) {
   tbForm.classList.toggle('active', t === 'FORM');
   tbSheet.classList.toggle('active', t === 'SHEET');
   tbLatest.classList.toggle('active', t === 'LATEST');
-  renderSheets();
+  
+function exportDtExcel() {
+  const all = getRecords();
+  const scoped = isHO ? all : all.filter(r => r.outlet === curOut);
+  const rows = [
+    ['Timestamp', 'Outlet Name', 'Dispatch Person', 'Dispatch Date', 'Expense From', 'Expense To', 'Transport', 'HO Status', 'Pending Days'],
+    ...scoped.map(r => ['"' + r.ts + '"', '"' + r.outlet + '"', '"' + r.person + '"', r.dispDate, r.from, r.to, r.trans, r.status, calcPendingDays(r.to)])
+  ];
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' }));
+  a.download = (isHO ? 'HeadOffice_All_Outlets' : curOut.replace(/[^a-zA-Z0-9]/g, '_')) + '_Dispatch_Tracker.csv';
+  a.click();
+}
+renderSheets();
 }
 
 function getRecords() {
