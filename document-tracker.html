@@ -1,239 +1,209 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RestaurantPro | Bills & Expense Dispatch Tracker</title>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Bills &amp; Expense Dispatch Tracking</title>
 <style>
-:root{--bg:#f4f7f6;--card:#fff;--ink:#132a25;--muted:#5c726d;--line:#cbd5e1;--teal:#0f766e;--dark:#115e59;--purp:#4c1d95}
-*{box-sizing:border-box;font-family:Inter,'Segoe UI',Arial,sans-serif}
+:root{--bg:#f4f7f6;--ink:#1e293b;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59;--red:#b91c1c}
+*{box-sizing:border-box;font-family:Cambria,Georgia,serif}
 body{margin:0;background:var(--bg);color:var(--ink)}
-header{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:20}
-.wrap{max-width:1440px;margin:auto;padding:16px}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px;overflow-x:auto}
+header{background:#fff;border-bottom:1px solid var(--line);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.wrap{max-width:1460px;margin:auto;padding:16px}
 .tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.tab{padding:8px 16px;border-radius:8px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer;font-size:12.5px}
+.tab{padding:9px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer;font-size:13.5px}
 .tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
-.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
-label{font-size:11.5px;font-weight:700;color:#334155;display:block;margin-bottom:3px}
-input,select{width:100%;padding:7px 9px;border:1px solid #cbd5e1;border-radius:7px;font-size:12.5px}
-input[readonly]{background:#f1f5f9;font-weight:700}
-table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}
-th{background:#4c1d95;color:#fff;padding:8px 10px;text-align:left;border:1px solid #6d28d9}
-td{border:1px solid #e2e8f0;padding:7px 9px}
-.btn{border:0;border-radius:7px;padding:7px 13px;background:var(--teal);color:#fff;font-weight:600;cursor:pointer;text-decoration:none;font-size:12px;display:inline-block}
-.btn.light{background:#fff;color:var(--teal);border:1px solid var(--line)}.btn.sm{padding:4px 8px;font-size:11px}
-.badge{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
-.badge.red{background:#fee2e2;color:#b91c1c}.badge.pend{background:#fef3c7;color:#92400e}
-</style>
-<style id="rpCambriaFont">
-  *, body, input, select, textarea, button, table, th, td, h1, h2, h3, h4, p, span, div {
-    font-family: Cambria, 'Times New Roman', Georgia, serif !important;
-  }
-</style>
-</head>
+.form-card{max-width:640px;margin:0 auto;background:#fff;border-radius:12px;border:1px solid #cbd5e1;border-top:8px solid #b91c1c;padding:22px;box-shadow:0 4px 16px rgba(0,0,0,.05)}
+.qbox{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:12px}
+.qbox label{font-size:13.5px;font-weight:700;display:block;margin-bottom:6px;color:#1e293b}
+input[type="text"],input[type="date"],select{width:100%;padding:9px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:13.5px}
+.radio-row{display:flex;flex-direction:column;gap:8px;margin-top:6px;font-size:13.5px}
+.radio-row label{font-weight:600;display:flex;align-items:center;gap:8px;margin:0;cursor:pointer}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
+.btn{border:0;border-radius:8px;padding:9px 16px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}
+.btn.light{background:#fff;color:#0f766e;border:1px solid var(--line)}.btn.sm{padding:4px 9px;font-size:11.5px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+th{background:#eef6f4;color:#115e59;padding:9px 10px;text-align:left;border:1px solid #cbd5e1}
+td{border:1px solid #cbd5e1;padding:8px 10px}
+.pend-hi{background:#fee2e2;color:#b91c1c;font-weight:800;padding:3px 8px;border-radius:6px}
+.pend-ok{background:#dcfce7;color:#166534;font-weight:800;padding:3px 8px;border-radius:6px}
+</style></head>
 <body>
 <header>
-  <div><strong style="font-size:17px;color:var(--dark)">✦ Bills &amp; Expense Dispatch Tracking System</strong><br><small id="roleSub" style="color:var(--muted)"></small></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-    <button class="btn light" onclick="exportTrackerExcel()">⬇ Excel</button>
-    <button class="btn light" onclick="window.print()">🖨 PDF</button>
-    <a href="/index.html" class="btn light">← Dashboard</a>
+  <div><strong style="font-size:18px;color:#115e59">Bills &amp; Expense Dispatch Tracking System</strong> | <small id="outSub" style="color:#64748b"></small></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn light" onclick="exportDtExcel()">Export Excel</button>
+    <button class="btn light" onclick="window.print()">Print PDF</button>
+    <a href="/index.html" class="btn light">&larr; Dashboard</a>
   </div>
 </header>
 <div class="wrap">
-  <!-- HEAD OFFICE APPROVAL QUEUE FOR ACCOUNTS EDITS -->
-  <div id="hoAccReqCard" class="card" style="display:none;border-color:#f59e0b;background:#fffbeb">
-    <h3 style="margin-top:0;color:#92400e">🛡 Head Office Approval — Accounts Date Edit Requests</h3>
-    <table><thead><tr><th>Outlet</th><th>Dispatch Date</th><th>Requested Receiving Date</th><th>Requested Payment Date</th><th>Reason</th><th>Action</th></tr></thead><tbody id="hoAccReqBody"></tbody></table>
-  </div>
-
-  <!-- 1. OUTLET BILLS & EXPENSE DISPATCH FORM -->
-  <div class="card" id="dispatchFormCard">
-    <h3 style="margin-top:0;color:var(--dark)">📤 Outlet Bills &amp; Expense Dispatch Form (Vendor Bills / Expense Packet)</h3>
-    <form id="dispForm" class="fgrid">
-      <div><label>Outlet Name</label><input id="dOutlet" readonly></div>
-      <div><label>Dispatch Date *</label><input type="date" id="dDate" required></div>
-      <div><label>Dispatch Person Name *</label><input id="dPerson" required placeholder="e.g. Rahul / Courier Boy"></div>
-      <div><label>Expense / Bill From Date *</label><input type="date" id="dFrom" required></div>
-      <div><label>Expense / Bill To Date *</label><input type="date" id="dTo" required></div>
-      <div><label>Transport / Through *</label><select id="dMode"><option>Van</option><option>Courier</option><option>Delivery</option><option>By Hand</option></select></div>
-      <div><label>MRN Status</label><select id="dMrn"><option>Updated</option><option>Pending</option></select></div>
-      <div><label>Area Manager Name *</label><input id="dAm" required placeholder="e.g. Mr. Harikant Vashistha"></div>
-      <div><label>Submission Timeline</label><select id="dTime"><option>1 time in week</option><option>2 time in week</option></select></div>
-      <div style="display:flex;align-items:end"><button class="btn" style="width:100%">Submit Dispatch Entry ✓</button></div>
-    </form>
-  </div>
-  <!-- TABS: MASTER DATA | OUTLET EXPENSE TRACKER | ACCOUNTS CREDIT TRACKER -->
   <div class="tabs">
-    <button class="tab active" id="tMaster" onclick="switchTab('master')">1. Master Data (Form Responses)</button>
-    <button class="tab" id="tOutlet" onclick="switchTab('outlet')">2. Outlet Expense Tracker (10-Day Alert)</button>
-    <button class="tab" id="tAccounts" onclick="switchTab('accounts')">3. Accounts Credit &amp; Payment Tracker</button>
+    <button class="tab active" id="tbForm" onclick="setDtTab('FORM')">1. Bills &amp; Expense Dispatch Form</button>
+    <button class="tab" id="tbSheet" onclick="setDtTab('SHEET')">2. Dispatch Tracker Sheet</button>
+    <button class="tab" id="tbLatest" onclick="setDtTab('LATEST')" style="display:none">3. Latest 30 Outlets Entry (Head Office)</button>
   </div>
 
-  <!-- TAB 1: MASTER DATA -->
-  <div class="card" id="viewMaster">
-    <table>
-      <thead><tr><th>Timestamp</th><th>Outlet Name</th><th>Dispatch Date</th><th>Dispatch Person Name</th><th>Expense From Date</th><th>Expense To Date</th><th>Transport / Through</th><th>MRN Status</th><th>Area Manager</th></tr></thead>
-      <tbody id="masterBody"></tbody>
-    </table>
+  <!-- TAB 1: GOOGLE FORM STYLE DISPATCH FORM (PHOTO 1) -->
+  <div id="secForm">
+    <div class="form-card">
+      <div style="background:#b91c1c;color:#fff;padding:10px 16px;border-radius:8px;text-align:center;font-weight:900;font-size:17px;margin-bottom:10px">RESTAURANTPRO ? BILLS &amp; EXPENSE DISPATCH FORM</div>
+      <p style="font-size:12.5px;color:#64748b;margin-top:0">Fill dispatch details below. Entry will automatically sync to Dispatch Tracker &amp; Head Office.</p>
+      <form id="dispForm">
+        <div class="qbox"><label>1. Outlet Name *</label><select id="dOutlet" required></select></div>
+        <div class="qbox"><label>2. Dispatch Date *</label><input type="date" id="dDate" required></div>
+        <div class="qbox"><label>3. Dispatch Person Name *</label><input type="text" id="dPerson" required placeholder="Enter Person Name"></div>
+        <div class="qbox"><label>4. Expense From Date *</label><input type="date" id="dFrom" required></div>
+        <div class="qbox"><label>5. Expense To Date *</label><input type="date" id="dTo" required></div>
+        <div class="qbox">
+          <label>6. Transport / Sent Through *</label>
+          <div class="radio-row">
+            <label><input type="radio" name="dTrans" value="Courier" checked> Courier</label>
+            <label><input type="radio" name="dTrans" value="Self Delivery"> Self Delivery</label>
+            <label><input type="radio" name="dTrans" value="Rapido"> Rapido</label>
+            <label><input type="radio" name="dTrans" value="Company Gadi"> Company Gadi</label>
+          </div>
+        </div>
+        <button type="submit" class="btn" style="width:100%;padding:11px;font-size:14.5px">Submit Dispatch Form &rarr;</button>
+      </form>
+    </div>
+  </div>
+  <!-- TAB 2: EXPENSE TRACKER SHEET (PHOTO 2) -->
+  <div id="secSheet" style="display:none">
+    <div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;align-items:end">
+      <div><label style="font-size:11.5px;font-weight:700">Filter Outlet</label><select id="fOut" onchange="renderSheets()"><option value="ALL">All Outlets</option></select></div>
+      <div><label style="font-size:11.5px;font-weight:700">Dispatch Date</label><input type="date" id="fDate" onchange="renderSheets()"></div>
+      <div><label style="font-size:11.5px;font-weight:700">Pending Days Filter</label><select id="fPend" onchange="renderSheets()"><option value="ALL">All Records</option><option value="OVERDUE">Pending &gt; 3 Days (Alert)</option><option value="FRESH">0 to 3 Days</option></select></div>
+      <div><label style="font-size:11.5px;font-weight:700">Search Person / Mode</label><input type="text" id="fSearch" placeholder="Name / Courier..." oninput="renderSheets()"></div>
+      <button type="button" class="btn light" onclick="fOut.value='ALL';fDate.value='';fPend.value='ALL';fSearch.value='';renderSheets()">Clear Filters</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Timestamp</th><th>Outlet Name</th><th>Dispatch Person</th><th>Dispatch Date</th><th>Expense From</th><th>Expense To</th><th>Transport Through</th><th>HO Status</th><th>Doc. Pending Date</th><th>Pending Days</th><th id="hoEditTh" style="display:none">HO Edit</th></tr></thead>
+        <tbody id="sheetBody"></tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- TAB 2: OUTLET EXPENSE TRACKER -->
-  <div class="card" id="viewOutlet" style="display:none">
-    <table>
-      <thead><tr><th>Code</th><th>Timestamp</th><th>Outlet Name</th><th>Area Manager</th><th>Dispatch Person</th><th>Dispatch Date</th><th>Expense From</th><th>Expense To</th><th>Transport</th><th>MRN Status</th><th>Doc. Pending Date (+10d)</th><th>Pending Days</th><th>Timeline</th><th>Auto-Mail</th></tr></thead>
-      <tbody id="outletBody"></tbody>
-    </table>
-  </div>
-
-  <!-- TAB 3: ACCOUNTS CREDIT & PAYMENT TRACKER -->
-  <div class="card" id="viewAccounts" style="display:none">
-    <table>
-      <thead><tr><th>Timestamp</th><th>Outlet Name</th><th>Dispatch Date</th><th>Dispatch Person</th><th>Expense From–To</th><th>Transport</th><th>Area Manager</th><th>Account Team</th><th>Receiving Date</th><th>Payment Release Date</th><th>Due Days / Status</th><th>Action (HO Lock)</th></tr></thead>
-      <tbody id="accountsBody"></tbody>
-    </table>
+  <!-- TAB 3: LATEST 30 OUTLETS ENTRY (HEAD OFFICE ONLY) -->
+  <div id="secLatest" style="display:none">
+    <div class="card">
+      <h3 style="margin-top:0;color:#115e59">Latest Dispatch Entry Per Outlet (Max 30-31 Latest Outlet Records)</h3>
+      <table>
+        <thead><tr><th>#</th><th>Outlet Name</th><th>Latest Timestamp</th><th>Dispatch Person</th><th>Last Dispatch Date</th><th>Expense Period (From &rarr; To)</th><th>Transport</th><th>Pending Days</th><th>HO Status</th></tr></thead>
+        <tbody id="latestBody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 <script>
-const selOutlet = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
-const isHO = selOutlet === 'Head Office';
-dOutlet.value = selOutlet;
-dDate.value = new Date().toISOString().slice(0,10);
-roleSub.textContent = isHO ? '● Head Office & Accounts Master Control (All Outlets)' : '● Outlet Dispatch Mode: ' + selOutlet;
-if (isHO) hoAccReqCard.style.display = 'block';
+const OUTLETS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+const isHO = curOut === 'Head Office';
+outSub.textContent = isHO ? 'Head Office Master View (All 31 Outlets + Edit Rights)' : 'Active Unit: ' + curOut + ' (Unit-Only View)';
 
-function getList() { return JSON.parse(localStorage.getItem('rpDocTracker') || '[]'); }
-function saveList(l) { localStorage.setItem('rpDocTracker', JSON.stringify(l)); }
-function getAccReqs() { return JSON.parse(localStorage.getItem('rpAccEditReqs') || '[]'); }
-function saveAccReqs(r) { localStorage.setItem('rpAccEditReqs', JSON.stringify(r)); }
+if (isHO) {
+  tbLatest.style.display = 'inline-block';
+  hoEditTh.style.display = 'table-cell';
+  dOutlet.innerHTML = OUTLETS.map(o => '<option value="'+o+'">'+o+'</option>').join('');
+} else {
+  dOutlet.innerHTML = '<option value="'+curOut+'">'+curOut+'</option>';
+}
 
-function switchTab(t) {
-  viewMaster.style.display = t==='master'?'block':'none';
-  viewOutlet.style.display = t==='outlet'?'block':'none';
-  viewAccounts.style.display = t==='accounts'?'block':'none';
-  tMaster.classList.toggle('active', t==='master');
-  tOutlet.classList.toggle('active', t==='outlet');
-  tAccounts.classList.toggle('active', t==='accounts');
+const today = new Date().toISOString().slice(0,10);
+dDate.value = dFrom.value = dTo.value = today;
+
+function setDtTab(t) {
+  secForm.style.display = t === 'FORM' ? 'block' : 'none';
+  secSheet.style.display = t === 'SHEET' ? 'block' : 'none';
+  secLatest.style.display = t === 'LATEST' ? 'block' : 'none';
+  tbForm.classList.toggle('active', t === 'FORM');
+  tbSheet.classList.toggle('active', t === 'SHEET');
+  tbLatest.classList.toggle('active', t === 'LATEST');
+  renderSheets();
+}
+
+function getRecords() {
+  let l = JSON.parse(localStorage.getItem('rpDocDispatches') || '[]');
+  if (!l.length) {
+    l = [
+      { id: 'd-1', ts: '18-11-2026 10:15 AM', outlet: 'Main Outlet', person: 'Ajay Kumar', dispDate: today, from: today, to: today, trans: 'Courier', status: 'Update' },
+      { id: 'd-2', ts: '15-11-2026 04:30 PM', outlet: 'RestaurantPro - Noida', person: 'Ramesh', dispDate: '2026-11-14', from: '2026-11-08', to: '2026-11-10', trans: 'Company Gadi', status: 'Pending' },
+      { id: 'd-3', ts: '12-11-2026 02:10 PM', outlet: 'RestaurantPro - Assam', person: 'Shyam Singh', dispDate: '2026-11-12', from: '2026-11-05', to: '2026-11-10', trans: 'Rapido', status: 'Pending' }
+    ];
+    localStorage.setItem('rpDocDispatches', JSON.stringify(l));
+  }
+  return l;
+}
+function saveRecords(l) { localStorage.setItem('rpDocDispatches', JSON.stringify(l)); }
+
+function calcPendingDays(expTo) {
+  const diff = Math.floor((new Date() - new Date(expTo || today)) / 86400000);
+  return Math.max(0, diff);
 }
 
 dispForm.onsubmit = e => {
   e.preventDefault();
-  const list = getList();
-  list.unshift({
-    id: 'doc-' + Date.now(), code: 'C' + Math.floor(100 + Math.random()*899),
-    timestamp: new Date().toLocaleString('en-GB'),
-    outlet: dOutlet.value, dispatchDate: dDate.value, person: dPerson.value.trim(),
-    fromDate: dFrom.value, toDate: dTo.value, mode: dMode.value, mrn: dMrn.value,
-    areaManager: dAm.value.trim(), timeline: dTime.value,
-    accountTeam: 'Accounts Team', receivingDate: '', paymentDate: '', locked: false
+  const trans = document.querySelector('input[name="dTrans"]:checked')?.value || 'Courier';
+  const l = getRecords();
+  l.unshift({
+    id: 'd-' + Date.now(),
+    ts: new Date().toLocaleString('en-GB', { hour12: true }),
+    outlet: dOutlet.value,
+    person: dPerson.value.trim(),
+    dispDate: dDate.value,
+    from: dFrom.value,
+    to: dTo.value,
+    trans,
+    status: 'Pending'
   });
-  saveList(list);
+  saveRecords(l);
   dPerson.value = '';
-  renderAll();
-  alert('✓ Dispatch Entry Saved in Master Data & Trackers!');
+  alert('Form Submitted! Data added to Dispatch Tracker & Head Office.');
+  setDtTab('SHEET');
 };
 
-function daysDiff(dateStr) {
-  if (!dateStr) return 0;
-  const d = new Date(dateStr), now = new Date();
-  return Math.floor((now - d) / (1000*60*60*24));
+function hoEditRec(id) {
+  if (!isHO) return;
+  const l = getRecords(), r = l.find(x => x.id === id); if (!r) return;
+  const newPerson = prompt('Edit Dispatch Person Name:', r.person); if (!newPerson) return;
+  const newTrans = prompt('Edit Transport (Courier / Self Delivery / Rapido / Company Gadi):', r.trans); if (!newTrans) return;
+  const newStat = confirm('Mark Status as "Update (Received)"? Cancel for "Pending"') ? 'Update' : 'Pending';
+  r.person = newPerson.trim(); r.trans = newTrans.trim(); r.status = newStat;
+  saveRecords(l); renderSheets();
 }
 
-function addDays(dateStr, n) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr); d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0,10);
-}
+function renderSheets() {
+  const all = getRecords();
+  const scoped = isHO ? all : all.filter(r => r.outlet === curOut);
 
-function saveAccountsEntry(id) {
-  const rec = document.getElementById('rec_' + id).value;
-  const pay = document.getElementById('pay_' + id).value;
-  if (!rec) return alert('Kripya Receiving Date bharein.');
-  const list = getList();
-  const item = list.find(x => x.id === id);
-  if (!item) return;
-  item.receivingDate = rec;
-  item.paymentDate = pay;
-  item.locked = true;
-  saveList(list);
-  renderAll();
-  alert('✓ Accounts Receiving & Payment Release Date Locked!');
-}
+  const curF = fOut.value || 'ALL';
+  const outs = [...new Set(scoped.map(x => x.outlet))];
+  fOut.innerHTML = '<option value="ALL">All Outlets (' + outs.length + ')</option>' + outs.map(o => '<option value="'+o+'">'+o+'</option>').join('');
+  if ([...fOut.options].some(o => o.value === curF)) fOut.value = curF;
 
-function reqAccountsEdit(id) {
-  const list = getList();
-  const item = list.find(x => x.id === id);
-  if (!item) return;
-  const newRec = prompt('New Receiving Date (YYYY-MM-DD):', item.receivingDate);
-  if (!newRec) return;
-  const newPay = prompt('New Payment Release Date (YYYY-MM-DD):', item.paymentDate);
-  const reason = prompt('Reason for Edit:');
-  if (isHO) {
-    item.receivingDate = newRec; item.paymentDate = newPay || item.paymentDate; saveList(list); renderAll(); return;
-  }
-  const reqs = getAccReqs();
-  reqs.unshift({ reqId: 'areq-' + Date.now(), docId: id, outlet: item.outlet, dispatchDate: item.dispatchDate, newRec, newPay, reason: reason || '-' });
-  saveAccReqs(reqs);
-  alert('⏳ Accounts Edit Request sent to Head Office for Approval!');
-}
-
-function approveAccEdit(reqId) {
-  const reqs = getAccReqs();
-  const r = reqs.find(x => x.reqId === reqId);
-  if (!r) return;
-  const list = getList();
-  const item = list.find(x => x.id === r.docId);
-  if (item) { item.receivingDate = r.newRec; if (r.newPay) item.paymentDate = r.newPay; saveList(list); }
-  saveAccReqs(reqs.filter(x => x.reqId !== reqId));
-  renderAll();
-  alert('✓ Approved & Updated!');
-}
-
-function renderAll() {
-  const all = getList();
-  const rows = isHO ? all : all.filter(x => x.outlet === selOutlet);
-
-  masterBody.innerHTML = rows.map(r => `<tr><td>${r.timestamp}</td><td><b>${r.outlet}</b></td><td>${r.dispatchDate}</td><td>${r.person}</td><td>${r.fromDate}</td><td>${r.toDate}</td><td>${r.mode}</td><td>${r.mrn}</td><td>${r.areaManager}</td></tr>`).join('') || '<tr><td colspan="9">No dispatch entries yet.</td></tr>';
-
-  outletBody.innerHTML = rows.map(r => {
-    const dueDt = addDays(r.toDate, 10);
-    const pendDays = Math.max(0, daysDiff(r.toDate));
-    const overdue = pendDays > 10 && !r.receivingDate;
-    return `<tr><td><b>${r.code}</b></td><td>${r.timestamp}</td><td><b>${r.outlet}</b></td><td>${r.areaManager}</td><td>${r.person}</td><td>${r.dispatchDate}</td><td>${r.fromDate}</td><td>${r.toDate}</td><td>${r.mode}</td><td>${r.mrn}</td><td>${dueDt}</td><td><span class="badge ${overdue?'red':''}">${pendDays} Days</span></td><td>${r.timeline}</td><td>${overdue ? '<span class="badge red">📧 10d Auto-Mail Sent</span>' : '<span class="badge">On Time</span>'}</td></tr>`;
-  }).join('') || '<tr><td colspan="14">No records.</td></tr>';
-
-  accountsBody.innerHTML = rows.map(r => {
-    const payOverdue = r.paymentDate && daysDiff(r.paymentDate) > 0;
-    const dueDays = r.paymentDate ? daysDiff(r.paymentDate) : daysDiff(r.dispatchDate);
-    return `<tr>
-      <td>${r.timestamp}</td><td><b>${r.outlet}</b></td><td>${r.dispatchDate}</td><td>${r.person}</td><td>${r.fromDate} to ${r.toDate}</td><td>${r.mode}</td><td>${r.areaManager}</td><td>${r.accountTeam}</td>
-      <td>${r.locked ? `<b>${r.receivingDate}</b>` : `<input type="date" id="rec_${r.id}" value="${r.receivingDate}">`}</td>
-      <td>${r.locked ? `<b>${r.paymentDate || '-'}</b>` : `<input type="date" id="pay_${r.id}" value="${r.paymentDate}">`}</td>
-      <td>${payOverdue ? `<span class="badge red">⚠ Overdue ${dueDays}d (Mail Alert)</span>` : (r.receivingDate ? `<span class="badge">Received (${dueDays}d)</span>` : `<span class="badge pend">${dueDays} Days Pending</span>`)}</td>
-      <td>${r.locked ? `<button class="btn light sm" onclick="reqAccountsEdit('${r.id}')">🔒 Request Edit (HO)</button>` : `<button class="btn sm" onclick="saveAccountsEntry('${r.id}')">Save &amp; Lock</button>`}</td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="12">No records.</td></tr>';
-
-  const reqs = getAccReqs();
-  hoAccReqBody.innerHTML = reqs.map(q => `<tr><td><b>${q.outlet}</b></td><td>${q.dispatchDate}</td><td>${q.newRec}</td><td>${q.newPay||'-'}</td><td>${q.reason}</td><td><button class="btn sm" onclick="approveAccEdit('${q.reqId}')">✓ Approve</button></td></tr>`).join('') || '<tr><td colspan="6">No pending Accounts edit approvals.</td></tr>';
-}
-
-function exportTrackerExcel() {
-  const rows = [['Timestamp','Outlet','Dispatch Date','Person','From','To','Transport','MRN','Area Manager','Receiving Date','Payment Date'], ...getList().map(r=>[r.timestamp,r.outlet,r.dispatchDate,r.person,r.fromDate,r.toDate,r.mode,r.mrn,r.areaManager,r.receivingDate,r.paymentDate])];
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = 'RestaurantPro_Expense_Dispatch_Tracker.csv'; a.click();
-}
-renderAll();
-</script>
-<script id="rpAll31Outlets">
-(function(){
-  const ALL_OUTLETS = ["Head Office","Main Outlet","RestaurantPro - Noida","RestaurantPro - Delhi NCT","RestaurantPro - Uttar Pradesh","RestaurantPro - Haryana","RestaurantPro - Andhra Pradesh","RestaurantPro - Arunachal Pradesh","RestaurantPro - Assam","RestaurantPro - Bihar","RestaurantPro - Chhattisgarh","RestaurantPro - Goa","RestaurantPro - Gujarat","RestaurantPro - Himachal Pradesh","RestaurantPro - Jharkhand","RestaurantPro - Karnataka","RestaurantPro - Kerala","RestaurantPro - Madhya Pradesh","RestaurantPro - Maharashtra","RestaurantPro - Manipur","RestaurantPro - Meghalaya","RestaurantPro - Mizoram","RestaurantPro - Nagaland","RestaurantPro - Odisha","RestaurantPro - Punjab","RestaurantPro - Rajasthan","RestaurantPro - Sikkim","RestaurantPro - Tamil Nadu","RestaurantPro - Telangana","RestaurantPro - Tripura","RestaurantPro - Uttarakhand","RestaurantPro - West Bengal","RestaurantPro -"];
-  const sel = localStorage.getItem('rpSelectedOutlet') || '';
-  document.querySelectorAll('select#outlet, select#fOutlet, select#outletFilter').forEach(el => {
-    const cur = el.value || sel;
-    el.innerHTML = ALL_OUTLETS.map(o => '<option value="' + o + '">' + o + '</option>').join('');
-    if (cur && ALL_OUTLETS.includes(cur)) el.value = cur;
+  const q = (fSearch.value || '').toLowerCase();
+  const rows = scoped.filter(r => {
+    const pDays = calcPendingDays(r.to);
+    const matchOut = fOut.value === 'ALL' || r.outlet === fOut.value;
+    const matchDate = !fDate.value || r.dispDate === fDate.value;
+    const matchPend = fPend.value === 'ALL' || (fPend.value === 'OVERDUE' && pDays > 3) || (fPend.value === 'FRESH' && pDays <= 3);
+    const matchQ = !q || r.person.toLowerCase().includes(q) || r.trans.toLowerCase().includes(q) || r.outlet.toLowerCase().includes(q);
+    return matchOut && matchDate && matchPend && matchQ;
   });
-})();
-</script>
-</body>
-</html>
+
+  sheetBody.innerHTML = rows.map(r => {
+    const pDays = calcPendingDays(r.to);
+    return '<tr><td>'+r.ts+'</td><td><b>'+r.outlet+'</b></td><td>'+r.person+'</td><td>'+r.dispDate+'</td><td>'+r.from+'</td><td>'+r.to+'</td><td><b>'+r.trans+'</b></td><td>'+r.status+'</td><td>'+r.to+'</td><td><span class="'+(pDays>3?'pend-hi':'pend-ok')+'">'+pDays+' Days</span></td>' + (isHO ? '<td><button class="btn light sm" onclick="hoEditRec(\''+r.id+'\')">Edit</button></td>' : '') + '</tr>';
+  }).join('') || '<tr><td colspan="11">No dispatch records found.</td></tr>';
+
+  // Tab 3: Latest 1 entry per outlet (up to 30-31 outlets) for Head Office
+  if (isHO) {
+    const latestMap = {};
+    all.forEach(r => { if (!latestMap[r.outlet]) latestMap[r.outlet] = r; });
+    const latestList = Object.values(latestMap).slice(0, 31);
+    latestBody.innerHTML = latestList.map((r, i) => {
+      const pDays = calcPendingDays(r.to);
+      return '<tr><td>'+(i+1)+'</td><td><b>'+r.outlet+'</b></td><td>'+r.ts+'</td><td>'+r.person+'</td><td>'+r.dispDate+'</td><td>'+r.from+' &rarr; '+r.to+'</td><td><b>'+r.trans+'</b></td><td><span class="'+(pDays>3?'pend-hi':'pend-ok')+'">'+pDays+' Days</span></td><td>'+r.status+'</td></tr>';
+    }).join('');
+  }
+}
+renderSheets();
+</script></body></html>
