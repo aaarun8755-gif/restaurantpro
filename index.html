@@ -2438,5 +2438,17 @@ setInterval(() => {
   pnlEl.parentNode.insertBefore(btn, pnlEl.nextSibling);
 }, 350);
 </script>
+<script id="rpPurchaseMgmtHook">
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('div, button, a, li');
+  if (!card) return;
+  const txt = (card.innerText || '').trim();
+  if ((txt.startsWith('Purchase Management') || txt === 'Purchase Management') && card.offsetHeight < 180) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    window.location.href = '/purchase-mgmt.html';
+  }
+}, true);
+</script>
 </body>
 </html>

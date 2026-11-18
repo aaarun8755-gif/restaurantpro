@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Smart Purchase Management &amp; Sales Forecasting</title>
+<style>
+:root{--bg:#f4f7f6;--ink:#1e293b;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59}
+*{box-sizing:border-box;font-family:Cambria,Georgia,serif}
+body{margin:0;background:var(--bg);color:var(--ink)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.wrap{max-width:1460px;margin:auto;padding:16px}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:9px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer;font-size:13.5px}
+.tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;align-items:end}
+label{font-size:11.5px;font-weight:700;color:#334155;display:block;margin-bottom:3px}
+input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}
+.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}
+.btn.light{background:#fff;color:#0f766e;border:1px solid var(--line)}.btn.sm{padding:4px 9px;font-size:11.5px}
+table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
+th{background:#eef6f4;color:#115e59;padding:9px 10px;text-align:left;border:1px solid #cbd5e1}
+td{border:1px solid #cbd5e1;padding:8px 10px}
+.badge{padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center}
+@media print{.no-print{display:none!important}}
+</style></head>
+<body>
+<header class="no-print">
+  <div><strong style="font-size:18px;color:#115e59">Smart Purchase Management (Sales-Observed Forecasting)</strong> | <small id="outLbl" style="color:#64748b"></small></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn light" onclick="exportPmExcel()">Export Excel</button>
+    <button class="btn light" onclick="window.print()">Print PDF</button>
+    <a href="/index.html" class="btn light">&larr; Dashboard</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="tabs no-print">
+    <button class="tab active" id="tbSug" onclick="setPmTab('SUG')">1. Suggested Purchase &amp; Generate Supplier PDF</button>
+    <button class="tab" id="tbSup" onclick="setPmTab('SUP')">2. Create Supplier &amp; Raw Material</button>
+    <button class="tab" id="tbRec" onclick="setPmTab('REC')">3. Permanent Purchase Record (Audit Locked)</button>
+  </div>
+
+  <!-- TAB 1: SALES-OBSERVED SUGGESTED PURCHASE & PDF GENERATOR -->
+  <div id="secSug">
+    <div class="card fgrid no-print">
+      <div><label>Kitne Din ka Order Lagana Hai (Days) *</label>
+        <select id="pDays" onchange="renderSugTable()">
+          <option value="3">3 Days Stock</option>
+          <option value="7" selected>7 Days (1 Week)</option>
+          <option value="15">15 Days (Fortnight)</option>
+          <option value="30">30 Days (1 Month)</option>
+        </select>
+      </div>
+      <div><label>Select Supplier (Auto-Loads Items) *</label><select id="pSupFilter" onchange="renderSugTable()"></select></div>
+      <div><label>Category Filter</label><select id="pCatFilter" onchange="renderSugTable()"><option value="ALL">All Categories</option><option>Sweets &amp; Mithai</option><option>Dairy &amp; Khoya</option><option>Dryfruits</option><option>Packaging</option><option>Restaurant</option></select></div>
+      <div><label>Search Item</label><input id="pItemSearch" placeholder="Raw material..." oninput="renderSugTable()"></div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <strong style="color:#115e59" id="sugHeading">Sales-Observed Raw Material Requirement</strong>
+        <button class="btn" onclick="generateSupplierPdfAndSave()">Generate Supplier PO PDF &amp; Save Record &rarr;</button>
+      </div>
+      <table>
+        <thead><tr><th>Supplier Name</th><th>Category</th><th>Raw Material</th><th>Unit</th><th>Current Stock</th><th>Daily Sale Need</th><th>Suggested Purchase</th><th>Your Order Qty (Editable)</th><th>Rate (&#8377;)</th><th>Total (&#8377;)</th></tr></thead>
+        <tbody id="sugBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 2: CREATE SUPPLIER & MAP RAW MATERIALS -->
+  <div id="secSup" style="display:none">
+    <div class="card">
+      <h3 style="margin-top:0;color:#115e59">+ Create Supplier &amp; Add Raw Material</h3>
+      <form id="supMatForm" class="fgrid">
+        <div><label>Supplier Name *</label><input id="sSupName" required placeholder="e.g. Tamanna Traders"></div>
+        <div><label>Supplier Mobile / GST</label><input id="sSupPhone" placeholder="Mobile or GSTIN"></div>
+        <div><label>Category *</label><select id="sCat"><option>Sweets &amp; Mithai</option><option>Dairy &amp; Khoya</option><option>Dryfruits</option><option>Packaging</option><option>Restaurant</option></select></div>
+        <div><label>Raw Material Name *</label><input id="sMatName" required placeholder="e.g. Khoya (kg)"></div>
+        <div><label>Unit *</label><select id="sUnit"><option>KG</option><option>Litre</option><option>Piece</option><option>Box</option></select></div>
+        <div><label>Rate per Unit (&#8377;) *</label><input id="sRate" type="number" step="0.01" required placeholder="280"></div>
+        <div><label>Avg Daily Need (Sales Based) *</label><input id="sDaily" type="number" step="0.1" required placeholder="12"></div>
+        <div><button class="btn" style="width:100%">+ Add to Supplier</button></div>
+      </form>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Registered Suppliers &amp; Mapped Raw Materials</h3>
+      <table><thead><tr><th>Supplier Name</th><th>Mobile/GST</th><th>Category</th><th>Raw Material</th><th>Unit</th><th>Rate (&#8377;)</th><th>Avg Daily Need</th></tr></thead><tbody id="supListBody"></tbody></table>
+    </div>
+  </div>
+
+  <!-- TAB 3: PERMANENT AUDIT-LOCKED PURCHASE RECORDS (NO EDIT / NO DELETE) -->
+  <div id="secRec" style="display:none">
+    <div class="card fgrid no-print">
+      <div id="hoOutFilterBox" style="display:none"><label>Head Office ? Outlet Filter *</label><select id="recOutFilter" onchange="renderRecords()"></select></div>
+      <div><label>From Date</label><input type="date" id="recFrom" onchange="renderRecords()"></div>
+      <div><label>To Date</label><input type="date" id="recTo" onchange="renderRecords()"></div>
+      <div><label>Search PO / Supplier</label><input id="recSearch" placeholder="PO No. or Supplier..." oninput="renderRecords()"></div>
+      <div><button class="btn light" style="width:100%" onclick="recFrom.value='';recTo.value='';recSearch.value='';renderRecords()">Clear Filters</button></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h3 style="margin:0;color:#115e59">Permanent Purchase Order Ledger (Edit &amp; Delete Disabled for Audit Safety)</h3>
+        <span class="badge">Audit-Locked Records</span>
+      </div>
+      <table><thead><tr><th>PO No.</th><th>Date</th><th>Outlet</th><th>Supplier</th><th>Days</th><th>Items Ordered</th><th>Total Amount (&#8377;)</th><th>Supplier PDF</th></tr></thead><tbody id="recBody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- SUPPLIER PO PDF MODAL -->
+<div class="modal" id="poPdfModal">
+  <div style="background:#fff;border-radius:14px;padding:22px;width:94%;max-width:660px;max-height:88vh;overflow:auto">
+    <div id="poPdfPrintArea"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px" class="no-print">
+      <button class="btn light" onclick="poPdfModal.style.display='none'">Close</button>
+      <button class="btn" onclick="window.print()">Download / Print Supplier PDF</button>
+    </div>
+  </div>
+</div>
+<script>
+const OUTLETS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+const isHO = curOut === 'Head Office';
+outLbl.textContent = isHO ? 'Head Office Master View (All 31 Outlets)' : 'Active Unit: ' + curOut;
+
+if (isHO) {
+  hoOutFilterBox.style.display = 'block';
+  recOutFilter.innerHTML = '<option value="ALL">All 31 Outlets</option>' + OUTLETS.map(o => '<option value="'+o+'">'+o+'</option>').join('');
+}
+
+function getSupCatalog() {
+  let l = JSON.parse(localStorage.getItem('rpSupplierCatalog') || '[]');
+  if (!l.length) {
+    l = [
+      { id: 'sm-1', sup: 'Brij Mohan Dairy', phone: '9811220011', cat: 'Dairy & Khoya', mat: 'Khoya (kg)', unit: 'KG', rate: 280, daily: 14 },
+      { id: 'sm-2', sup: 'Brij Mohan Dairy', phone: '9811220011', cat: 'Dairy & Khoya', mat: 'Desi Ghee (kg)', unit: 'KG', rate: 540, daily: 8 },
+      { id: 'sm-3', sup: 'Tamanna Traders', phone: '9811220022', cat: 'Sweets & Mithai', mat: 'Maida (kg)', unit: 'KG', rate: 40, daily: 18 },
+      { id: 'sm-4', sup: 'Tamanna Traders', phone: '9811220022', cat: 'Sweets & Mithai', mat: 'Sugar (kg)', unit: 'KG', rate: 42, daily: 22 },
+      { id: 'sm-5', sup: 'Ajay Kumar Dryfruits', phone: '9811220033', cat: 'Dryfruits', mat: 'Kaju / Cashew (kg)', unit: 'KG', rate: 720, daily: 6 },
+      { id: 'sm-6', sup: 'Metro Packaging', phone: '9811220044', cat: 'Packaging', mat: '1 Kg Sweet Box', unit: 'Piece', rate: 18, daily: 45 }
+    ];
+    localStorage.setItem('rpSupplierCatalog', JSON.stringify(l));
+  }
+  return l;
+}
+
+function getLockedRecords() { return JSON.parse(localStorage.getItem('rpLockedPurchasePOs') || '[]'); }
+
+function setPmTab(t) {
+  secSug.style.display = t === 'SUG' ? 'block' : 'none';
+  secSup.style.display = t === 'SUP' ? 'block' : 'none';
+  secRec.style.display = t === 'REC' ? 'block' : 'none';
+  tbSug.classList.toggle('active', t === 'SUG');
+  tbSup.classList.toggle('active', t === 'SUP');
+  tbRec.classList.toggle('active', t === 'REC');
+  refreshSupDropdown(); renderSugTable(); renderSupList(); renderRecords();
+}
+
+function refreshSupDropdown() {
+  const sups = [...new Set(getSupCatalog().map(x => x.sup))];
+  const cur = pSupFilter.value || 'ALL';
+  pSupFilter.innerHTML = '<option value="ALL">All Suppliers (' + sups.length + ')</option>' + sups.map(s => '<option value="'+s+'">'+s+'</option>').join('');
+  if ([...pSupFilter.options].some(o => o.value === cur)) pSupFilter.value = cur;
+}
+
+supMatForm.onsubmit = e => {
+  e.preventDefault();
+  const l = getSupCatalog();
+  l.unshift({ id: 'sm-' + Date.now(), sup: sSupName.value.trim(), phone: sSupPhone.value.trim() || '-', cat: sCat.value, mat: sMatName.value.trim(), unit: sUnit.value, rate: Number(sRate.value), daily: Number(sDaily.value) });
+  localStorage.setItem('rpSupplierCatalog', JSON.stringify(l));
+  sMatName.value = ''; sRate.value = ''; sDaily.value = '';
+  refreshSupDropdown(); renderSupList(); renderSugTable();
+  alert('Supplier & Raw Material Added!');
+};
+
+function renderSupList() {
+  supListBody.innerHTML = getSupCatalog().map(x => '<tr><td><b>'+x.sup+'</b></td><td>'+x.phone+'</td><td>'+x.cat+'</td><td><b>'+x.mat+'</b></td><td>'+x.unit+'</td><td>&#8377;'+x.rate+'</td><td>'+x.daily+' '+x.unit+'/day</td></tr>').join('');
+}
+function renderSugTable() {
+  const days = Number(pDays.value || 7), supF = pSupFilter.value || 'ALL', catF = pCatFilter.value || 'ALL', q = (pItemSearch.value || '').toLowerCase();
+  const st = JSON.parse(localStorage.getItem('rpInventoryStock::' + curOut) || localStorage.getItem('rpInventoryStock') || '{}');
+  const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
+  const salesFactor = bills.length > 10 ? 1.15 : 1.0;
+  const items = getSupCatalog().filter(x => (supF === 'ALL' || x.sup === supF) && (catF === 'ALL' || x.cat === catF) && (!q || x.mat.toLowerCase().includes(q)));
+  sugHeading.textContent = 'Sales-Observed Requirement for Next ' + days + ' Days (' + items.length + ' Items)';
+
+  sugBody.innerHTML = items.map(x => {
+    const avail = Number(st[x.mat] || 0), need = Math.ceil(x.daily * days * salesFactor), sug = Math.max(0, need - avail), tot = +(sug * x.rate).toFixed(2);
+    return '<tr class="sug-row" data-sup="'+x.sup+'" data-mat="'+x.mat+'" data-unit="'+x.unit+'" data-rate="'+x.rate+'">' +
+      '<td><b>'+x.sup+'</b></td><td>'+x.cat+'</td><td><b>'+x.mat+'</b></td><td>'+x.unit+'</td>' +
+      '<td style="color:'+(avail<need?'#dc2626':'#16a34a')+';font-weight:700">'+avail+'</td><td>'+x.daily+' / day</td>' +
+      '<td><span class="badge">'+sug+' '+x.unit+'</span></td>' +
+      '<td><input type="number" class="ord-qty" value="'+sug+'" min="0" step="0.5" style="width:95px;font-weight:700" oninput="recalcSugRow(this)"></td>' +
+      '<td>&#8377;'+x.rate+'</td><td class="row-tot" style="font-weight:700">&#8377;'+tot.toFixed(2)+'</td></tr>';
+  }).join('') || '<tr><td colspan="10">No items match this filter.</td></tr>';
+}
+
+function recalcSugRow(inp) {
+  const tr = inp.closest('tr');
+  tr.querySelector('.row-tot').textContent = 'Rs. ' + (Number(inp.value || 0) * Number(tr.dataset.rate || 0)).toFixed(2);
+}
+
+function generateSupplierPdfAndSave() {
+  const chosen = [];
+  document.querySelectorAll('.sug-row').forEach(tr => {
+    const qty = Number(tr.querySelector('.ord-qty').value || 0);
+    if (qty > 0) chosen.push({ sup: tr.dataset.sup, mat: tr.dataset.mat, unit: tr.dataset.unit, rate: Number(tr.dataset.rate), qty, amt: +(qty * Number(tr.dataset.rate)).toFixed(2) });
+  });
+  if (!chosen.length) return alert('Kam se kam 1 item mein Order Qty bharein.');
+  const poNo = 'PO-' + Math.floor(100000 + Math.random()*899999), dateStr = new Date().toISOString().slice(0,10);
+  const supName = [...new Set(chosen.map(x => x.sup))].join(', '), grandTot = chosen.reduce((s,x)=>s+x.amt,0);
+  const itemSummary = chosen.map(x => x.mat + ' (' + x.qty + ' ' + x.unit + ')').join(', ');
+  const rec = { poNo, date: dateStr, outlet: isHO ? 'Main Outlet' : curOut, supplier: supName, days: pDays.value + ' Days', itemsText: itemSummary, items: chosen, total: +grandTot.toFixed(2) };
+  const all = getLockedRecords(); all.unshift(rec); localStorage.setItem('rpLockedPurchasePOs', JSON.stringify(all));
+  openPoPdf(poNo); renderRecords();
+}
+
+function openPoPdf(poNo) {
+  const r = getLockedRecords().find(x => x.poNo === poNo); if (!r) return;
+  poPdfPrintArea.innerHTML = '<div style="border:2px solid #0f766e;padding:20px;border-radius:10px"><div style="display:flex;justify-content:space-between;border-bottom:1px solid #cbd5e1;padding-bottom:8px"><div><strong style="font-size:19px;color:#115e59">RESTAURANTPRO PURCHASE ORDER</strong><br><small>Outlet: ' + r.outlet + '</small></div><div style="text-align:right"><b>PO No:</b> ' + r.poNo + '<br><b>Date:</b> ' + r.date + '</div></div><p style="font-size:13px"><b>To Supplier:</b> ' + r.supplier + ' &nbsp;|&nbsp; <b>Period:</b> ' + r.days + '</p><table style="width:100%;border-collapse:collapse;font-size:12.5px"><thead><tr><th style="border:1px solid #cbd5e1;padding:7px">Raw Material</th><th style="border:1px solid #cbd5e1;padding:7px">Order Qty</th><th style="border:1px solid #cbd5e1;padding:7px">Rate</th><th style="border:1px solid #cbd5e1;padding:7px">Amount</th></tr></thead><tbody>' + (r.items||[]).map(i => '<tr><td style="border:1px solid #cbd5e1;padding:7px">' + i.mat + '</td><td style="border:1px solid #cbd5e1;padding:7px"><b>' + i.qty + ' ' + i.unit + '</b></td><td style="border:1px solid #cbd5e1;padding:7px">&#8377;' + i.rate + '</td><td style="border:1px solid #cbd5e1;padding:7px"><b>&#8377;' + i.amt.toFixed(2) + '</b></td></tr>').join('') + '</tbody></table><h3 style="text-align:right;color:#0f766e;margin-bottom:0">Grand Total: &#8377;' + Number(r.total).toFixed(2) + '</h3></div>';
+  poPdfModal.style.display = 'flex';
+}
+
+function renderRecords() {
+  const all = getLockedRecords(), outF = isHO ? (recOutFilter.value || 'ALL') : curOut, q = (recSearch.value || '').toLowerCase();
+  const rows = all.filter(r => (outF === 'ALL' || r.outlet === outF) && (!recFrom.value || r.date >= recFrom.value) && (!recTo.value || r.date <= recTo.value) && (!q || r.poNo.toLowerCase().includes(q) || r.supplier.toLowerCase().includes(q) || r.itemsText.toLowerCase().includes(q)));
+  recBody.innerHTML = rows.map(r => '<tr><td><b>'+r.poNo+'</b></td><td>'+r.date+'</td><td><b>'+r.outlet+'</b></td><td>'+r.supplier+'</td><td>'+r.days+'</td><td>'+r.itemsText+'</td><td><b>&#8377;'+Number(r.total).toFixed(2)+'</b></td><td><button class="btn light sm" onclick="openPoPdf(\''+r.poNo+'\')">View / Download PDF</button></td></tr>').join('') || '<tr><td colspan="8">No purchase orders saved yet.</td></tr>';
+}
+
+function exportPmExcel() {
+  const all = getLockedRecords(), outF = isHO ? (recOutFilter.value || 'ALL') : curOut;
+  const rows = [['PO No','Date','Outlet','Supplier','Days','Items','Total'], ...all.filter(r=>outF==='ALL'||r.outlet===outF).map(r=>[r.poNo,r.date,'"'+r.outlet+'"','"'+r.supplier+'"',r.days,'"'+r.itemsText+'"',r.total])];
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = 'Purchase_Management_Ledger.csv'; a.click();
+}
+refreshSupDropdown(); renderSugTable(); renderSupList(); renderRecords();
+</script></body></html>
