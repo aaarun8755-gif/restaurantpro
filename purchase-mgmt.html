@@ -70,16 +70,21 @@ td{border:1px solid #cbd5e1;padding:8px 10px}
   <!-- TAB 2: CREATE SUPPLIER & MAP RAW MATERIALS -->
   <div id="secSup" style="display:none">
     <div class="card">
-      <h3 style="margin-top:0;color:#115e59">+ Create Supplier &amp; Add Raw Material</h3>
-      <form id="supMatForm" class="fgrid">
-        <div><label>Supplier Name *</label><input id="sSupName" required placeholder="e.g. Tamanna Traders"></div>
-        <div><label>Supplier Mobile / GST</label><input id="sSupPhone" placeholder="Mobile or GSTIN"></div>
-        <div><label>Category *</label><select id="sCat"><option>Sweets &amp; Mithai</option><option>Dairy &amp; Khoya</option><option>Dryfruits</option><option>Packaging</option><option>Restaurant</option></select></div>
-        <div><label>Raw Material Name *</label><input id="sMatName" required placeholder="e.g. Khoya (kg)"></div>
-        <div><label>Unit *</label><select id="sUnit"><option>KG</option><option>Litre</option><option>Piece</option><option>Box</option></select></div>
-        <div><label>Fixed Rate (&#8377;) *</label><input id="sRate" type="number" step="0.01" required placeholder="280"></div><div><label>Fixed GST % *</label><select id="sGst"><option value="0">0%</option><option value="5" selected>5% GST</option><option value="12">12% GST</option><option value="18">18% GST</option></select></div>
-        <div><label>Avg Daily Need (Sales Based) *</label><input id="sDaily" type="number" step="0.1" required placeholder="12"></div>
-        <div><button class="btn" style="width:100%">+ Add to Supplier</button></div>
+      <h3 style="margin-top:0;color:#115e59">+ Map Raw Materials to Head-Office Approved Supplier</h3>
+      <form id="supMatForm">
+        <div class="fgrid" style="margin-bottom:10px">
+          <div><label>Select Head-Office Approved Supplier *</label><select id="sSupName" required onchange="autoFillSupMobile()"></select></div>
+          <div><label>Supplier Mobile / GSTIN (Auto-Filled)</label><input id="sSupPhone" readonly style="background:#f8fafc"></div>
+          <div><label>Default Category *</label><select id="sCat"><option>Sweets &amp; Mithai</option><option>Dairy &amp; Khoya</option><option>Dryfruits</option><option>Packaging</option><option>Restaurant</option></select></div>
+        </div>
+        <div style="background:#f8fafc;padding:12px;border-radius:10px;border:1px solid #cbd5e1">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <strong style="font-size:12.5px;color:#0f766e">Add Raw Materials Supplied by This Approved Vendor:</strong>
+            <button type="button" class="btn light sm" onclick="addSupMatRow()">+ Add Raw Material Row</button>
+          </div>
+          <div id="supMatRowsWrap"></div>
+        </div>
+        <div style="margin-top:12px;text-align:right"><button class="btn">Save Approved Supplier Materials &#10003;</button></div>
       </form>
     </div>
     <div class="card">
@@ -288,5 +293,77 @@ window.openPoPdf = function(poNo) {
 };
 
 renderSugTable();
+</script>
+
+<script>
+function loadApprovedVendorsDropdown() {
+  const autoV = JSON.parse(localStorage.getItem('rpAutoPurchases') || '[]').map(x => ({ name: x.vendor, phone: x.gstin || 'Approved Vendor' }));
+  const vpV = JSON.parse(localStorage.getItem('rpVendorPayments') || '[]').map(x => ({ name: x.vendor, phone: x.phone || 'Approved Vendor' }));
+  const catV = getSupCatalog().map(x => ({ name: x.sup, phone: x.phone || 'Approved Vendor' }));
+  const defaults = [
+    { name: 'Brij Mohan Dairy', phone: '9811220011 (HO Approved)' },
+    { name: 'Tamanna Traders', phone: '9811220022 (HO Approved)' },
+    { name: 'Ajay Kumar Dryfruits', phone: '9811220033 (HO Approved)' },
+    { name: 'Metro Packaging', phone: '9811220044 (HO Approved)' },
+    { name: 'Aarvi Horeca Solutions', phone: '9811220055 (HO Approved)' }
+  ];
+  const map = {};
+  [...defaults, ...autoV, ...vpV, ...catV].forEach(v => { if (v.name && !map[v.name]) map[v.name] = v.phone; });
+  window._approvedSupMap = map;
+  const names = Object.keys(map);
+  if (document.getElementById('sSupName')) {
+    sSupName.innerHTML = names.map(n => '<option value="' + n + '">' + n + ' (HO Approved)</option>').join('');
+    autoFillSupMobile();
+  }
+}
+
+window.autoFillSupMobile = function() {
+  if (document.getElementById('sSupPhone') && window._approvedSupMap) {
+    sSupPhone.value = window._approvedSupMap[sSupName.value] || 'HO Approved Vendor';
+  }
+};
+
+window.addSupMatRow = function(mat='', unit='KG', rate='', gst='5', daily='') {
+  const div = document.createElement('div');
+  div.className = 'sm-row';
+  div.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:6px';
+  div.innerHTML = '<input class="sm-mat" required placeholder="Raw Material (e.g. Khoya)" value="'+mat+'">' +
+    '<select class="sm-unit"><option>KG</option><option>Litre</option><option>Piece</option><option>Box</option></select>' +
+    '<input class="sm-rate" type="number" step="0.01" required placeholder="Fixed Rate Rs" value="'+rate+'">' +
+    '<select class="sm-gst"><option value="0">0% GST</option><option value="5" selected>5% GST</option><option value="12">12% GST</option><option value="18">18% GST</option></select>' +
+    '<input class="sm-daily" type="number" step="0.1" required placeholder="Daily Need" value="'+daily+'">' +
+    '<button type="button" class="btn light sm" style="color:#dc2626" onclick="this.parentElement.remove()">X</button>';
+  supMatRowsWrap.appendChild(div);
+};
+
+window.renderSupList = function() {
+  supListBody.innerHTML = getSupCatalog().map(x =>
+    '<tr><td><b>' + x.sup + '</b></td><td>' + (x.phone||'HO Approved') + '</td><td>' + x.cat + '</td><td><b>' + x.mat + '</b></td><td>' + x.unit + '</td><td><b>&#8377;' + x.rate + '</b></td><td><b>' + (x.gst||0) + '%</b></td><td>' + x.daily + ' ' + x.unit + '/day</td></tr>'
+  ).join('');
+};
+
+supMatForm.onsubmit = function(e) {
+  e.preventDefault();
+  const rows = Array.from(document.querySelectorAll('.sm-row')).map(r => ({
+    mat: r.querySelector('.sm-mat').value.trim(),
+    unit: r.querySelector('.sm-unit').value,
+    rate: Number(r.querySelector('.sm-rate').value || 0),
+    gst: Number(r.querySelector('.sm-gst').value || 0),
+    daily: Number(r.querySelector('.sm-daily').value || 0)
+  })).filter(x => x.mat && x.rate > 0);
+  if (!rows.length) return alert('Kam se kam 1 Raw Material aur Fixed Rate bharein.');
+  const cat = getSupCatalog();
+  rows.forEach(item => {
+    cat.unshift({ id: 'sm-' + Date.now() + Math.random(), sup: sSupName.value, phone: sSupPhone.value, cat: sCat.value, ...item });
+  });
+  localStorage.setItem('rpSupplierCatalog', JSON.stringify(cat));
+  supMatRowsWrap.innerHTML = ''; addSupMatRow(); addSupMatRow();
+  refreshSupDropdown(); renderSupList(); renderSugTable();
+  alert(rows.length + ' Raw Materials mapped to Approved Supplier: ' + sSupName.value);
+};
+
+loadApprovedVendorsDropdown();
+if (document.getElementById('supMatRowsWrap')) { supMatRowsWrap.innerHTML = ''; addSupMatRow(); addSupMatRow(); }
+renderSupList();
 </script>
 </body></html>
