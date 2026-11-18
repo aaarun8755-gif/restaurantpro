@@ -61,7 +61,7 @@ td{border:1px solid #cbd5e1;padding:8px 10px}
         <button class="btn" onclick="generateSupplierPdfAndSave()">Generate Supplier PO PDF &amp; Save Record &rarr;</button>
       </div>
       <table>
-        <thead><tr><th>Supplier Name</th><th>Category</th><th>Raw Material</th><th>Unit</th><th>Current Stock</th><th>Daily Sale Need</th><th>Suggested Purchase</th><th>Your Order Qty (Editable)</th><th>Rate (&#8377;)</th><th>Total (&#8377;)</th></tr></thead>
+        <thead><tr><th>Supplier Name</th><th>Category</th><th>Raw Material</th><th>Unit</th><th>Current Stock</th><th>Daily Sale Need</th><th>Suggested Purchase</th><th>Your Order Qty (Editable)</th><th>Fixed Rate (&#8377;)</th><th>Fixed GST %</th><th>GST Amt (&#8377;)</th><th>Grand Total (&#8377;)</th></tr></thead>
         <tbody id="sugBody"></tbody>
       </table>
     </div>
@@ -77,14 +77,14 @@ td{border:1px solid #cbd5e1;padding:8px 10px}
         <div><label>Category *</label><select id="sCat"><option>Sweets &amp; Mithai</option><option>Dairy &amp; Khoya</option><option>Dryfruits</option><option>Packaging</option><option>Restaurant</option></select></div>
         <div><label>Raw Material Name *</label><input id="sMatName" required placeholder="e.g. Khoya (kg)"></div>
         <div><label>Unit *</label><select id="sUnit"><option>KG</option><option>Litre</option><option>Piece</option><option>Box</option></select></div>
-        <div><label>Rate per Unit (&#8377;) *</label><input id="sRate" type="number" step="0.01" required placeholder="280"></div>
+        <div><label>Fixed Rate (&#8377;) *</label><input id="sRate" type="number" step="0.01" required placeholder="280"></div><div><label>Fixed GST % *</label><select id="sGst"><option value="0">0%</option><option value="5" selected>5% GST</option><option value="12">12% GST</option><option value="18">18% GST</option></select></div>
         <div><label>Avg Daily Need (Sales Based) *</label><input id="sDaily" type="number" step="0.1" required placeholder="12"></div>
         <div><button class="btn" style="width:100%">+ Add to Supplier</button></div>
       </form>
     </div>
     <div class="card">
       <h3 style="margin-top:0">Registered Suppliers &amp; Mapped Raw Materials</h3>
-      <table><thead><tr><th>Supplier Name</th><th>Mobile/GST</th><th>Category</th><th>Raw Material</th><th>Unit</th><th>Rate (&#8377;)</th><th>Avg Daily Need</th></tr></thead><tbody id="supListBody"></tbody></table>
+      <table><thead><tr><th>Supplier Name</th><th>Mobile/GST</th><th>Category</th><th>Raw Material</th><th>Unit</th><th>Fixed Rate (&#8377;)</th><th>Fixed GST %</th><th>Avg Daily Need</th></tr></thead><tbody id="supListBody"></tbody></table>
     </div>
   </div>
 
@@ -132,12 +132,12 @@ function getSupCatalog() {
   let l = JSON.parse(localStorage.getItem('rpSupplierCatalog') || '[]');
   if (!l.length) {
     l = [
-      { id: 'sm-1', sup: 'Brij Mohan Dairy', phone: '9811220011', cat: 'Dairy & Khoya', mat: 'Khoya (kg)', unit: 'KG', rate: 280, daily: 14 },
-      { id: 'sm-2', sup: 'Brij Mohan Dairy', phone: '9811220011', cat: 'Dairy & Khoya', mat: 'Desi Ghee (kg)', unit: 'KG', rate: 540, daily: 8 },
-      { id: 'sm-3', sup: 'Tamanna Traders', phone: '9811220022', cat: 'Sweets & Mithai', mat: 'Maida (kg)', unit: 'KG', rate: 40, daily: 18 },
-      { id: 'sm-4', sup: 'Tamanna Traders', phone: '9811220022', cat: 'Sweets & Mithai', mat: 'Sugar (kg)', unit: 'KG', rate: 42, daily: 22 },
-      { id: 'sm-5', sup: 'Ajay Kumar Dryfruits', phone: '9811220033', cat: 'Dryfruits', mat: 'Kaju / Cashew (kg)', unit: 'KG', rate: 720, daily: 6 },
-      { id: 'sm-6', sup: 'Metro Packaging', phone: '9811220044', cat: 'Packaging', mat: '1 Kg Sweet Box', unit: 'Piece', rate: 18, daily: 45 }
+      { id: 'sm-1', sup: 'Brij Mohan Dairy', phone: '9811220011', cat: 'Dairy & Khoya', mat: 'Khoya (kg)', unit: 'KG', rate: 280, gst: 5, daily: 14 },
+      { id: 'sm-2', sup: 'Brij Mohan Dairy', phone: '9811220011', cat: 'Dairy & Khoya', mat: 'Desi Ghee (kg)', unit: 'KG', rate: 540, gst: 12, daily: 8 },
+      { id: 'sm-3', sup: 'Tamanna Traders', phone: '9811220022', cat: 'Sweets & Mithai', mat: 'Maida (kg)', unit: 'KG', rate: 40, gst: 5, daily: 18 },
+      { id: 'sm-4', sup: 'Tamanna Traders', phone: '9811220022', cat: 'Sweets & Mithai', mat: 'Sugar (kg)', unit: 'KG', rate: 42, gst: 5, daily: 22 },
+      { id: 'sm-5', sup: 'Ajay Kumar Dryfruits', phone: '9811220033', cat: 'Dryfruits', mat: 'Kaju / Cashew (kg)', unit: 'KG', rate: 720, gst: 5, daily: 6 },
+      { id: 'sm-6', sup: 'Metro Packaging', phone: '9811220044', cat: 'Packaging', mat: '1 Kg Sweet Box', unit: 'Piece', rate: 18, gst: 18, daily: 45 }
     ];
     localStorage.setItem('rpSupplierCatalog', JSON.stringify(l));
   }
@@ -166,7 +166,7 @@ function refreshSupDropdown() {
 supMatForm.onsubmit = e => {
   e.preventDefault();
   const l = getSupCatalog();
-  l.unshift({ id: 'sm-' + Date.now(), sup: sSupName.value.trim(), phone: sSupPhone.value.trim() || '-', cat: sCat.value, mat: sMatName.value.trim(), unit: sUnit.value, rate: Number(sRate.value), daily: Number(sDaily.value) });
+  l.unshift({ id: 'sm-' + Date.now(), sup: sSupName.value.trim(), phone: sSupPhone.value.trim() || '-', cat: sCat.value, mat: sMatName.value.trim(), unit: sUnit.value, rate: Number(sRate.value), gst: Number(sGst.value || 0), daily: Number(sDaily.value) });
   localStorage.setItem('rpSupplierCatalog', JSON.stringify(l));
   sMatName.value = ''; sRate.value = ''; sDaily.value = '';
   refreshSupDropdown(); renderSupList(); renderSugTable();
@@ -233,4 +233,60 @@ function exportPmExcel() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = 'Purchase_Management_Ledger.csv'; a.click();
 }
 refreshSupDropdown(); renderSugTable(); renderSupList(); renderRecords();
-</script></body></html>
+</script>
+<script>
+window.renderSugTable = function() {
+  const days = Number(pDays.value || 7), supF = pSupFilter.value || 'ALL', catF = pCatFilter.value || 'ALL', q = (pItemSearch.value || '').toLowerCase();
+  const st = JSON.parse(localStorage.getItem('rpInventoryStock::' + curOut) || localStorage.getItem('rpInventoryStock') || '{}');
+  const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
+  const salesFactor = bills.length > 10 ? 1.15 : 1.0;
+  const items = getSupCatalog().filter(x => (supF === 'ALL' || x.sup === supF) && (catF === 'ALL' || x.cat === catF) && (!q || x.mat.toLowerCase().includes(q)));
+  sugHeading.textContent = 'Sales-Observed Requirement for Next ' + days + ' Days (' + items.length + ' Items)';
+
+  sugBody.innerHTML = items.map(x => {
+    const avail = Number(st[x.mat] || 0), need = Math.ceil(x.daily * days * salesFactor), sug = Math.max(0, need - avail);
+    const gPct = Number(x.gst || 0), sub = sug * x.rate, gAmt = +(sub * gPct / 100).toFixed(2), tot = +(sub + gAmt).toFixed(2);
+    return '<tr class="sug-row" data-sup="' + x.sup + '" data-mat="' + x.mat + '" data-unit="' + x.unit + '" data-rate="' + x.rate + '" data-gst="' + gPct + '">' +
+      '<td><b>' + x.sup + '</b></td><td>' + x.cat + '</td><td><b>' + x.mat + '</b></td><td>' + x.unit + '</td>' +
+      '<td style="color:' + (avail < need ? '#dc2626' : '#16a34a') + ';font-weight:700">' + avail + '</td><td>' + x.daily + ' / day</td>' +
+      '<td><span class="badge">' + sug + ' ' + x.unit + '</span></td>' +
+      '<td><input type="number" class="ord-qty" value="' + sug + '" min="0" step="0.5" style="width:95px;font-weight:700" oninput="recalcSugRow(this)"></td>' +
+      '<td><b>&#8377;' + x.rate + '</b></td><td><b>' + gPct + '%</b></td><td class="row-gst">&#8377;' + gAmt.toFixed(2) + '</td><td class="row-tot" style="font-weight:700">&#8377;' + tot.toFixed(2) + '</td></tr>';
+  }).join('') || '<tr><td colspan="12">No items match this filter.</td></tr>';
+};
+
+window.recalcSugRow = function(inp) {
+  const tr = inp.closest('tr');
+  const sub = Number(inp.value || 0) * Number(tr.dataset.rate || 0);
+  const ga = +(sub * Number(tr.dataset.gst || 0) / 100).toFixed(2);
+  tr.querySelector('.row-gst').textContent = 'Rs. ' + ga.toFixed(2);
+  tr.querySelector('.row-tot').textContent = 'Rs. ' + (sub + ga).toFixed(2);
+};
+
+window.generateSupplierPdfAndSave = function() {
+  const chosen = [];
+  document.querySelectorAll('.sug-row').forEach(tr => {
+    const qty = Number(tr.querySelector('.ord-qty').value || 0);
+    if (qty > 0) {
+      const r = Number(tr.dataset.rate), g = Number(tr.dataset.gst || 0), s = qty * r, ga = +(s * g / 100).toFixed(2);
+      chosen.push({ sup: tr.dataset.sup, mat: tr.dataset.mat, unit: tr.dataset.unit, rate: r, gst: g, gstAmt: ga, qty, amt: +(s + ga).toFixed(2) });
+    }
+  });
+  if (!chosen.length) return alert('Kam se kam 1 item mein Order Qty bharein.');
+  const poNo = 'PO-' + Math.floor(100000 + Math.random()*899999), dateStr = new Date().toISOString().slice(0,10);
+  const supName = [...new Set(chosen.map(x => x.sup))].join(', '), grandTot = chosen.reduce((s,x)=>s+x.amt,0);
+  const itemSummary = chosen.map(x => x.mat + ' (' + x.qty + ' ' + x.unit + ' @' + x.gst + '% GST)').join(', ');
+  const rec = { poNo, date: dateStr, outlet: isHO ? 'Main Outlet' : curOut, supplier: supName, days: pDays.value + ' Days', itemsText: itemSummary, items: chosen, total: +grandTot.toFixed(2) };
+  const all = getLockedRecords(); all.unshift(rec); localStorage.setItem('rpLockedPurchasePOs', JSON.stringify(all));
+  openPoPdf(poNo); renderRecords();
+};
+
+window.openPoPdf = function(poNo) {
+  const r = getLockedRecords().find(x => x.poNo === poNo); if (!r) return;
+  poPdfPrintArea.innerHTML = '<div style="border:2px solid #0f766e;padding:20px;border-radius:10px"><div style="display:flex;justify-content:space-between;border-bottom:1px solid #cbd5e1;padding-bottom:8px"><div><strong style="font-size:19px;color:#115e59">RESTAURANTPRO PURCHASE ORDER</strong><br><small>Outlet: ' + r.outlet + '</small></div><div style="text-align:right"><b>PO No:</b> ' + r.poNo + '<br><b>Date:</b> ' + r.date + '</div></div><p style="font-size:13px"><b>To Supplier:</b> ' + r.supplier + ' &nbsp;|&nbsp; <b>Period:</b> ' + r.days + '</p><table style="width:100%;border-collapse:collapse;font-size:12.5px"><thead><tr><th style="border:1px solid #cbd5e1;padding:7px">Raw Material</th><th style="border:1px solid #cbd5e1;padding:7px">Order Qty</th><th style="border:1px solid #cbd5e1;padding:7px">Fixed Rate</th><th style="border:1px solid #cbd5e1;padding:7px">GST %</th><th style="border:1px solid #cbd5e1;padding:7px">GST Amt</th><th style="border:1px solid #cbd5e1;padding:7px">Total</th></tr></thead><tbody>' + (r.items||[]).map(i => '<tr><td style="border:1px solid #cbd5e1;padding:7px">' + i.mat + '</td><td style="border:1px solid #cbd5e1;padding:7px"><b>' + i.qty + ' ' + i.unit + '</b></td><td style="border:1px solid #cbd5e1;padding:7px">&#8377;' + i.rate + '</td><td style="border:1px solid #cbd5e1;padding:7px">' + (i.gst||0) + '%</td><td style="border:1px solid #cbd5e1;padding:7px">&#8377;' + (i.gstAmt||0).toFixed(2) + '</td><td style="border:1px solid #cbd5e1;padding:7px"><b>&#8377;' + i.amt.toFixed(2) + '</b></td></tr>').join('') + '</tbody></table><h3 style="text-align:right;color:#0f766e;margin-bottom:0">Grand Total (Incl. GST): &#8377;' + Number(r.total).toFixed(2) + '</h3></div>';
+  poPdfModal.style.display = 'flex';
+};
+
+renderSugTable();
+</script>
+</body></html>
