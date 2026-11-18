@@ -2385,5 +2385,17 @@ setInterval(() => {
   });
 }, 350);
 </script>
+<script id="rpDocTrackerHook">
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('div, button, a, li');
+  if (!card) return;
+  const txt = (card.innerText || '').trim();
+  if ((txt.startsWith('Document Tracker') || txt === 'Document Tracker') && card.offsetHeight < 180) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    window.location.href = '/document-tracker.html';
+  }
+}, true);
+</script>
 </body>
 </html>
