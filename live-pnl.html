@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Live Department &amp; Consolidated Profit &amp; Loss</title>
+<style>
+:root{--bg:#f4f7f6;--ink:#1e293b;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59}
+*{box-sizing:border-box;font-family:Cambria,Georgia,serif}
+body{margin:0;background:var(--bg);color:var(--ink)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.wrap{max-width:1480px;margin:auto;padding:16px}
+.tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.tab{padding:10px 18px;border-radius:10px;border:1px solid var(--line);background:#fff;font-weight:700;cursor:pointer;font-size:13.5px}
+.tab.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+.kcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.kcard small{color:#64748b;font-weight:700;font-size:12px;display:block}
+.kcard strong{font-size:22px;display:block;margin-top:4px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+th{background:#eef6f4;color:#115e59;padding:10px;text-align:center;border:1px solid #cbd5e1}
+td{border:1px solid #cbd5e1;padding:8px 10px;text-align:center;font-weight:700}
+input.cell-inp{width:105px;padding:5px 6px;border:1px solid #cbd5e1;border-radius:6px;text-align:right;font-weight:700;font-size:13px}
+.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}
+.btn.light{background:#fff;color:#0f766e;border:1px solid var(--line)}
+.prof{background:#dcfce7;color:#166534;font-size:14.5px}
+.loss{background:#fee2e2;color:#b91c1c;font-size:14.5px}
+</style></head>
+<body>
+<header>
+  <div><strong style="font-size:18px;color:#115e59">Live Profit &amp; Loss Statement (Department-Wise &amp; Consolidated)</strong><br><small id="outLbl" style="color:#64748b"></small></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <input type="date" id="pnlDate" style="padding:6px 10px;border:1px solid #cbd5e1;border-radius:8px" onchange="renderPnl()">
+    <button class="btn light" onclick="exportPnlExcel()">Export Excel</button>
+    <button class="btn light" onclick="window.print()">Print PDF</button>
+    <a href="/index.html" class="btn light">&larr; Dashboard</a>
+  </div>
+</header>
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab active" id="tbAll" onclick="setDept('ALL')">All Combined (Master Total P&amp;L)</button>
+    <button class="tab" id="tbSweet" onclick="setDept('SWEET')">1. Sweets P&amp;L</button>
+    <button class="tab" id="tbBob" onclick="setDept('BOB')">2. Bakery / BOB P&amp;L</button>
+    <button class="tab" id="tbNam" onclick="setDept('NAMKEEN')">3. Namkeen P&amp;L</button>
+    <button class="tab" id="tbRest" onclick="setDept('REST')">4. Restaurant P&amp;L</button>
+  </div>
+
+  <div class="kgrid">
+    <div class="kcard" style="border-top:4px solid #2563eb"><small>NET TOTAL PURCHASE</small><strong id="kNetPur" style="color:#2563eb">&#8377;0</strong></div>
+    <div class="kcard" style="border-top:4px solid #0f766e"><small>NET TOTAL SALE</small><strong id="kNetSale" style="color:#0f766e">&#8377;0</strong></div>
+    <div class="kcard" style="border-top:4px solid #f59e0b"><small>TOTAL SALARY &amp; FIXED EXPENSE</small><strong id="kNetExp" style="color:#b45309">&#8377;0</strong></div>
+    <div class="kcard" style="border-top:4px solid #16a34a"><small>NET PROFIT AMOUNT</small><strong id="kNetProf">&#8377;0</strong></div>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <strong style="font-size:16px;color:#115e59" id="sheetTitle">Consolidated Master P&amp;L Sheet (Sweets + Bakery/BOB + Namkeen + Restaurant)</strong>
+      <small style="color:#64748b">Aap kisi bhi white box mein live value edit karke <b>Save Values</b> daba sakte hain ? Total Purchase, Total Sale aur Profit Amount apne aap calculate honge.</small>
+    </div>
+    <div id="pnlTableArea"></div>
+    <div style="margin-top:12px;text-align:right" id="saveBtnRow">
+      <button class="btn" onclick="saveCurrentDept()">Save &amp; Recalculate Live P&amp;L &#10003;</button>
+    </div>
+  </div>
+</div>
+<script>
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+outLbl.textContent = 'Active Unit: ' + curOut + ' (31-Outlet Cloud Sync)';
+pnlDate.value = new Date().toISOString().slice(0,10);
+let curDept = 'ALL';
+
+const DEFAULT_DATA = {
+  SWEET: { pur: 1000000, raw: 50000, pack: 30000, sale: 1800000, gross: 1600000, packAv: 10000, rawAv: 20000, itemAv: 150000, sal: 90000, fixExp: 110000 },
+  BOB:   { pur: 320000,  raw: 0,     pack: 18000, sale: 580000,  gross: 550000,  packAv: 8000,  rawAv: 0,     itemAv: 45000,  sal: 42000, fixExp: 35000 },
+  NAMKEEN:{ pur: 410000, raw: 0,     pack: 24000, sale: 760000,  gross: 720000,  packAv: 12000, rawAv: 0,     itemAv: 68000,  sal: 48000, fixExp: 40000 },
+  REST:  { pur: 540000,  raw: 65000, pack: 22000, sale: 1120000, gross: 1050000, packAv: 9000,  rawAv: 25000, itemAv: 40000,  sal: 115000,fixExp: 85000 }
+};
+
+function getPnlStore() {
+  const key = 'rpLivePnlData::' + curOut;
+  const saved = JSON.parse(localStorage.getItem(key) || 'null');
+  return saved || JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+function savePnlStore(obj) { localStorage.setItem('rpLivePnlData::' + curOut, JSON.stringify(obj)); }
+
+// Exact Excel Formula Calculator
+function calcMetrics(d, hasRaw) {
+  const netPurchase = Number(d.pur||0) + (hasRaw ? Number(d.raw||0) : 0) + Number(d.pack||0) + Number(d.sal||0) + Number(d.fixExp||0) - (Number(d.packAv||0) + (hasRaw ? Number(d.rawAv||0) : 0) + Number(d.itemAv||0));
+  const netSale = Number(d.gross || d.sale || 0);
+  const profit = netSale - netPurchase;
+  return { ...d, netPurchase, netSale, profit };
+}
+
+function setDept(dept) {
+  curDept = dept;
+  ['tbAll','tbSweet','tbBob','tbNam','tbRest'].forEach(id => document.getElementById(id).classList.remove('active'));
+  if(dept==='ALL') tbAll.classList.add('active');
+  if(dept==='SWEET') tbSweet.classList.add('active');
+  if(dept==='BOB') tbBob.classList.add('active');
+  if(dept==='NAMKEEN') tbNam.classList.add('active');
+  if(dept==='REST') tbRest.classList.add('active');
+  renderPnl();
+}
+
+function saveCurrentDept() {
+  if (curDept === 'ALL') return;
+  const store = getPnlStore();
+  const d = store[curDept];
+  document.querySelectorAll('.cell-inp').forEach(inp => { d[inp.dataset.key] = Number(inp.value || 0); });
+  savePnlStore(store);
+  renderPnl();
+  alert('Saved! Consolidated All-Department P&L updated automatically.');
+}
+
+function renderPnl() {
+  const st = getPnlStore();
+  const sw = calcMetrics(st.SWEET, true);
+  const bb = calcMetrics(st.BOB, false);
+  const nm = calcMetrics(st.NAMKEEN, false);
+  const rs = calcMetrics(st.REST, true);
+
+  if (curDept === 'ALL') {
+    sheetTitle.textContent = 'Consolidated Master P&L (All 4 Departments Combined Total)';
+    saveBtnRow.style.display = 'none';
+    const totPur = sw.pur + bb.pur + nm.pur + rs.pur;
+    const totRaw = sw.raw + rs.raw;
+    const totPack = sw.pack + bb.pack + nm.pack + rs.pack;
+    const totSale = sw.sale + bb.sale + nm.sale + rs.sale;
+    const totGross = sw.gross + bb.gross + nm.gross + rs.gross;
+    const totPackAv = sw.packAv + bb.packAv + nm.packAv + rs.packAv;
+    const totRawAv = sw.rawAv + rs.rawAv;
+    const totItemAv = sw.itemAv + bb.itemAv + nm.itemAv + rs.itemAv;
+    const totSal = sw.sal + bb.sal + nm.sal + rs.sal;
+    const totFix = sw.fixExp + bb.fixExp + nm.fixExp + rs.fixExp;
+    const netPur = sw.netPurchase + bb.netPurchase + nm.netPurchase + rs.netPurchase;
+    const netSale = sw.netSale + bb.netSale + nm.netSale + rs.netSale;
+    const netProf = netSale - netPur;
+
+    kNetPur.textContent = 'Rs. ' + netPur.toLocaleString('en-IN');
+    kNetSale.textContent = 'Rs. ' + netSale.toLocaleString('en-IN');
+    kNetExp.textContent = 'Rs. ' + (totSal + totFix).toLocaleString('en-IN');
+    kNetProf.textContent = 'Rs. ' + netProf.toLocaleString('en-IN');
+    kNetProf.style.color = netProf >= 0 ? '#16a34a' : '#dc2626';
+
+    pnlTableArea.innerHTML = '<table><thead><tr><th>Department</th><th>Purchase</th><th>Raw Mat.</th><th>Packing</th><th>Dept Sale</th><th>Gross Sale</th><th>Pack Avail</th><th>Raw Avail</th><th>Stock Avail</th><th>Salary</th><th>Fix Exp</th><th>Total Purchase</th><th>Total Sale</th><th>Profit Amount</th></tr></thead><tbody>' +
+      [['1. Sweets', sw], ['2. Bakery / BOB', bb], ['3. Namkeen', nm], ['4. Restaurant', rs]].map(([lbl, m]) =>
+        '<tr><td style="text-align:left">'+lbl+'</td><td>'+m.pur+'</td><td>'+m.raw+'</td><td>'+m.pack+'</td><td>'+m.sale+'</td><td>'+m.gross+'</td><td>'+m.packAv+'</td><td>'+m.rawAv+'</td><td>'+m.itemAv+'</td><td>'+m.sal+'</td><td>'+m.fixExp+'</td><td style="color:#2563eb">'+m.netPurchase+'</td><td style="color:#0f766e">'+m.netSale+'</td><td class="'+(m.profit>=0?'prof':'loss')+'">'+m.profit+'</td></tr>'
+      ).join('') +
+      '<tr style="background:#f8fafc;font-size:13.5px"><td style="text-align:left"><b>GRAND TOTAL (ALL 4)</b></td><td><b>'+totPur+'</b></td><td><b>'+totRaw+'</b></td><td><b>'+totPack+'</b></td><td><b>'+totSale+'</b></td><td><b>'+totGross+'</b></td><td><b>'+totPackAv+'</b></td><td><b>'+totRawAv+'</b></td><td><b>'+totItemAv+'</b></td><td><b>'+totSal+'</b></td><td><b>'+totFix+'</b></td><td style="color:#2563eb"><b>'+netPur+'</b></td><td style="color:#0f766e"><b>'+netSale+'</b></td><td class="'+(netProf>=0?'prof':'loss')+'"><b>'+netProf+'</b></td></tr></tbody></table>';
+    return;
+  }
+
+  saveBtnRow.style.display = 'block';
+  const is13Col = (curDept === 'SWEET' || curDept === 'REST');
+  const m = curDept === 'SWEET' ? sw : (curDept === 'BOB' ? bb : (curDept === 'NAMKEEN' ? nm : rs));
+  const titleMap = { SWEET: 'Sweets Live Profit & Loss (13 Columns)', BOB: 'Bakery / BOB Live Profit & Loss (11 Columns)', NAMKEEN: 'Namkeen Live Profit & Loss (11 Columns)', REST: 'Restaurant Live Profit & Loss (13 Columns)' };
+  sheetTitle.textContent = titleMap[curDept];
+
+  kNetPur.textContent = 'Rs. ' + m.netPurchase.toLocaleString('en-IN');
+  kNetSale.textContent = 'Rs. ' + m.netSale.toLocaleString('en-IN');
+  kNetExp.textContent = 'Rs. ' + (m.sal + m.fixExp).toLocaleString('en-IN');
+  kNetProf.textContent = 'Rs. ' + m.profit.toLocaleString('en-IN');
+  kNetProf.style.color = m.profit >= 0 ? '#16a34a' : '#dc2626';
+
+  if (is13Col) {
+    const lbl = curDept === 'SWEET' ? 'Sweet' : 'Restaurant';
+    pnlTableArea.innerHTML = '<table><thead><tr><th colspan="13" style="font-size:15px">Purchase &amp; P&amp;L ? ' + lbl + '</th></tr><tr><th>1. Total ' + lbl + ' Purchase</th><th>2. Total Raw Material</th><th>3. Total Packing</th><th>4. Total ' + lbl + ' Sale</th><th>5. Gross Sale</th><th>6. Avail Packing Stock</th><th>7. Avail Raw Material</th><th>8. Avail ' + lbl + '</th><th>9. Salary Counter</th><th>10. Fixed Expense</th><th>11. Total Purchase</th><th>12. Total Sale</th><th>13. Net Profit Amount</th></tr></thead><tbody><tr>' +
+      ['pur','raw','pack','sale','gross','packAv','rawAv','itemAv','sal','fixExp'].map(k => '<td><input class="cell-inp" data-key="'+k+'" type="number" value="'+m[k]+'"></td>').join('') +
+      '<td style="background:#eff6ff;color:#1d4ed8">'+m.netPurchase+'</td><td style="background:#f0fdf4;color:#0f766e">'+m.netSale+'</td><td class="'+(m.profit>=0?'prof':'loss')+'">'+m.profit+'</td></tr></tbody></table>';
+  } else {
+    const lbl = curDept === 'BOB' ? 'Bakery' : 'Namkeen';
+    const saleLbl = curDept === 'BOB' ? '3. BOB Sale' : '3. Namkeen Sale';
+    pnlTableArea.innerHTML = '<table><thead><tr><th colspan="11" style="font-size:15px">Purchase &amp; P&amp;L ? ' + lbl + '</th></tr><tr><th>1. Total ' + lbl + ' Purchase</th><th>2. ' + lbl + ' Packing</th><th>' + saleLbl + '</th><th>4. Gross Sale</th><th>5. Packing Available</th><th>6. ' + lbl + ' Available</th><th>7. ' + lbl + ' Salary</th><th>8. Fixed Expense</th><th>9. Total Purchase</th><th>10. Total Sale</th><th>11. Profit Amount</th></tr></thead><tbody><tr>' +
+      ['pur','pack','sale','gross','packAv','itemAv','sal','fixExp'].map(k => '<td><input class="cell-inp" data-key="'+k+'" type="number" value="'+m[k]+'"></td>').join('') +
+      '<td style="background:#eff6ff;color:#1d4ed8">'+m.netPurchase+'</td><td style="background:#f0fdf4;color:#0f766e">'+m.netSale+'</td><td class="'+(m.profit>=0?'prof':'loss')+'">'+m.profit+'</td></tr></tbody></table>';
+  }
+}
+
+function exportPnlExcel() {
+  const st = getPnlStore();
+  const rows = [['Dept','Purchase','Raw','Packing','Sale','Gross','PackAvail','RawAvail','ItemAvail','Salary','FixExp'], ...['SWEET','BOB','NAMKEEN','REST'].map(k => [k, st[k].pur, st[k].raw, st[k].pack, st[k].sale, st[k].gross, st[k].packAv, st[k].rawAv, st[k].itemAv, st[k].sal, st[k].fixExp])];
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = 'Live_Department_PnL.csv'; a.click();
+}
+renderPnl();
+</script></body></html>

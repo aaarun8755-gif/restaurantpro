@@ -2368,5 +2368,22 @@ setInterval(() => {
   });
 }, 350);
 </script>
+
+<script id="rpLivePnlHook">
+setInterval(() => {
+  document.querySelectorAll('aside button, aside a, nav button, nav a, div').forEach(el => {
+    const t = (el.innerText || '').trim();
+    if (el.children.length <= 2 && (t.includes('Live Profit') || t.includes('Profit & Loss')) && !el.dataset.pnlBound) {
+      el.dataset.pnlBound = '1';
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/live-pnl.html';
+      }, true);
+    }
+  });
+}, 350);
+</script>
 </body>
 </html>
