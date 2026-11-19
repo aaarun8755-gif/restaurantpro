@@ -108,3 +108,52 @@ td{border:1px solid #cbd5e1;padding:8px 10px}
 
 <!-- VIEW ITEM & BARCODE MODAL -->
 <div class="modal" id="viewModal"><div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:460px;text-align:center"><div id="viewBody"></div><button class="btn light" style="margin-top:12px" onclick="viewModal.style.display='none'">Close</button></div></div>
+
+<script>
+function openHoApprove(reqId) {
+  const req = getApprovals().find(x => x.reqId === reqId); if (!req) return;
+  hoReqSummary.innerHTML = '<b>Action:</b> ' + req.action + ' &nbsp;|&nbsp; <b>Item:</b> ' + req.item.name + ' (Rs.' + req.item.price + ') &nbsp;|&nbsp; <b>Barcode:</b> ' + req.item.barcode + '<br><b>Categories:</b> ' + req.item.cat1 + ' &rarr; ' + req.item.cat2 + ' &rarr; ' + req.item.cat3 + ' | <b>Vendor:</b> ' + (req.item.vendor||'-');
+  hoOutletsGrid.innerHTML = OUTLETS.map(o => '<label style="display:flex;align-items:center;gap:6px;font-size:12px;margin:0"><input type="checkbox" class="ho-out-chk" value="'+o+'" checked style="width:auto"> '+o+'</label>').join('');
+  confirmApproveBtn.onclick = () => executeHoApproval(reqId);
+  hoApproveModal.style.display = 'flex';
+}
+function executeHoApproval(reqId) {
+  const q = getApprovals(), rIdx = q.findIndex(x => x.reqId === reqId); if (rIdx < 0) return;
+  const req = q[rIdx];
+  const selectedOutlets = Array.from(document.querySelectorAll('.ho-out-chk:checked')).map(c => c.value);
+  let menu = getApprovedMenu();
+  if (req.action === 'DELETE') {
+    menu = menu.filter(x => x.id !== req.targetId);
+  } else {
+    req.item.outlets = selectedOutlets;
+    const mIdx = menu.findIndex(x => x.id === req.targetId);
+    if (mIdx >= 0) menu[mIdx] = req.item; else menu.unshift(req.item);
+    if (req.item.selfCreate) {
+      selectedOutlets.forEach(outName => {
+        const k = 'rpInventoryStock::' + outName;
+        const st = JSON.parse(localStorage.getItem(k) || '{}');
+        if (st[req.item.name] === undefined) st[req.item.name] = 50;
+        localStorage.setItem(k, JSON.stringify(st));
+      });
+    }
+  }
+  localStorage.setItem('rpMasterMenuItems', JSON.stringify(menu));
+  q.splice(rIdx, 1); localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q));
+  hoApproveModal.style.display = 'none'; renderMenu();
+  alert('Approved & Synced to ' + selectedOutlets.length + ' Outlets!');
+}
+function viewItem(id) {
+  const it = getApprovedMenu().find(x => x.id === id); if (!it) return;
+  const recTxt = it.selfCreate ? ('Self-Created Raw Material: <b>' + it.name + '</b> (' + it.selfUnit + ' deducted per bill)') : (it.manualRec.map(r=>r.mat+' ('+r.qty+' '+r.unit+')').join(', ') || 'Manual');
+  viewBody.innerHTML = '<h3 style="margin-top:0;color:#115e59">' + it.name + '</h3><div style="border:2px dashed #0f766e;padding:10px;border-radius:8px;margin:10px 0;font-family:monospace;font-size:18px;letter-spacing:3px">||| || ||| || |||<br><b>' + it.barcode + '</b></div><p style="font-size:13px;text-align:left"><b>Short Code:</b> ' + it.shortCode + '<br><b>Category 1:</b> ' + it.cat1 + '<br><b>Category 2:</b> ' + it.cat2 + '<br><b>Category 3:</b> ' + it.cat3 + '<br><b>Vendor:</b> ' + (it.vendor||'-') + '<br><b>Recipe Logic:</b> ' + recTxt + '<br><b>Active Outlets:</b> ' + (it.outlets||[]).length + ' Outlets</p>';
+  viewModal.style.display = 'flex';
+}
+function renderMenu() {
+  const q = getApprovals();
+  apBody.innerHTML = q.map(r => '<tr><td><b>'+r.reqId+'</b></td><td><span class="badge pend">'+r.action+'</span></td><td><b>'+r.item.name+'</b></td><td>'+r.item.cat1+' / '+r.item.cat2+' / '+r.item.cat3+'<br><small><b>Vendor:</b> '+(r.item.vendor||'-')+'</small></td><td>Code: <b>'+r.item.shortCode+'</b> | Bar: <b>'+r.item.barcode+'</b></td><td>'+(r.item.selfCreate?'Self-Create ('+r.item.selfUnit+')':'Manual Recipe')+'</td><td>'+r.reqBy+'</td><td>'+(isHO?'<button class="btn sm" onclick="openHoApprove(\''+r.reqId+'\')">Review &amp; Select Outlets</button>':'<span class="badge pend">Pending HO</span>')+'</td></tr>').join('') || '<tr><td colspan="8">No pending approval requests.</td></tr>';
+  const s = (mSearch.value || '').toLowerCase();
+  const list = getApprovedMenu().filter(it => (isHO || (it.outlets||[]).includes(curOut)) && (!s || it.name.toLowerCase().includes(s) || it.shortCode.includes(s) || it.barcode.toLowerCase().includes(s) || it.cat1.toLowerCase().includes(s) || (it.vendor||'').toLowerCase().includes(s)));
+  menuBody.innerHTML = list.map(it => '<tr><td><b>'+it.name+'</b></td><td>'+it.cat1+'</td><td>'+it.cat2+'</td><td>'+it.cat3+'</td><td><b>'+(it.vendor||'-')+'</b></td><td><b>'+it.shortCode+'</b></td><td style="font-family:monospace"><b>'+it.barcode+'</b></td><td><b>&#8377;'+it.price+'</b></td><td>'+(it.selfCreate?'<span class="badge">Self RM: -'+it.selfUnit+'/bill</span>':'Manual Recipe')+'</td><td><button class="btn light sm" onclick="viewItem(\''+it.id+'\')">View</button> <button class="btn light sm" onclick="openItemModal(\'EDIT\',\''+it.id+'\')">Edit</button> <button class="btn d sm" onclick="requestDelete(\''+it.id+'\')">Delete</button></td></tr>').join('') || '<tr><td colspan="10">No approved menu items for this outlet.</td></tr>';
+}
+renderMenu();
+</script></body></html>
