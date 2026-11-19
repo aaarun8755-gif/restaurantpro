@@ -580,6 +580,38 @@ function invPrintPdf(title,headers,rows){const w=window.open("","_blank");if(!w)
 
 
 
+<script id="rpSafeMenuFormEnhance">
+setInterval(function() {
+  if (!(document.body.innerText || '').includes('Menu Management - Add Item')) return;
+  if (document.getElementById('rpExtraMenuFields')) return;
+
+  const scInp = Array.from(document.querySelectorAll('input')).find(i => (i.placeholder || '').includes('PT01'));
+  const formGrid = scInp ? scInp.closest('div').parentElement : null;
+  if (!formGrid) return;
+
+  const wrap = document.createElement('div');
+  wrap.id = 'rpExtraMenuFields';
+  wrap.style.cssText = 'grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;background:#f0fdf4;padding:12px;border-radius:10px;border:1px solid #bbf7d0;margin-top:4px';
+  wrap.innerHTML =
+    '<div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Category 2 (Sub Category) *</label><input id="rpCat2" placeholder="e.g. Retail Item" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"></div>' +
+    '<div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Category 3 *</label><input id="rpCat3" placeholder="e.g. Packed Sweet" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"></div>' +
+    '<div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Category 4 (Vendor / Supplier) *</label><input id="rpCat4" placeholder="e.g. Arun Traders Vendor" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"></div>' +
+    '<div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Barcode (Auto on Self-Recipe) *</label><input id="rpBarcode" placeholder="Auto-generated barcode" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"></div>' +
+    '<div><label style="font-size:12px;font-weight:700;display:block;margin-bottom:4px">Self-Recipe Deduct Unit</label><select id="rpSelfUnit" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"><option>1 Pc</option><option>1 Kg</option><option>1 Litre</option><option>1 Box</option></select></div>';
+
+  formGrid.appendChild(wrap);
+
+  // Auto-generate barcode when Name or Short Code is typed
+  const nameInp = Array.from(document.querySelectorAll('input')).find(i => (i.placeholder || '').includes('Paneer Tikka'));
+  const genBar = () => {
+    const nm = (nameInp ? nameInp.value : 'ITEM').replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6) || 'ITEM';
+    const sc = (scInp ? scInp.value : '101').replace(/[^a-zA-Z0-9]/g, '').toUpperCase() || '101';
+    document.getElementById('rpBarcode').value = '890' + nm + sc;
+  };
+  if (nameInp) nameInp.addEventListener('input', genBar);
+  if (scInp) scInp.addEventListener('input', genBar);
+}, 400);
+</script>
 </body></html>`);w.document.close()}
 function invExportButtons(prefix){return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px"><button class="btn" id="${prefix}Excel">Download Excel (CSV)</button><button class="btn light" id="${prefix}Pdf">Download PDF / Print</button></div>`}
 function invUploadButtons(){return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px"><button type="button" class="btn light" id="invUploadTrigger">Upload Sheet (CSV)</button><input type="file" id="invUploadFile" accept=".csv,.txt,text/csv" style="display:none"><span style="align-self:center;color:var(--muted);font-size:12px">Excel file ko pehle CSV UTF-8 format mein Save As karein.</span></div>`}
@@ -1667,14 +1699,6 @@ setInterval(async function() {
 
 
 
-
-
-
-
-
-
-
-
 <script id="rpMasterLiveFix">
 (function(){
   // A. Faltu KDS popup ko rokein aur QR/Captain links ko live Render domain par rakhein
@@ -1730,8 +1754,6 @@ setInterval(async function() {
   };
 })();
 </script>
-
-
 <script id="rpQrApprovalSuite">
 (function(){
   if (document.getElementById('rpQrBarBox')) return;
