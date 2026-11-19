@@ -582,6 +582,45 @@ function invPrintPdf(title,headers,rows){const w=window.open("","_blank");if(!w)
 
 
 
+<script id="rpSafeMenuLink">
+setInterval(() => {
+  if (document.getElementById('rpOpenNewMenuBtn')) return;
+  const h = Array.from(document.querySelectorAll('h1,h2,h3,div,span')).find(el => el.children.length === 0 && (el.innerText || '').trim().includes('Menu Management - Add Item'));
+  if (!h || !h.parentElement) return;
+  const btn = document.createElement('button');
+  btn.id = 'rpOpenNewMenuBtn';
+  btn.type = 'button';
+  btn.textContent = 'Open 4-Category, Barcode, Self-Recipe & HO Approval Manager ->';
+  btn.style.cssText = 'margin-left:12px;background:#0f766e;color:#fff;border:0;border-radius:8px;padding:7px 14px;font-weight:700;font-size:12.5px;cursor:pointer';
+  btn.onclick = () => { window.location.href = '/menu-master.html'; };
+  h.parentElement.appendChild(btn);
+}, 400);
+</script>
+<script id="rpSelfRecipeBillingDeduction">
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('button');
+  if (!btn || !(btn.innerText || '').toLowerCase().includes('complete bill')) return;
+  setTimeout(() => {
+    const out = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+    const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
+    const last = bills[0]; if (!last || !last.items) return;
+    const menu = JSON.parse(localStorage.getItem('rpMasterMenuItems') || '[]');
+    const stKey = 'rpInventoryStock::' + out;
+    const st = JSON.parse(localStorage.getItem(stKey) || '{}');
+    last.items.forEach(bi => {
+      const mItem = menu.find(m => m.name.toLowerCase() === String(bi.name||'').toLowerCase());
+      if (!mItem) return;
+      if (mItem.selfCreate) {
+        const perUnit = parseFloat(mItem.selfUnit) || 1;
+        st[mItem.name] = Math.max(0, Number(st[mItem.name] || 0) - (Number(bi.qty || 1) * perUnit));
+      } else if (mItem.manualRec) {
+        mItem.manualRec.forEach(r => { st[r.mat] = Math.max(0, Number(st[r.mat] || 0) - (Number(bi.qty || 1) * Number(r.qty || 0))); });
+      }
+    });
+    localStorage.setItem(stKey, JSON.stringify(st));
+  }, 500);
+}, true);
+</script>
 </body></html>`);w.document.close()}
 function invExportButtons(prefix){return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px"><button class="btn" id="${prefix}Excel">Download Excel (CSV)</button><button class="btn light" id="${prefix}Pdf">Download PDF / Print</button></div>`}
 function invUploadButtons(){return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px"><button type="button" class="btn light" id="invUploadTrigger">Upload Sheet (CSV)</button><input type="file" id="invUploadFile" accept=".csv,.txt,text/csv" style="display:none"><span style="align-self:center;color:var(--muted);font-size:12px">Excel file ko pehle CSV UTF-8 format mein Save As karein.</span></div>`}
