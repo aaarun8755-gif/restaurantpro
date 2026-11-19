@@ -64,6 +64,7 @@ td{border:1px solid #cbd5e1;padding:8px 9px}
     <table><thead><tr><th>Channel</th><th>Order ID</th><th>Date &amp; Time</th><th>Outlet Name</th><th>Customer</th><th>Items</th><th>Amount</th><th>Order Status</th><th>Delivery SLA</th><th>Complaint / Issue</th><th>Update Action</th></tr></thead><tbody id="ocBody"></tbody></table>
   </div>
 </div>
+
 <script>
 const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
 const isHO = curOut === 'Head Office';
@@ -75,9 +76,9 @@ function getOrders() {
   let l = JSON.parse(localStorage.getItem('rpOnlineChannelOrders') || '[]');
   if (!l.length) {
     l = [
-      { id: 'SWG-9012', ch: 'Swiggy', dt: 'Today, 12:40 PM', out: 'Main Outlet', cust: 'Aarav Sharma', items: 'Kaju Katli 500g, Samosa x4', amt: 640, status: 'Delivered', sla: 'Success (On-Time)', cmp: '-' },
-      { id: 'ZMT-7741', ch: 'Zomato', dt: 'Today, 01:05 PM', out: 'Main Outlet', cust: 'Priya Verma', items: 'Paneer Tikka x1, Dal Makhani x1', amt: 520, status: 'Accepted / Cooking', sla: 'Success (On-Time)', cmp: '-' },
-      { id: 'WEB-4410', ch: 'Web', dt: 'Today, 01:15 PM', out: 'Main Outlet', cust: 'Rohan Gupta', items: 'Motichoor Laddu 1kg', amt: 580, status: 'Accepted / Cooking', sla: 'Success (On-Time)', cmp: '-' }
+      { id: 'SWG-9012', ch: 'Swiggy', dt: '12:40 PM', out: 'Main Outlet', cust: 'Aarav Sharma', items: 'Kaju Katli 500g', amt: 640, status: 'Delivered', sla: 'Success (On-Time)', cmp: '-' },
+      { id: 'ZMT-7741', ch: 'Zomato', dt: '01:05 PM', out: 'Main Outlet', cust: 'Priya Verma', items: 'Paneer Tikka x1', amt: 520, status: 'Accepted / Cooking', sla: 'Success (On-Time)', cmp: '-' },
+      { id: 'WEB-4410', ch: 'Web', dt: '01:15 PM', out: 'Main Outlet', cust: 'Rohan Gupta', items: 'Motichoor Laddu 1kg', amt: 580, status: 'Accepted / Cooking', sla: 'Success (On-Time)', cmp: '-' }
     ];
     localStorage.setItem('rpOnlineChannelOrders', JSON.stringify(l));
   }
@@ -94,12 +95,11 @@ function setCh(c) {
 ocForm.onsubmit = function(e) {
   e.preventDefault();
   const list = getOrders();
-  const ord = { id: fOid.value.trim(), ch: fCh.value, dt: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}), out: isHO ? 'Main Outlet' : curOut, cust: fCust.value.trim(), items: fItems.value.trim(), amt: Number(fAmt.value || 0), status: 'Accepted / Cooking', sla: fSla.value, cmp: fCmp.value.trim() || '-' };
+  const ord = { id: fOid.value.trim(), ch: fCh.value, dt: 'Just Now', out: isHO ? 'Main Outlet' : curOut, cust: fCust.value.trim(), items: fItems.value.trim(), amt: Number(fAmt.value || 0), status: 'Accepted / Cooking', sla: fSla.value, cmp: fCmp.value.trim() || '-' };
   list.unshift(ord);
   localStorage.setItem('rpOnlineChannelOrders', JSON.stringify(list));
-  // Sync to KDS
   const kds = JSON.parse(localStorage.getItem('rpKdsOrders') || '[]');
-  kds.unshift({ id: ord.id, table: ord.ch + ' Online', items: ord.items, status: 'Preparing', time: ord.dt });
+  kds.unshift({ id: ord.id, table: ord.ch, items: ord.items, status: 'Preparing', time: ord.dt });
   localStorage.setItem('rpKdsOrders', JSON.stringify(kds));
   ocForm.reset(); if (curCh !== 'ALL') fCh.value = curCh;
   renderOc();
@@ -121,13 +121,12 @@ function renderOc() {
   kCan.textContent = rows.filter(x=>x.status==='Cancelled').length;
   kSla.textContent = rows.filter(x=>x.sla.includes('On-Time')).length + ' / ' + rows.filter(x=>x.sla.includes('Late')).length;
   kCmp.textContent = rows.filter(x=>x.cmp && x.cmp !== '-').length;
-  ocBody.innerHTML = rows.map(o => '<tr><td><b>'+o.ch+'</b></td><td><b>'+o.id+'</b></td><td>'+o.dt+'</td><td>'+o.out+'</td><td>'+o.cust+'</td><td>'+o.items+'</td><td><b>Rs.'+o.amt+'</b></td><td><b>'+o.status+'</b></td><td>'+o.sla+'</td><td>'+o.cmp+'</td><td><button class="btn sm" onclick="updSt(''+o.id+'','Delivered')">Deliver</button> <button class="btn light sm" onclick="updSt(''+o.id+'','Rejected')">Reject</button></td></tr>').join('') || '<tr><td colspan="11">No orders in this filter.</td></tr>';
+  ocBody.innerHTML = rows.map(o => '<tr><td><b>'+o.ch+'</b></td><td><b>'+o.id+'</b></td><td>'+o.dt+'</td><td>'+o.out+'</td><td>'+o.cust+'</td><td>'+o.items+'</td><td><b>Rs.'+o.amt+'</b></td><td><b>'+o.status+'</b></td><td>'+o.sla+'</td><td>'+o.cmp+'</td><td><button class="btn sm" onclick="updSt(\''+o.id+'\',\'Delivered\')">Deliver</button> <button class="btn light sm" onclick="updSt(\''+o.id+'\',\'Rejected\')">Reject</button></td></tr>').join('') || '<tr><td colspan="11">No orders.</td></tr>';
 }
 
 function exportOcCsv() {
   const rows = [['Channel','Order ID','Outlet','Customer','Items','Amount','Status'], ...getOrders().map(o=>[o.ch,o.id,'"'+o.out+'"','"'+o.cust+'"','"'+o.items+'"',o.amt,o.status])];
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('
-')], {type:'text/csv'})); a.download = 'Online_Channel_Orders.csv'; a.click();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = 'Online_Channel_Orders.csv'; a.click();
 }
 setCh(curCh);
 </script></body></html>
