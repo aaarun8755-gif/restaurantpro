@@ -32,6 +32,13 @@ try {
 const persist = () => fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
 const byOutlet = (arr, out) => (out && out !== 'Head Office') ? arr.filter(x => x.outlet === out) : arr;
 
+
+app.get(['/favicon.ico', '/favicon.svg'], (req, res) => {
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'no-store');
+  res.send('<svg xmlns="http://w3.org" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="#b91c1c"/><circle cx="32" cy="32" r="24.5" fill="#ffffff"/><circle cx="32" cy="32" r="18" fill="#dc2626"/><circle cx="32" cy="32" r="11.5" fill="#1d4ed8"/><polygon points="32,21.5 34.8,29.2 43,29.2 36.4,34 38.9,41.8 32,37 25.1,41.8 27.6,34 21,29.2 29.2,29.2" fill="#ffffff"/></svg>');
+});
+
 app.get('/api/network-info', (req, res) => { const proto = req.headers['x-forwarded-proto'] || req.protocol; const host = req.headers['x-forwarded-host'] || req.get('host'); if (host && !host.includes('127.0.0.1') && !host.includes('localhost')) return res.json({ publicUrl: proto + '://' + host, localIp: host, port: '' });
   let tunnelUrl = '', ip = '127.0.0.1';
   const nets = os.networkInterfaces();
