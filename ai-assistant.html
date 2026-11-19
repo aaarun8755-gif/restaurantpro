@@ -1,186 +1,52 @@
 <!DOCTYPE html>
-<html lang="en"><head>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://w3.org' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='31' fill='%23b91c1c'/%3E%3Ccircle cx='32' cy='32' r='24.5' fill='%23ffffff'/%3E%3Ccircle cx='32' cy='32' r='18' fill='%23dc2626'/%3E%3Ccircle cx='32' cy='32' r='11.5' fill='%231d4ed8'/%3E%3Cpolygon points='32,21.5 34.8,29.2 43,29.2 36.4,34 38.9,41.8 32,37 25.1,41.8 27.6,34 21,29.2 29.2,29.2' fill='%23ffffff'/%3E%3C/svg%3E">
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RestaurantPro | Ask Me Anything AI (Enterprise Copilot)</title>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | Ask Me Anything AI</title>
 <style>
-:root{--bg:#f4f7f6;--ink:#1e293b;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59}
 *{box-sizing:border-box;font-family:Cambria,Georgia,serif}
-body{margin:0;background:var(--bg);color:var(--ink);display:flex;flex-direction:column;height:100vh}
-header{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
-.chat-wrap{flex:1;max-width:980px;width:100%;margin:auto;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
-.msg{max-width:82%;padding:13px 16px;border-radius:14px;font-size:14.5px;line-height:1.55;white-space:pre-wrap}
-.msg.ai{background:#fff;border:1px solid var(--line);align-self:flex-start;box-shadow:0 2px 8px rgba(0,0,0,.03)}
-.msg.user{background:var(--teal);color:#fff;align-self:flex-end}
-.chips{max-width:980px;width:100%;margin:0 auto 8px;padding:0 16px;display:flex;gap:8px;flex-wrap:wrap}
-.chip{background:#fff;border:1px solid #cbd5e1;border-radius:20px;padding:6px 13px;font-size:12.5px;font-weight:700;color:#0f766e;cursor:pointer}
-.chip:hover{background:#eef6f4}
-.bar{background:#fff;border-top:1px solid var(--line);padding:12px 16px}
-.bar-in{max-width:980px;margin:auto;display:flex;gap:8px;align-items:center}
-input{flex:1;padding:11px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px}
-.btn{background:var(--teal);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-weight:700;cursor:pointer;font-size:13.5px;text-decoration:none}
-.btn.light{background:#fff;color:#0f766e;border:1px solid var(--line)}
-</style>
-<meta name="robots" content="noindex, nofollow">
-</head>
+body{margin:0;background:#f4f7f6;color:#1e293b;display:flex;flex-direction:column;height:100vh}
+header{background:#fff;border-bottom:1px solid #dbe5e2;padding:12px 22px;display:flex;justify-content:space-between;align-items:center}
+.chat{flex:1;max-width:960px;width:100%;margin:auto;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.msg{max-width:82%;padding:12px 16px;border-radius:14px;font-size:14.5px;line-height:1.5;background:#fff;border:1px solid #dbe5e2}
+.msg.u{background:#0f766e;color:#fff;align-self:flex-end;border:0}
+.bar{background:#fff;border-top:1px solid #dbe5e2;padding:12px 16px;display:flex;gap:8px;justify-content:center}
+input{flex:1;max-width:760px;padding:10px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px}
+button,a.btn{background:#0f766e;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}
+a.btn{background:#fff;color:#0f766e;border:1px solid #dbe5e2}
+</style></head>
 <body>
 <header>
-  <div><strong style="font-size:18px;color:#115e59">&#10024; RestaurantPro AI Copilot (Ask Me Anything)</strong><br><small id="outLbl" style="color:#64748b"></small></div>
-  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    <input id="gemKeyInp" type="password" placeholder="Optional: Paste Gemini API Key" style="width:220px;padding:7px 10px;font-size:12px" onchange="localStorage.setItem('rpGeminiKey',this.value.trim())">
-    <a href="/index.html" class="btn light" style="padding:7px 13px">&larr; Dashboard</a>
-  </div>
+  <div><strong style="font-size:17px;color:#115e59">RestaurantPro AI Copilot</strong> | <small id="oLbl"></small></div>
+  <a href="/index.html" class="btn">&larr; Dashboard</a>
 </header>
-
-<div class="chat-wrap" id="chatFeed">
-  <div class="msg ai"><b>Namaste! Main aapka RestaurantPro AI Assistant hoon.</b>
-Main aapke sabhi <b>31 Outlets + Head Office</b> ke live data (Sales, Cash vs UPI, Inventory Stock, PO &amp; Transfers, Production, Staff &amp; Payroll, Tasks, aur Customer Feedback) se juda hoon.
-
-Aap Hindi, Hinglish ya English mein kuch bhi pooch sakte hain!</div>
+<div class="chat" id="feed">
+  <div class="msg"><b>Namaste!</b> Main aapke outlet ke live Sales, Stock, PO, Menu aur Tasks se juda hoon. Kuch bhi poochein (jaise: <i>Maida stock</i>, <i>Aaj ki sale</i>, <i>Pending PO</i>).</div>
 </div>
-
-<div class="chips">
-  <button class="chip" onclick="askPreset('Aaj ki total sale, orders aur cash vs UPI batao')">Aaj ki Total Sale &amp; Cash</button>
-  <button class="chip" onclick="askPreset('Inventory stock aur low stock items check karo')">Inventory &amp; Low Stock</button>
-  <button class="chip" onclick="askPreset('Pending PO, Stock Transfers aur Production status kya hai?')">PO, Transfer &amp; Production</button>
-  <button class="chip" onclick="askPreset('Staff attendance, Tasks aur Customer Feedback summary do')">Staff, Tasks &amp; Feedback</button>
-  <button class="chip" onclick="askPreset('31 outlets ka complete executive summary report banao')">All 31 Outlets Summary</button>
-</div>
-
 <div class="bar">
-  <div class="bar-in">
-    <button type="button" class="btn light" id="micBtn" onclick="startVoice()" title="Speak in Hindi/English">&#127908;</button>
-    <input id="qInp" placeholder="Ask anything about Sales, Stock, PO, Staff, Tasks, Marketing..." onkeydown="if(event.key==='Enter') sendQuery()">
-    <button type="button" class="btn" onclick="sendQuery()">Ask AI &rarr;</button>
-  </div>
+  <input id="qBox" placeholder="Type your question here..." onkeydown="if(event.key==='Enter')askNow()">
+  <button onclick="askNow()">Ask AI &rarr;</button>
 </div>
 <script>
-const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
-outLbl.textContent = 'Connected Live to: ' + curOut + ' (31-Outlet Cloud ERP)';
-gemKeyInp.value = localStorage.getItem('rpGeminiKey') || '';
+const out = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+oLbl.textContent = 'Outlet: ' + out;
+function add(t, cls) { const d = document.createElement('div'); d.className = 'msg ' + (cls||''); d.innerHTML = t; feed.appendChild(d); feed.scrollTop = feed.scrollHeight; }
+function askNow() {
+  const q = qBox.value.trim(); if (!q) return; qBox.value = ''; add(q, 'u');
+  const low = q.toLowerCase();
+  const st = { 'Maida (kg)': 80, 'Khoya (kg)': 45, 'Desi Ghee (kg)': 32, 'Sugar (kg)': 60, 'Paneer (kg)': 25, ...JSON.parse(localStorage.getItem('rpInventoryStock::' + out) || '{}') };
+  const bills = JSON.parse(localStorage.getItem('rpBills') || '[]').filter(b => out === 'Head Office' || !b.outlet || b.outlet === out);
+  const pos = JSON.parse(localStorage.getItem('rpLockedPurchasePOs') || '[]').filter(p => out === 'Head Office' || p.outlet === out);
+  const menu = JSON.parse(localStorage.getItem('rpMasterMenuItems') || '[]');
 
-function addMsg(txt, who) {
-  const d = document.createElement('div');
-  d.className = 'msg ' + who;
-  d.innerHTML = txt.replace(/\n/g, '<br>');
-  chatFeed.appendChild(d);
-  chatFeed.scrollTop = chatFeed.scrollHeight;
-  return d;
-}
-
-function getLiveErpSnapshot() {
-  const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
-  const totSale = bills.reduce((s,x)=>s+Number(x.total||0),0) || 2284.8;
-  const ordCnt = bills.length || 6;
-  const stock = JSON.parse(localStorage.getItem('rpInventoryStock::' + curOut) || localStorage.getItem('rpInventoryStock') || '{}');
-  const pos = JSON.parse(localStorage.getItem('rpOutletPOs') || '[]');
-  const trs = JSON.parse(localStorage.getItem('rpStockTransfers') || '[]');
-  const prods = JSON.parse(localStorage.getItem('rpProdLogs') || '[]');
-  const staff = JSON.parse(localStorage.getItem('rpStaffList') || '[]');
-  const tasks = JSON.parse(localStorage.getItem('rpTasksList') || '[]');
-  const fbs = JSON.parse(localStorage.getItem('rpCustFeedbacks') || '[]');
-  return { outlet: curOut, totSale: totSale.toFixed(2), ordCnt, stock, pos, trs, prods, staffCount: staff.length || 4, tasks, fbs };
-}
-
-function buildSmartLocalReply(q, snap) {
-  const low = q.toLowerCase().trim();
-  const activeOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
-  const isHO = activeOut === 'Head Office';
-  const ALL_OUTS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
-
-  let reqOut = null;
-  for (const o of ALL_OUTS) {
-    const shortN = o.replace('RestaurantPro - ', '').toLowerCase();
-    if (shortN.length > 2 && low.includes(shortN)) { reqOut = o; break; }
+  if (low.includes('maida') || low.includes('mailda')) { add('<b>Maida Stock (' + out + '):</b> ' + (st['Maida (kg)'] ?? 80) + ' kg Available'); return; }
+  if (low.includes('khoya')) { add('<b>Khoya Stock (' + out + '):</b> ' + (st['Khoya (kg)'] ?? 45) + ' kg Available'); return; }
+  if (low.includes('ghee')) { add('<b>Desi Ghee Stock (' + out + '):</b> ' + (st['Desi Ghee (kg)'] ?? 32) + ' kg Available'); return; }
+  if (low.includes('stock') || low.includes('inventory')) { add('<b>Live Stock (' + out + '):</b><br>' + Object.entries(st).map(([k,v]) => k + ': <b>' + v + '</b>').join('<br>')); return; }
+  if (low.includes('sale') || low.includes('cash') || low.includes('order') || low.includes('bill')) {
+    const tot = bills.reduce((s,x) => s + Number(x.total||0), 0);
+    add('<b>Sales Summary (' + out + '):</b><br>Total Sales: <b>Rs. ' + tot.toFixed(2) + '</b> (' + bills.length + ' Bills)'); return;
   }
-  if (!isHO && reqOut && reqOut !== activeOut) {
-    return '<span style="color:#dc2626;font-weight:800">Access Denied (Strict Outlet Privacy):</span>\nAap <b>' + activeOut + '</b> se logged-in hain. Kisi doosre outlet (<b>' + reqOut + '</b>) ka data sirf Head Office dekh sakta hai.';
-  }
-  const targetOut = (isHO && reqOut) ? reqOut : activeOut;
-
-  const outStock = JSON.parse(localStorage.getItem('rpInventoryStock::' + targetOut) || '{}');
-  const fullStock = { 'Maida (kg)': 80, 'Khoya (kg)': 45, 'Desi Ghee (kg)': 32, 'Sugar (kg)': 60, 'Paneer (kg)': 25, ...outStock };
-
-  // 1. Specific item check (e.g., maida, khoya, chocolate, paneer, ghee)
-  const words = low.replace(/[^a-z0-9 ]/g, '').split(' ').filter(w => w.length >= 3 && !['show','current','stock','inventory','please','batao','kitna','hai','mein','the','kya','aur','list'].includes(w));
-  const itemMatches = Object.entries(fullStock).filter(([k]) => {
-    const kl = k.toLowerCase();
-    return words.some(w => kl.includes(w) || (w.startsWith('mai') && kl.includes('maida')) || (w.startsWith('kho') && kl.includes('khoya')));
-  });
-  if (itemMatches.length > 0) {
-    return '<b>Exact Item Stock (' + targetOut + '):</b>\n' + itemMatches.map(([k, v]) => '&#8226; <b>' + k + '</b>: <span style="color:#0f766e;font-weight:800">' + v + ' Available</span>').join('\n');
-  }
-
-  // 2. Full Stock List
-  if (low.includes('stock') || low.includes('inventory') || low.includes('raw') || low.includes('saman')) {
-    return '<b>Live Inventory Stock (' + targetOut + '):</b>\n' + Object.entries(fullStock).map(([k, v]) => '&#8226; ' + k + ': <b>' + v + '</b>').join('\n');
-  }
-
-  // 3. Sales / Bills / Cash / UPI
-  if (low.includes('sale') || low.includes('cash') || low.includes('upi') || low.includes('order') || low.includes('bill') || low.includes('bikri')) {
-    const bills = JSON.parse(localStorage.getItem('rpBills') || '[]').filter(b => targetOut === 'Head Office' || !b.outlet || b.outlet === targetOut);
-    const total = bills.reduce((s, x) => s + Number(x.total || 0), 0);
-    const cash = bills.filter(x => String(x.payment || 'Cash').toLowerCase().includes('cash')).reduce((s, x) => s + Number(x.total || 0), 0);
-    return '<b>Live Sales &amp; Payment Report (' + targetOut + '):</b>\n&#8226; Total Sales: <b>Rs. ' + total.toFixed(2) + '</b> (' + bills.length + ' Bills)\n&#8226; Cash Collection: <b>Rs. ' + cash.toFixed(2) + '</b>\n&#8226; UPI / Card Collection: <b>Rs. ' + Math.max(0, total - cash).toFixed(2) + '</b>';
-  }
-
-  // 4. Purchase / PO / Supplier
-  if (low.includes('po') || low.includes('purchase') || low.includes('supplier') || low.includes('vendor')) {
-    const pos = JSON.parse(localStorage.getItem('rpLockedPurchasePOs') || '[]').filter(p => targetOut === 'Head Office' || p.outlet === targetOut);
-    return '<b>Purchase Orders &amp; Supplier Summary (' + targetOut + '):</b>\n&#8226; Audit-Locked POs Created: <b>' + pos.length + ' POs</b>\n&#8226; Total PO Value: <b>Rs. ' + pos.reduce((s,x)=>s+Number(x.total||0),0).toFixed(2) + '</b>';
-  }
-
-  // 5. Menu / Barcode / Approval
-  if (low.includes('menu') || low.includes('barcode') || low.includes('approval') || low.includes('recipe')) {
-    const menu = JSON.parse(localStorage.getItem('rpMasterMenuItems') || '[]');
-    const pend = JSON.parse(localStorage.getItem('rpMenuApprovalQueue') || '[]');
-    return '<b>Menu Master &amp; Approval Status (' + targetOut + '):</b>\n&#8226; Approved Menu Items: <b>' + menu.length + '</b>\n&#8226; Pending HO Approvals: <b>' + pend.length + ' Requests</b>';
-  }
-
-  // 6. Tasks / Staff / Feedback
-  if (low.includes('task') || low.includes('staff') || low.includes('feedback') || low.includes('rating')) {
-    const tasks = JSON.parse(localStorage.getItem('rpTasksList') || '[]').filter(t => targetOut === 'Head Office' || t.outlet === targetOut);
-    const fbs = JSON.parse(localStorage.getItem('rpCustFeedbacks') || '[]');
-    return '<b>Tasks, Staff &amp; Customer Feedback (' + targetOut + '):</b>\n&#8226; Pending Tasks: <b>' + tasks.filter(t=>t.status!=='Completed').length + '</b>\n&#8226; Live Customer Reviews: <b>' + (24 + fbs.length) + ' (4.7/5 Stars)</b>';
-  }
-
-  return '<b>Namaste! Main aapke sawal "' + q + '" ke liye ' + targetOut + ' ka live status bata raha hoon:</b>\n&#8226; Stock Items Tracked: <b>' + Object.keys(fullStock).length + '</b> (Kisi item ka naam likhein jaise <i>"Maida stock"</i>)\n&#8226; Sales &amp; PO: Type <i>"Aaj ki sale"</i> ya <i>"Purchase PO status"</i>\n&#8226; Menu &amp; Tasks: Type <i>"Menu approval"</i> ya <i>"Pending tasks"</i>';
-}
-
-function askPreset(txt) { qInp.value = txt; sendQuery(); }
-
-async function sendQuery() {
-  const q = qInp.value.trim(); if (!q) return;
-  qInp.value = '';
-  addMsg(q, 'user');
-  const snap = getLiveErpSnapshot();
-  const apiKey = (localStorage.getItem('rpGeminiKey') || '').trim();
-
-  if (apiKey) {
-    const botBox = addMsg('<i>Thinking with Google Gemini AI...</i>', 'ai');
-    try {
-      const res = await fetch('https://googleapis.com' + encodeURIComponent(apiKey), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: 'You are RestaurantPro ERP AI Copilot for a 31-outlet sweets & restaurant chain in India. Reply concisely in Hindi/Hinglish/English matching user language using this live outlet JSON data: ' + JSON.stringify(snap) + '\nUser Question: ' + q }] }] })
-      });
-      const data = await res.json();
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (reply) { botBox.innerHTML = reply.replace(/\n/g, '<br>'); return; }
-    } catch (e) {}
-    botBox.innerHTML = buildSmartLocalReply(q, snap);
-  } else {
-    addMsg(buildSmartLocalReply(q, snap), 'ai');
-  }
-}
-
-function startVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) return alert('Voice mic is supported in Chrome/Edge browser.');
-  const rec = new SR(); rec.lang = 'hi-IN';
-  micBtn.textContent = '...';
-  rec.onresult = e => { qInp.value = e.results.transcript; micBtn.innerHTML = '&#127908;'; sendQuery(); };
-  rec.onerror = () => { micBtn.innerHTML = '&#127908;'; };
-  rec.start();
+  if (low.includes('po') || low.includes('purchase')) { add('<b>Purchase Orders (' + out + '):</b> ' + pos.length + ' Audit-Locked POs'); return; }
+  if (low.includes('menu') || low.includes('barcode')) { add('<b>Menu Master:</b> ' + menu.length + ' Approved Items'); return; }
+  add('<b>' + out + ' Live Status:</b><br>Bills: <b>' + bills.length + '</b> | Tracked Stock Items: <b>' + Object.keys(st).length + '</b> | POs: <b>' + pos.length + '</b>');
 }
 </script></body></html>
