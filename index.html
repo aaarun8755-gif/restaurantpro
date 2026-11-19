@@ -2453,5 +2453,17 @@ document.addEventListener('click', function(e) {
   }
 }, true);
 </script>
+<script id="rpMenuMasterHook">
+document.addEventListener('click', function(e) {
+  const el = e.target.closest('button, a, div, li');
+  if (!el) return;
+  const txt = (el.innerText || '').trim();
+  if ((txt === 'Menu' || txt === 'Menu Management' || txt === 'Item Master') && el.offsetHeight < 90) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    window.location.href = '/menu-master.html';
+  }
+}, true);
+</script>
 </body>
 </html>
