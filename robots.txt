@@ -1,3 +1,11 @@
 User-agent: *
-Allow: /
+Allow: /website.html
+Disallow: /web-admin.html
+Disallow: /online-channels.html
+Disallow: /index.html
+Disallow: /mis-report.html
+Disallow: /purchase-mgmt.html
+Disallow: /live-pnl.html
+Disallow: /automail-hub.html
+Disallow: /ai-assistant.html
 Sitemap: https://onrender.com
