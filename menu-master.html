@@ -64,27 +64,42 @@ td{border:1px solid #cbd5e1;padding:8px 10px}
   <div class="out-grid" id="hoOutletsGrid"></div>
   <div style="text-align:right;margin-top:12px"><button class="btn light" onclick="hoApproveModal.style.display='none'">Cancel</button> <button class="btn" id="confirmApproveBtn">Approve &amp; Push &#10003;</button></div>
 </div></div>
-<div class="modal" id="viewModal"><div style="background:#fff;border-radius:14px;padding:20px;width:90%;max-width:420px;text-align:center"><div id="viewBody"></div><button class="btn light" style="margin-top:10px" onclick="viewModal.style.display='none'">Close</button></div></div><script>
+<div class="modal" id="viewModal"><div style="background:#fff;border-radius:14px;padding:20px;width:90%;max-width:420px;text-align:center"><div id="viewBody"></div><button class="btn light" style="margin-top:10px" onclick="viewModal.style.display='none'">Close</button></div></div>
+<script>
 const OUTLETS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
 const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet', isHO = curOut === 'Head Office';
-outLbl.textContent = isHO ? 'Head Office Control' : 'Outlet: ' + curOut;
-apHint.textContent = isHO ? 'Approve & assign outlets' : 'Pending HO approval';
+outLbl.textContent = isHO ? 'Head Office Master Control' : 'Active Unit: ' + curOut;
+apHint.textContent = isHO ? 'Click Approve to select outlets' : 'Waiting for HO approval';
+
 function getApprovedMenu() {
   let l = JSON.parse(localStorage.getItem('rpMasterMenuItems') || '[]');
-  if (!l.length) { l = [{ id: 'itm-1', name: '5 Star Chocolate', price: 40, shortCode: '234', barcode: '8905STAR234', cat1: 'Chocolate', cat2: 'Retail Item', cat3: 'Self Create Recipe', vendor: 'Arun Traders Vendor', selfCreate: true, selfUnit: '1 Pc', manualRec: [], outlets: OUTLETS }]; localStorage.setItem('rpMasterMenuItems', JSON.stringify(l)); }
+  if (!l.length) {
+    l = [{ id: 'itm-1', name: '5 Star Chocolate', price: 40, shortCode: '234', barcode: '8905STAR234', cat1: 'Chocolate', cat2: 'Retail Item', cat3: 'Self Create Recipe', vendor: 'Arun Traders Vendor', selfCreate: true, selfUnit: '1 Pc', manualRec: [], outlets: OUTLETS }];
+    localStorage.setItem('rpMasterMenuItems', JSON.stringify(l));
+  }
   return l;
 }
 function getApprovals() { return JSON.parse(localStorage.getItem('rpMenuApprovalQueue') || '[]'); }
 function autoGenBarcode() { if (chkSelfCreate.checked) fBarcode.value = '890' + (fItemName.value||'ITEM').replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,6) + (fShortCode.value||'101'); }
 function toggleRecipeMode() { selfUnitWrap.style.display = chkSelfCreate.checked ? 'block' : 'none'; manualRecWrap.style.display = chkSelfCreate.checked ? 'none' : 'block'; if (chkSelfCreate.checked) autoGenBarcode(); }
-function addManRow(m='',q='0.25',u='KG') { const d=document.createElement('div'); d.className='mr-row'; d.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:4px'; d.innerHTML='<input class="mr-mat" placeholder="Raw Material" value="'+m+'"><input class="mr-qty" type="number" step="0.01" value="'+q+'"><select class="mr-unit"><option>KG</option><option>Pc</option></select><button type="button" class="btn d sm" onclick="this.parentElement.remove()">X</button>'; manRowsBox.appendChild(d); }
+
+function addManRow(m='',q='0.25',u='KG') {
+  const d=document.createElement('div'); d.className='mr-row';
+  d.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:4px';
+  d.innerHTML='<input class="mr-mat" placeholder="Raw Material" value="'+m+'"><input class="mr-qty" type="number" step="0.01" value="'+q+'"><select class="mr-unit"><option>KG</option><option>Pc</option></select><button type="button" class="btn d sm" onclick="this.parentElement.remove()">X</button>';
+  manRowsBox.appendChild(d);
+}
 function openItemModal(act, id='') {
   reqActionType.value = act; editItemId.value = id; manRowsBox.innerHTML = '';
   if (id) { const it = getApprovedMenu().find(x=>x.id===id); mFormTitle.textContent='Edit Item'; fItemName.value=it.name; fPrice.value=it.price; fShortCode.value=it.shortCode; fBarcode.value=it.barcode; fCat1.value=it.cat1; fCat2.value=it.cat2; fCat3.value=it.cat3; fVendor.value=it.vendor||''; chkSelfCreate.checked=!!it.selfCreate; fSelfUnit.value=it.selfUnit||'1 Pc'; (it.manualRec||[]).forEach(r=>addManRow(r.mat,r.qty,r.unit)); }
   else { mFormTitle.textContent='Add New Menu Item'; menuItemForm.reset(); chkSelfCreate.checked=true; addManRow(); }
   toggleRecipeMode(); itemModal.style.display='flex';
 }
-function requestDelete(id) { const it = getApprovedMenu().find(x=>x.id===id); if (!it || !confirm('Send Delete Request to HO?')) return; const q = getApprovals(); q.unshift({ reqId:'REQ-'+Math.floor(1000+Math.random()*8999), action:'DELETE', targetId:id, item:it, reqBy:curOut }); localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q)); renderMenu(); }
+function requestDelete(id) {
+  const it = getApprovedMenu().find(x=>x.id===id); if (!it || !confirm('Send Delete Request to HO?')) return;
+  const q = getApprovals(); q.unshift({ reqId:'REQ-'+Math.floor(1000+Math.random()*8999), action:'DELETE', targetId:id, item:it, reqBy:curOut });
+  localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q)); renderMenu();
+}
 menuItemForm.onsubmit = function(e) {
   e.preventDefault(); if (chkSelfCreate.checked && !fBarcode.value) autoGenBarcode();
   const manualRec = Array.from(document.querySelectorAll('.mr-row')).map(r=>({mat:r.querySelector('.mr-mat').value.trim(),qty:Number(r.querySelector('.mr-qty').value||0),unit:r.querySelector('.mr-unit').value})).filter(x=>x.mat&&x.qty>0);
@@ -92,6 +107,7 @@ menuItemForm.onsubmit = function(e) {
   const q = getApprovals(); q.unshift({ reqId:'REQ-'+Math.floor(1000+Math.random()*8999), action:reqActionType.value, targetId:itemObj.id, item:itemObj, reqBy:curOut });
   localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q)); itemModal.style.display='none'; renderMenu();
 };
+
 function openHoApprove(reqId) {
   const req = getApprovals().find(x=>x.reqId===reqId); if (!req) return;
   hoReqSummary.innerHTML = '<b>'+req.action+':</b> '+req.item.name+' | '+req.item.cat1+' / '+req.item.cat2+' / '+req.item.cat3+' / '+req.item.vendor;
@@ -108,10 +124,10 @@ function openHoApprove(reqId) {
 function viewItem(id) { const it = getApprovedMenu().find(x=>x.id===id); if (!it) return; viewBody.innerHTML = '<h3>'+it.name+'</h3><div style="border:2px dashed #0f766e;padding:8px;font-family:monospace;font-size:18px">||| || ||| || |||<br><b>'+it.barcode+'</b></div><p style="font-size:13px">Code: <b>'+it.shortCode+'</b> | Vendor: <b>'+it.vendor+'</b><br>'+it.cat1+' / '+it.cat2+' / '+it.cat3+'</p>'; viewModal.style.display='flex'; }
 function renderMenu() {
   const q = getApprovals();
-  apBody.innerHTML = q.map(r=>'<tr><td><b>'+r.reqId+'</b></td><td><span class="badge pend">'+r.action+'</span></td><td><b>'+r.item.name+'</b></td><td>'+r.item.cat1+' / '+r.item.cat2+' / '+r.item.cat3+' / '+r.item.vendor+'</td><td>'+r.item.shortCode+' / '+r.item.barcode+'</td><td>'+(r.item.selfCreate?'Self ('+r.item.selfUnit+')':'Manual')+'</td><td>'+r.reqBy+'</td><td>'+(isHO?'<button class="btn sm" onclick="openHoApprove(''+r.reqId+'')">Approve</button>':'<span class="badge pend">Pending HO</span>')+'</td></tr>').join('') || '<tr><td colspan="8">No pending requests.</td></tr>';
+  apBody.innerHTML = q.map(r=>'<tr><td><b>'+r.reqId+'</b></td><td><span class="badge pend">'+r.action+'</span></td><td><b>'+r.item.name+'</b></td><td>'+r.item.cat1+' / '+r.item.cat2+' / '+r.item.cat3+' / '+r.item.vendor+'</td><td>'+r.item.shortCode+' / '+r.item.barcode+'</td><td>'+(r.item.selfCreate?'Self ('+r.item.selfUnit+')':'Manual')+'</td><td>'+r.reqBy+'</td><td>'+(isHO?'<button class="btn sm" onclick="openHoApprove(\''+r.reqId+'\')">Approve</button>':'<span class="badge pend">Pending HO</span>')+'</td></tr>').join('') || '<tr><td colspan="8">No pending requests.</td></tr>';
   const s = (mSearch.value||'').toLowerCase();
   const list = getApprovedMenu().filter(it=>(isHO||(it.outlets||[]).includes(curOut))&&(!s||it.name.toLowerCase().includes(s)||it.shortCode.includes(s)||it.barcode.toLowerCase().includes(s)));
-  menuBody.innerHTML = list.map(it=>'<tr><td><b>'+it.name+'</b></td><td>'+it.cat1+'</td><td>'+it.cat2+'</td><td>'+it.cat3+'</td><td><b>'+it.vendor+'</b></td><td><b>'+it.shortCode+'</b></td><td><b>'+it.barcode+'</b></td><td><b>Rs.'+it.price+'</b></td><td>'+(it.selfCreate?'<span class="badge">Self: -'+it.selfUnit+'</span>':'Manual')+'</td><td><button class="btn light sm" onclick="viewItem(''+it.id+'')">View</button> <button class="btn light sm" onclick="openItemModal('EDIT',''+it.id+'')">Edit</button> <button class="btn d sm" onclick="requestDelete(''+it.id+'')">Delete</button></td></tr>').join('') || '<tr><td colspan="10">No items.</td></tr>';
+  menuBody.innerHTML = list.map(it=>'<tr><td><b>'+it.name+'</b></td><td>'+it.cat1+'</td><td>'+it.cat2+'</td><td>'+it.cat3+'</td><td><b>'+it.vendor+'</b></td><td><b>'+it.shortCode+'</b></td><td><b>'+it.barcode+'</b></td><td><b>Rs.'+it.price+'</b></td><td>'+(it.selfCreate?'<span class="badge">Self: -'+it.selfUnit+'</span>':'Manual')+'</td><td><button class="btn light sm" onclick="viewItem(\''+it.id+'\')">View</button> <button class="btn light sm" onclick="openItemModal(\'EDIT\',\''+it.id+'\')">Edit</button> <button class="btn d sm" onclick="requestDelete(\''+it.id+'\')">Delete</button></td></tr>').join('') || '<tr><td colspan="10">No items.</td></tr>';
 }
 renderMenu();
 </script></body></html>
