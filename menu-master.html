@@ -1,159 +1,117 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RestaurantPro | Master Menu, 3-Category, Barcode &amp; HO Approval</title>
+<title>RestaurantPro | Menu Master &amp; HO Approval</title>
 <style>
-:root{--bg:#f4f7f6;--ink:#1e293b;--line:#dbe5e2;--teal:#0f766e;--dark:#115e59}
 *{box-sizing:border-box;font-family:Cambria,Georgia,serif}
-body{margin:0;background:var(--bg);color:var(--ink)}
-header{background:#fff;border-bottom:1px solid var(--line);padding:13px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+body{margin:0;background:#f4f7f6;color:#1e293b}
+header{background:#fff;border-bottom:1px solid #dbe5e2;padding:13px 22px;display:flex;justify-content:space-between;align-items:center}
 .wrap{max-width:1460px;margin:auto;padding:16px}
-.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
-.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px;align-items:end}
-label{font-size:11.5px;font-weight:700;color:#334155;display:block;margin-bottom:3px}
+.card{background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end}
+label{font-size:11.5px;font-weight:700;display:block;margin-bottom:3px}
 input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}
-.btn{border:0;border-radius:8px;padding:8px 14px;background:var(--teal);color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}
-.btn.light{background:#fff;color:#0f766e;border:1px solid var(--line)}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:4px 9px;font-size:11.5px}
+.btn{border:0;border-radius:8px;padding:8px 14px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}
+.btn.light{background:#fff;color:#0f766e;border:1px solid #cbd5e1}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:4px 9px;font-size:11.5px}
 table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
 th{background:#eef6f4;color:#115e59;padding:9px 10px;text-align:left;border:1px solid #cbd5e1}
 td{border:1px solid #cbd5e1;padding:8px 10px}
 .badge{padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
 .badge.pend{background:#fef3c7;color:#b45309}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center}
-.out-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;max-height:240px;overflow-y:auto;border:1px solid #cbd5e1;padding:10px;border-radius:8px;background:#f8fafc}
-</style></head>
-<body>
+.out-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;max-height:220px;overflow-y:auto;border:1px solid #cbd5e1;padding:10px;border-radius:8px}
+</style></head><body>
 <header>
-  <div><strong style="font-size:18px;color:#115e59">Menu Master, 3-Category, Barcode &amp; Self-Create Recipe</strong> | <small id="outLbl" style="color:#64748b"></small></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
-    <button class="btn" onclick="openItemModal('ADD')">+ Add New Menu Item (Send for Approval)</button>
-    <a href="/index.html" class="btn light">&larr; Dashboard</a>
-  </div>
+  <div><strong style="font-size:18px;color:#115e59">Menu Master (4 Categories, Barcode &amp; Self-Recipe)</strong> | <small id="outLbl"></small></div>
+  <div style="display:flex;gap:8px"><button class="btn" onclick="openItemModal('ADD')">+ Add New Menu Item</button><a href="/index.html" class="btn light">&larr; Dashboard</a></div>
 </header>
 <div class="wrap">
-  <!-- HEAD OFFICE / OUTLET APPROVAL QUEUE -->
-  <div class="card" id="approvalCard" style="border-left:5px solid #d97706">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <strong style="color:#b45309;font-size:15px">Pending Menu Approvals (Add / Edit / Delete Requests)</strong>
-      <small id="apHint" style="color:#64748b"></small>
-    </div>
-    <table><thead><tr><th>Req ID</th><th>Action</th><th>Item Name</th><th>3 Categories + Vendor</th><th>Short Code &amp; Barcode</th><th>Recipe Type</th><th>Requested By</th><th>Status / HO Action</th></tr></thead><tbody id="apBody"></tbody></table>
+  <div class="card" style="border-left:5px solid #d97706">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><strong style="color:#b45309">Pending Menu Approvals (Add / Edit / Delete)</strong><small id="apHint"></small></div>
+    <table><thead><tr><th>Req ID</th><th>Action</th><th>Item</th><th>4 Categories (Cat 1 / 2 / 3 / Vendor)</th><th>Code &amp; Barcode</th><th>Recipe</th><th>By</th><th>HO Action</th></tr></thead><tbody id="apBody"></tbody></table>
   </div>
-
-  <!-- ACTIVE APPROVED MENU TABLE -->
   <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-      <strong style="font-size:16px;color:#115e59">Approved Menu Items (Outlet Active Menu)</strong>
-      <input id="mSearch" placeholder="Search item, category, short code, barcode..." oninput="renderMenu()" style="width:280px">
-    </div>
-    <table><thead><tr><th>Item Name</th><th>Category One</th><th>Category Two</th><th>Category Three</th><th>Vendor / Supplier</th><th>Short Code</th><th>Barcode</th><th>Price (&#8377;)</th><th>Recipe &amp; Stock Link</th><th>Actions (View / Edit / Delete)</th></tr></thead><tbody id="menuBody"></tbody></table>
+    <div style="display:flex;justify-content:space-between;margin-bottom:10px"><strong style="color:#115e59">Approved Menu Items</strong><input id="mSearch" placeholder="Search item, code, barcode..." oninput="renderMenu()" style="width:260px"></div>
+    <table><thead><tr><th>Item Name</th><th>Category 1</th><th>Category 2</th><th>Category 3</th><th>Vendor / Supplier</th><th>Short Code</th><th>Barcode</th><th>Price</th><th>Recipe Stock Link</th><th>Actions</th></tr></thead><tbody id="menuBody"></tbody></table>
   </div>
 </div>
-
-<!-- ADD / EDIT MENU ITEM MODAL -->
-<div class="modal" id="itemModal">
-  <div style="background:#fff;border-radius:14px;padding:20px;width:95%;max-width:740px;max-height:90vh;overflow:auto">
-    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0;padding-bottom:8px;margin-bottom:12px">
-      <strong style="font-size:17px;color:#115e59" id="mFormTitle">Add Menu Item (Requires Head Office Approval)</strong>
-      <button class="btn light sm" onclick="itemModal.style.display='none'">Close &#10005;</button>
+<div class="modal" id="itemModal"><div style="background:#fff;border-radius:14px;padding:20px;width:95%;max-width:720px;max-height:90vh;overflow:auto">
+  <div style="display:flex;justify-content:space-between;margin-bottom:10px"><strong style="font-size:16px;color:#115e59" id="mFormTitle">Add Menu Item</strong><button class="btn light sm" onclick="itemModal.style.display='none'">Close</button></div>
+  <form id="menuItemForm">
+    <input type="hidden" id="editItemId"><input type="hidden" id="reqActionType" value="ADD">
+    <div class="fgrid">
+      <div><label>Item Name *</label><input id="fItemName" required oninput="autoGenBarcode()"></div>
+      <div><label>Selling Price (Rs.) *</label><input id="fPrice" type="number" step="0.01" required></div>
+      <div><label>Short Code *</label><input id="fShortCode" required oninput="autoGenBarcode()"></div>
+      <div><label>Barcode (Auto-Filled) *</label><input id="fBarcode" required></div>
     </div>
-    <form id="menuItemForm">
-      <input type="hidden" id="editItemId"><input type="hidden" id="reqActionType" value="ADD">
-      <div class="fgrid">
-        <div><label>Item Name *</label><input id="fItemName" required placeholder="e.g. 5 Star Chocolate" oninput="autoGenBarcode()"></div>
-        <div><label>Selling Price (&#8377;) *</label><input id="fPrice" type="number" step="0.01" required placeholder="40"></div>
-        <div><label>Short Code *</label><input id="fShortCode" required placeholder="e.g. 234"></div>
-        <div><label>Barcode (Auto-Filled on Self-Create) *</label><input id="fBarcode" required placeholder="Auto-generated barcode"></div>
-      </div>
-      <div class="fgrid" style="margin-top:8px"><div><label>1. Category One *</label><input id="fCat1" required placeholder="e.g. Chocolate"></div><div><label>2. Category Two *</label><input id="fCat2" required placeholder="e.g. Retail Item"></div><div><label>3. Category Three *</label><input id="fCat3" required placeholder="e.g. Packed Item"></div><div><label>4. Vendor / Supplier *</label><input id="fVendor" list="hoVendorsList" required placeholder="e.g. Arun Traders Vendor"><datalist id="hoVendorsList"><option value="Arun Traders Vendor"><option value="Brij Mohan Dairy"><option value="Tamanna Traders"><option value="Ajay Kumar Dryfruits"><option value="Metro Packaging"></datalist></div></div>
-
-      <!-- SELF-CREATE RECIPE + UNIT OR MANUAL RECIPE -->
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:12px;border-radius:10px;margin-top:12px">
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-          <label style="display:inline-flex;align-items:center;gap:6px;margin:0;font-size:13.5px;color:#0f766e;cursor:pointer">
-            <input type="checkbox" id="chkSelfCreate" checked onchange="toggleRecipeMode()" style="width:auto;margin:0">
-            <b>Self-Create Recipe (Auto-Create Same Raw Material + Auto-Generate Barcode)</b>
-          </label>
-          <div id="selfUnitWrap" style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:12px;font-weight:700">Deduct Per Bill:</span>
-            <select id="fSelfUnit" style="width:120px;margin:0"><option value="1 Pc">1 Pc</option><option value="1 Kg">1 Kg</option><option value="1 Litre">1 Litre</option><option value="1 Box">1 Box</option></select>
-          </div>
-        </div>
-        <div id="manualRecWrap" style="display:none;margin-top:10px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><small><b>Manual Raw Materials Deducted on Billing:</b></small><button type="button" class="btn light sm" onclick="addManRow()">+ Add Raw Material</button></div>
-          <div id="manRowsBox"></div>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
-        <button type="button" class="btn light" onclick="itemModal.style.display='none'">Cancel</button>
-        <button type="submit" class="btn">Submit for Head Office Approval &rarr;</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- HEAD OFFICE OUTLET ACCESS APPROVAL MODAL -->
-<div class="modal" id="hoApproveModal">
-  <div style="background:#fff;border-radius:14px;padding:20px;width:95%;max-width:680px">
-    <h3 style="margin-top:0;color:#115e59">Head Office Approval ? Select Outlets for Menu Access</h3>
-    <p id="hoReqSummary" style="font-size:13px;background:#f8fafc;padding:10px;border-radius:8px"></p>
-    <div style="margin-bottom:8px"><label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="chkAllOutlets" checked onchange="document.querySelectorAll('.ho-out-chk').forEach(c=>c.checked=this.checked)" style="width:auto"> <b>Grant Access to All 31 Outlets</b></label></div>
-    <div class="out-grid" id="hoOutletsGrid"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
-      <button class="btn light" onclick="hoApproveModal.style.display='none'">Cancel</button>
-      <button class="btn" id="confirmApproveBtn">Approve &amp; Push to Selected Outlets &#10003;</button>
+    <div class="fgrid" style="margin-top:8px">
+      <div><label>1. Category One *</label><input id="fCat1" required placeholder="Chocolate"></div>
+      <div><label>2. Category Two *</label><input id="fCat2" required placeholder="Retail Item"></div>
+      <div><label>3. Category Three *</label><input id="fCat3" required placeholder="Self Create Recipe"></div>
+      <div><label>4. Vendor / Supplier *</label><input id="fVendor" required placeholder="Arun Traders Vendor"></div>
     </div>
-  </div>
-</div>
-
-<!-- VIEW ITEM & BARCODE MODAL -->
-<div class="modal" id="viewModal"><div style="background:#fff;border-radius:14px;padding:20px;width:92%;max-width:460px;text-align:center"><div id="viewBody"></div><button class="btn light" style="margin-top:12px" onclick="viewModal.style.display='none'">Close</button></div></div>
-
-<script>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:10px;border-radius:8px;margin-top:10px">
+      <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="chkSelfCreate" checked onchange="toggleRecipeMode()" style="width:auto"> <b>Self-Create Recipe (Auto-Create Same Raw Material &amp; Barcode)</b></label>
+      <div id="selfUnitWrap" style="margin-top:6px"><select id="fSelfUnit" style="width:140px"><option value="1 Pc">1 Pc</option><option value="1 Kg">1 Kg</option><option value="1 Litre">1 Litre</option><option value="1 Box">1 Box</option></select></div>
+      <div id="manualRecWrap" style="display:none;margin-top:8px"><button type="button" class="btn light sm" onclick="addManRow()">+ Add Raw Material</button><div id="manRowsBox" style="margin-top:6px"></div></div>
+    </div>
+    <div style="text-align:right;margin-top:12px"><button class="btn">Submit for Head Office Approval &rarr;</button></div>
+  </form>
+</div></div>
+<div class="modal" id="hoApproveModal"><div style="background:#fff;border-radius:14px;padding:20px;width:95%;max-width:650px">
+  <h3 style="margin-top:0;color:#115e59">Head Office Approval ? Select Outlets</h3><p id="hoReqSummary" style="font-size:13px"></p>
+  <label style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px"><input type="checkbox" checked onchange="document.querySelectorAll('.ho-out-chk').forEach(c=>c.checked=this.checked)" style="width:auto"> <b>Select All 31 Outlets</b></label>
+  <div class="out-grid" id="hoOutletsGrid"></div>
+  <div style="text-align:right;margin-top:12px"><button class="btn light" onclick="hoApproveModal.style.display='none'">Cancel</button> <button class="btn" id="confirmApproveBtn">Approve &amp; Push &#10003;</button></div>
+</div></div>
+<div class="modal" id="viewModal"><div style="background:#fff;border-radius:14px;padding:20px;width:90%;max-width:420px;text-align:center"><div id="viewBody"></div><button class="btn light" style="margin-top:10px" onclick="viewModal.style.display='none'">Close</button></div></div><script>
+const OUTLETS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet', isHO = curOut === 'Head Office';
+outLbl.textContent = isHO ? 'Head Office Control' : 'Outlet: ' + curOut;
+apHint.textContent = isHO ? 'Approve & assign outlets' : 'Pending HO approval';
+function getApprovedMenu() {
+  let l = JSON.parse(localStorage.getItem('rpMasterMenuItems') || '[]');
+  if (!l.length) { l = [{ id: 'itm-1', name: '5 Star Chocolate', price: 40, shortCode: '234', barcode: '8905STAR234', cat1: 'Chocolate', cat2: 'Retail Item', cat3: 'Self Create Recipe', vendor: 'Arun Traders Vendor', selfCreate: true, selfUnit: '1 Pc', manualRec: [], outlets: OUTLETS }]; localStorage.setItem('rpMasterMenuItems', JSON.stringify(l)); }
+  return l;
+}
+function getApprovals() { return JSON.parse(localStorage.getItem('rpMenuApprovalQueue') || '[]'); }
+function autoGenBarcode() { if (chkSelfCreate.checked) fBarcode.value = '890' + (fItemName.value||'ITEM').replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,6) + (fShortCode.value||'101'); }
+function toggleRecipeMode() { selfUnitWrap.style.display = chkSelfCreate.checked ? 'block' : 'none'; manualRecWrap.style.display = chkSelfCreate.checked ? 'none' : 'block'; if (chkSelfCreate.checked) autoGenBarcode(); }
+function addManRow(m='',q='0.25',u='KG') { const d=document.createElement('div'); d.className='mr-row'; d.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:4px'; d.innerHTML='<input class="mr-mat" placeholder="Raw Material" value="'+m+'"><input class="mr-qty" type="number" step="0.01" value="'+q+'"><select class="mr-unit"><option>KG</option><option>Pc</option></select><button type="button" class="btn d sm" onclick="this.parentElement.remove()">X</button>'; manRowsBox.appendChild(d); }
+function openItemModal(act, id='') {
+  reqActionType.value = act; editItemId.value = id; manRowsBox.innerHTML = '';
+  if (id) { const it = getApprovedMenu().find(x=>x.id===id); mFormTitle.textContent='Edit Item'; fItemName.value=it.name; fPrice.value=it.price; fShortCode.value=it.shortCode; fBarcode.value=it.barcode; fCat1.value=it.cat1; fCat2.value=it.cat2; fCat3.value=it.cat3; fVendor.value=it.vendor||''; chkSelfCreate.checked=!!it.selfCreate; fSelfUnit.value=it.selfUnit||'1 Pc'; (it.manualRec||[]).forEach(r=>addManRow(r.mat,r.qty,r.unit)); }
+  else { mFormTitle.textContent='Add New Menu Item'; menuItemForm.reset(); chkSelfCreate.checked=true; addManRow(); }
+  toggleRecipeMode(); itemModal.style.display='flex';
+}
+function requestDelete(id) { const it = getApprovedMenu().find(x=>x.id===id); if (!it || !confirm('Send Delete Request to HO?')) return; const q = getApprovals(); q.unshift({ reqId:'REQ-'+Math.floor(1000+Math.random()*8999), action:'DELETE', targetId:id, item:it, reqBy:curOut }); localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q)); renderMenu(); }
+menuItemForm.onsubmit = function(e) {
+  e.preventDefault(); if (chkSelfCreate.checked && !fBarcode.value) autoGenBarcode();
+  const manualRec = Array.from(document.querySelectorAll('.mr-row')).map(r=>({mat:r.querySelector('.mr-mat').value.trim(),qty:Number(r.querySelector('.mr-qty').value||0),unit:r.querySelector('.mr-unit').value})).filter(x=>x.mat&&x.qty>0);
+  const itemObj = { id: editItemId.value||('itm-'+Date.now()), name:fItemName.value.trim(), price:Number(fPrice.value), shortCode:fShortCode.value.trim(), barcode:fBarcode.value.trim(), cat1:fCat1.value.trim(), cat2:fCat2.value.trim(), cat3:fCat3.value.trim(), vendor:fVendor.value.trim(), selfCreate:chkSelfCreate.checked, selfUnit:fSelfUnit.value, manualRec, outlets:[curOut] };
+  const q = getApprovals(); q.unshift({ reqId:'REQ-'+Math.floor(1000+Math.random()*8999), action:reqActionType.value, targetId:itemObj.id, item:itemObj, reqBy:curOut });
+  localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q)); itemModal.style.display='none'; renderMenu();
+};
 function openHoApprove(reqId) {
-  const req = getApprovals().find(x => x.reqId === reqId); if (!req) return;
-  hoReqSummary.innerHTML = '<b>Action:</b> ' + req.action + ' &nbsp;|&nbsp; <b>Item:</b> ' + req.item.name + ' (Rs.' + req.item.price + ') &nbsp;|&nbsp; <b>Barcode:</b> ' + req.item.barcode + '<br><b>Categories:</b> ' + req.item.cat1 + ' &rarr; ' + req.item.cat2 + ' &rarr; ' + req.item.cat3 + ' | <b>Vendor:</b> ' + (req.item.vendor||'-');
-  hoOutletsGrid.innerHTML = OUTLETS.map(o => '<label style="display:flex;align-items:center;gap:6px;font-size:12px;margin:0"><input type="checkbox" class="ho-out-chk" value="'+o+'" checked style="width:auto"> '+o+'</label>').join('');
-  confirmApproveBtn.onclick = () => executeHoApproval(reqId);
-  hoApproveModal.style.display = 'flex';
+  const req = getApprovals().find(x=>x.reqId===reqId); if (!req) return;
+  hoReqSummary.innerHTML = '<b>'+req.action+':</b> '+req.item.name+' | '+req.item.cat1+' / '+req.item.cat2+' / '+req.item.cat3+' / '+req.item.vendor;
+  hoOutletsGrid.innerHTML = OUTLETS.map(o=>'<label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" class="ho-out-chk" value="'+o+'" checked style="width:auto">'+o+'</label>').join('');
+  confirmApproveBtn.onclick = function() {
+    const q = getApprovals(), idx = q.findIndex(x=>x.reqId===reqId), sel = Array.from(document.querySelectorAll('.ho-out-chk:checked')).map(c=>c.value);
+    let menu = getApprovedMenu();
+    if (req.action==='DELETE') menu = menu.filter(x=>x.id!==req.targetId);
+    else { req.item.outlets = sel; const mi = menu.findIndex(x=>x.id===req.targetId); if(mi>=0) menu[mi]=req.item; else menu.unshift(req.item); if(req.item.selfCreate) sel.forEach(o=>{ const k='rpInventoryStock::'+o, st=JSON.parse(localStorage.getItem(k)||'{}'); if(st[req.item.name]===undefined) st[req.item.name]=50; localStorage.setItem(k,JSON.stringify(st)); }); }
+    localStorage.setItem('rpMasterMenuItems', JSON.stringify(menu)); q.splice(idx,1); localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q)); hoApproveModal.style.display='none'; renderMenu();
+  };
+  hoApproveModal.style.display='flex';
 }
-function executeHoApproval(reqId) {
-  const q = getApprovals(), rIdx = q.findIndex(x => x.reqId === reqId); if (rIdx < 0) return;
-  const req = q[rIdx];
-  const selectedOutlets = Array.from(document.querySelectorAll('.ho-out-chk:checked')).map(c => c.value);
-  let menu = getApprovedMenu();
-  if (req.action === 'DELETE') {
-    menu = menu.filter(x => x.id !== req.targetId);
-  } else {
-    req.item.outlets = selectedOutlets;
-    const mIdx = menu.findIndex(x => x.id === req.targetId);
-    if (mIdx >= 0) menu[mIdx] = req.item; else menu.unshift(req.item);
-    if (req.item.selfCreate) {
-      selectedOutlets.forEach(outName => {
-        const k = 'rpInventoryStock::' + outName;
-        const st = JSON.parse(localStorage.getItem(k) || '{}');
-        if (st[req.item.name] === undefined) st[req.item.name] = 50;
-        localStorage.setItem(k, JSON.stringify(st));
-      });
-    }
-  }
-  localStorage.setItem('rpMasterMenuItems', JSON.stringify(menu));
-  q.splice(rIdx, 1); localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q));
-  hoApproveModal.style.display = 'none'; renderMenu();
-  alert('Approved & Synced to ' + selectedOutlets.length + ' Outlets!');
-}
-function viewItem(id) {
-  const it = getApprovedMenu().find(x => x.id === id); if (!it) return;
-  const recTxt = it.selfCreate ? ('Self-Created Raw Material: <b>' + it.name + '</b> (' + it.selfUnit + ' deducted per bill)') : (it.manualRec.map(r=>r.mat+' ('+r.qty+' '+r.unit+')').join(', ') || 'Manual');
-  viewBody.innerHTML = '<h3 style="margin-top:0;color:#115e59">' + it.name + '</h3><div style="border:2px dashed #0f766e;padding:10px;border-radius:8px;margin:10px 0;font-family:monospace;font-size:18px;letter-spacing:3px">||| || ||| || |||<br><b>' + it.barcode + '</b></div><p style="font-size:13px;text-align:left"><b>Short Code:</b> ' + it.shortCode + '<br><b>Category 1:</b> ' + it.cat1 + '<br><b>Category 2:</b> ' + it.cat2 + '<br><b>Category 3:</b> ' + it.cat3 + '<br><b>Vendor:</b> ' + (it.vendor||'-') + '<br><b>Recipe Logic:</b> ' + recTxt + '<br><b>Active Outlets:</b> ' + (it.outlets||[]).length + ' Outlets</p>';
-  viewModal.style.display = 'flex';
-}
+function viewItem(id) { const it = getApprovedMenu().find(x=>x.id===id); if (!it) return; viewBody.innerHTML = '<h3>'+it.name+'</h3><div style="border:2px dashed #0f766e;padding:8px;font-family:monospace;font-size:18px">||| || ||| || |||<br><b>'+it.barcode+'</b></div><p style="font-size:13px">Code: <b>'+it.shortCode+'</b> | Vendor: <b>'+it.vendor+'</b><br>'+it.cat1+' / '+it.cat2+' / '+it.cat3+'</p>'; viewModal.style.display='flex'; }
 function renderMenu() {
   const q = getApprovals();
-  apBody.innerHTML = q.map(r => '<tr><td><b>'+r.reqId+'</b></td><td><span class="badge pend">'+r.action+'</span></td><td><b>'+r.item.name+'</b></td><td>'+r.item.cat1+' / '+r.item.cat2+' / '+r.item.cat3+'<br><small><b>Vendor:</b> '+(r.item.vendor||'-')+'</small></td><td>Code: <b>'+r.item.shortCode+'</b> | Bar: <b>'+r.item.barcode+'</b></td><td>'+(r.item.selfCreate?'Self-Create ('+r.item.selfUnit+')':'Manual Recipe')+'</td><td>'+r.reqBy+'</td><td>'+(isHO?'<button class="btn sm" onclick="openHoApprove(\''+r.reqId+'\')">Review &amp; Select Outlets</button>':'<span class="badge pend">Pending HO</span>')+'</td></tr>').join('') || '<tr><td colspan="8">No pending approval requests.</td></tr>';
-  const s = (mSearch.value || '').toLowerCase();
-  const list = getApprovedMenu().filter(it => (isHO || (it.outlets||[]).includes(curOut)) && (!s || it.name.toLowerCase().includes(s) || it.shortCode.includes(s) || it.barcode.toLowerCase().includes(s) || it.cat1.toLowerCase().includes(s) || (it.vendor||'').toLowerCase().includes(s)));
-  menuBody.innerHTML = list.map(it => '<tr><td><b>'+it.name+'</b></td><td>'+it.cat1+'</td><td>'+it.cat2+'</td><td>'+it.cat3+'</td><td><b>'+(it.vendor||'-')+'</b></td><td><b>'+it.shortCode+'</b></td><td style="font-family:monospace"><b>'+it.barcode+'</b></td><td><b>&#8377;'+it.price+'</b></td><td>'+(it.selfCreate?'<span class="badge">Self RM: -'+it.selfUnit+'/bill</span>':'Manual Recipe')+'</td><td><button class="btn light sm" onclick="viewItem(\''+it.id+'\')">View</button> <button class="btn light sm" onclick="openItemModal(\'EDIT\',\''+it.id+'\')">Edit</button> <button class="btn d sm" onclick="requestDelete(\''+it.id+'\')">Delete</button></td></tr>').join('') || '<tr><td colspan="10">No approved menu items for this outlet.</td></tr>';
+  apBody.innerHTML = q.map(r=>'<tr><td><b>'+r.reqId+'</b></td><td><span class="badge pend">'+r.action+'</span></td><td><b>'+r.item.name+'</b></td><td>'+r.item.cat1+' / '+r.item.cat2+' / '+r.item.cat3+' / '+r.item.vendor+'</td><td>'+r.item.shortCode+' / '+r.item.barcode+'</td><td>'+(r.item.selfCreate?'Self ('+r.item.selfUnit+')':'Manual')+'</td><td>'+r.reqBy+'</td><td>'+(isHO?'<button class="btn sm" onclick="openHoApprove(''+r.reqId+'')">Approve</button>':'<span class="badge pend">Pending HO</span>')+'</td></tr>').join('') || '<tr><td colspan="8">No pending requests.</td></tr>';
+  const s = (mSearch.value||'').toLowerCase();
+  const list = getApprovedMenu().filter(it=>(isHO||(it.outlets||[]).includes(curOut))&&(!s||it.name.toLowerCase().includes(s)||it.shortCode.includes(s)||it.barcode.toLowerCase().includes(s)));
+  menuBody.innerHTML = list.map(it=>'<tr><td><b>'+it.name+'</b></td><td>'+it.cat1+'</td><td>'+it.cat2+'</td><td>'+it.cat3+'</td><td><b>'+it.vendor+'</b></td><td><b>'+it.shortCode+'</b></td><td><b>'+it.barcode+'</b></td><td><b>Rs.'+it.price+'</b></td><td>'+(it.selfCreate?'<span class="badge">Self: -'+it.selfUnit+'</span>':'Manual')+'</td><td><button class="btn light sm" onclick="viewItem(''+it.id+'')">View</button> <button class="btn light sm" onclick="openItemModal('EDIT',''+it.id+'')">Edit</button> <button class="btn d sm" onclick="requestDelete(''+it.id+'')">Delete</button></td></tr>').join('') || '<tr><td colspan="10">No items.</td></tr>';
 }
 renderMenu();
 </script></body></html>
