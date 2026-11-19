@@ -8,7 +8,11 @@ const os = require('os');
 const QRCode = require('qrcode');
 
 const app = express();
-app.get(['/favicon.ico', '/favicon.svg'], (req, res) => { res.setHeader('Content-Type', 'image/svg+xml'); res.setHeader('Cache-Control', 'no-cache'); res.send('<svg xmlns="http://w3.org" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="#b91c1c"/><circle cx="32" cy="32" r="24.5" fill="#ffffff"/><circle cx="32" cy="32" r="18" fill="#dc2626"/><circle cx="32" cy="32" r="11.5" fill="#1d4ed8"/><polygon points="32,21.5 34.8,29.2 43,29.2 36.4,34 38.9,41.8 32,37 25.1,41.8 27.6,34 21,29.2 29.2,29.2" fill="#ffffff"/></svg>'); });
+app.get(['/favicon.ico', '/favicon.svg'], (req, res) => {
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'no-store, must-revalidate');
+  return res.status(200).send('<svg xmlns="http://w3.org" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="#b91c1c"/><circle cx="32" cy="32" r="24.5" fill="#ffffff"/><circle cx="32" cy="32" r="18" fill="#dc2626"/><circle cx="32" cy="32" r="11.5" fill="#1d4ed8"/><polygon points="32,21.5 34.8,29.2 43,29.2 36.4,34 38.9,41.8 32,37 25.1,41.8 27.6,34 21,29.2 29.2,29.2" fill="#ffffff"/></svg>');
+});
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: true } });
