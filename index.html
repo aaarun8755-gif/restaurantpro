@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://w3.org' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='31' fill='%23b91c1c'/%3E%3Ccircle cx='32' cy='32' r='24.5' fill='%23ffffff'/%3E%3Ccircle cx='32' cy='32' r='18' fill='%23dc2626'/%3E%3Ccircle cx='32' cy='32' r='11.5' fill='%231d4ed8'/%3E%3Cpolygon points='32,21.5 34.8,29.2 43,29.2 36.4,34 38.9,41.8 32,37 25.1,41.8 27.6,34 21,29.2 29.2,29.2' fill='%23ffffff'/%3E%3C/svg%3E">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RestaurantPro | Premium Restaurant Management</title>
@@ -334,28 +333,22 @@ footer{color:#89978f;padding:24px;font-size:12px}
 #staffPayrollPage [data-hr-jump]:hover{border-color:#3b82f6;box-shadow:0 4px 16px rgba(30,90,160,.10)}
 @media(max-width:640px){#staffPayrollPage{padding:10px!important}#staffPayrollPage .panel{padding:12px!important}#staffPayrollPage .inv-tab{font-size:12px;padding:8px 10px}}
 </style>
-<meta name="robots" content="noindex, nofollow">
+<style id="rpCambriaFont">
+  *, body, input, select, textarea, button, table, th, td, h1, h2, h3, h4, p, span, div {
+    font-family: Cambria, 'Times New Roman', Georgia, serif !important;
+  }
+</style>
+<style id="rpSidebarSizeBoost">
+  aside, nav, .side, #rpProdMgmtGroup, #rpLogiMgmtGroup, #rpMgmtSubMenu, #rpHoWebMenuBtn, #rpSwiggyNav, #rpZomatoNav, #rpWebNav {
+    font-size: 14.5px !important;
+  }
+  aside *, nav *, .side *, #rpProdMgmtGroup *, #rpLogiMgmtGroup *, #rpMgmtSubMenu *, #rpHoWebMenuBtn *, #rpSwiggyNav *, #rpZomatoNav *, #rpWebNav * {
+    font-size: 14.5px !important;
+  }
+</style>
+
 </head>
 <body>
-<div id="rpAllModulesBar" style="background:#064e3b;color:#fff;padding:7px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12.5px;border-bottom:2px solid #d97706">
-  <strong style="color:#fbbf24">ERP Modules:</strong>
-  <a href="/online-channels.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Swiggy / Zomato / Web</a>
-  <a href="/production.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Production</a>
-  <a href="/stock-transfer.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Stock Transfer</a>
-  <a href="/logistics.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Logistics</a>
-  <a href="/purchase-mgmt.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Purchase Mgmt</a>
-  <a href="/menu-master.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">4-Cat Menu &amp; Approval</a>
-  <a href="/mis-report.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">MIS Report</a>
-  <a href="/live-pnl.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Live P&amp;L</a>
-  <a href="/food-costing.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Food Costing</a>
-  <a href="/marketing.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Marketing</a>
-  <a href="/tasks-hub.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Tasks &amp; Audits</a>
-  <a href="/document-tracker.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Doc Tracker</a>
-  <a href="/automail-hub.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Auto-Mail</a>
-  <a href="/ai-assistant.html" style="background:#d97706;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Ask AI</a>
-  <a href="/qr-approval.html" style="background:#0f766e;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">QR Approval</a>
-  <a href="/website.html" target="_blank" style="background:#b91c1c;color:#fff;padding:4px 10px;border-radius:6px;text-decoration:none;font-weight:700">Live Website</a>
-</div>
 <main id="loginPage">
   <div class="login-layout">
     <section class="welcome">
@@ -1682,10 +1675,781 @@ setInterval(async function() {
 
 
 
+<script id="rpMasterLiveFix">
+(function(){
+  // A. Faltu KDS popup ko rokein aur QR/Captain links ko live Render domain par rakhein
+  setInterval(() => {
+    if (document.body && document.body.innerText.includes('POS bills and generated KOTs appear here for kitchen processing')) {
+      window.location.replace('/kds.html');
+    }
+    document.querySelectorAll('a[href*="scan-qr"], a[href*="captain"], input[value*="trycloudflare"], input[value*="127.0.0.1"]').forEach(el => {
+      if (el.tagName === 'A' && el.href) el.href = el.href.replace(/https?:\/\/[^/]+/, window.location.origin);
+      if (el.tagName === 'INPUT' && el.value) el.value = el.value.replace(/https?:\/\/[^/]+/, window.location.origin);
+    });
+  }, 200);
+
+  // B. Har rpBills update (chahe kisi bhi outlet prefix ke saath ho) ko source:'POS' ke saath /api/orders par bhejein
+  window._rpSentBillNos = JSON.parse(localStorage.getItem('_rpSentBillNos') || '{}');
+  function forwardBillsArray(arr) {
+    if (!Array.isArray(arr) || !arr.length) return;
+    [arr[0], arr[arr.length - 1]].forEach(b => {
+      if (!b || !Array.isArray(b.items) || !b.items.length) return;
+      const keyId = String(b.billNo || b.id || b.createdAt || '') + '_' + b.items.length + '_' + (b.total || b.grandTotal || 0);
+      if (!keyId || window._rpSentBillNos[keyId]) return;
+      window._rpSentBillNos[keyId] = true;
+      localStorage.setItem('_rpSentBillNos', JSON.stringify(window._rpSentBillNos));
+
+      fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: 'POS',
+          outlet: b.outlet || localStorage.getItem('rpSelectedOutlet') || 'RestaurantPro - Uttar Pradesh',
+          tableName: b.table || b.tableNo || 'POS Counter',
+          orderType: b.orderType || 'Dine-In',
+          customerName: b.customerName || 'Walk-in',
+          items: b.items.map(i => ({
+            itemId: String(i.id || i.itemId || i.name || 'item'),
+            name: String(i.name || i.itemName || 'Item'),
+            qty: Math.max(1, Number(i.qty || i.quantity || 1)),
+            price: Number(i.price || i.rate || 0)
+          })),
+          total: Number(b.total || b.grandTotal || b.amount || 0),
+          paymentMode: b.paymentMode || 'Cash'
+        })
+      }).catch(()=>{});
+    });
+  }
+
+  const origSet = Storage.prototype.setItem;
+  Storage.prototype.setItem = function(k, v) {
+    origSet.apply(this, arguments);
+    if (String(k).includes('rpBills') && v) {
+      try { forwardBillsArray(JSON.parse(v)); } catch(_) {}
+    }
+  };
+})();
 </script>
+
+
+<script id="rpQrApprovalSuite">
+(function(){
+  if (document.getElementById('rpQrBarBox')) return;
+  const bar = document.createElement('div');
+  bar.id = 'rpQrBarBox';
+  bar.style.cssText = 'display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:99999;background:#fffbeb;border:2px solid #f59e0b;box-shadow:0 12px 30px rgba(0,0,0,.2);padding:10px 16px;border-radius:12px;font-family:Inter,Arial,sans-serif;font-size:13px;max-width:94vw';
+  document.body.appendChild(bar);
+
+  const modal = document.createElement('div');
+  modal.id = 'rpQrViewModal';
+  modal.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100000;align-items:center;justify-content:center';
+  modal.innerHTML = '<div style="background:#fff;border-radius:14px;padding:18px;max-width:420px;width:92%;font-family:Inter,Arial,sans-serif"><h3 style="margin-top:0;color:#115e59">?? QR Table Order (Outlet Approval)</h3><div id="rpQrModalBody" style="font-size:13px;line-height:1.6"></div><div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end" id="rpQrModalBtns"></div></div>';
+  document.body.appendChild(modal);
+
+  window._qrCache = {};
+  function getCurOutlet() {
+    const sel = document.querySelector('select');
+    if (sel && sel.value && sel.value.includes('RestaurantPro') || sel?.value === 'Main Outlet' || sel?.value === 'Head Office') return sel.value;
+    return localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+  }
+
+  async function pollAllOutletsQr() {
+    try {
+      const r = await fetch('/api/orders');
+      if (!r.ok) return;
+      const all = await r.json();
+      const curOut = getCurOutlet();
+      const pend = all.filter(o =>
+        (o.source === 'QR' || o.status === 'Pending') &&
+        !['Accepted','Completed','Cancelled'].includes(o.status) &&
+        (curOut === 'Head Office' || !o.outlet || o.outlet.toLowerCase().includes(curOut.replace(/^RestaurantPro\s*-\s*/i,'').toLowerCase()))
+      );
+
+      // Update yellow "QR Orders (POS)" button count on dashboard
+      document.querySelectorAll('button, a').forEach(btn => {
+        if ((btn.innerText || '').includes('QR Orders (POS)')) {
+          btn.innerHTML = pend.length ? '?? QR Orders (POS) <span style="background:#dc2626;color:#fff;padding:1px 7px;border-radius:10px;font-size:11px;margin-left:4px">' + pend.length + '</span>' : '?? QR Orders (POS)';
+        }
+      });
+
+      if (!pend.length) { bar.style.display = 'none'; return; }
+      pend.forEach(o => window._qrCache[o.id] = o);
+      bar.style.display = 'block';
+      bar.innerHTML = '<strong style="color:#92400e">?? New QR Order (' + curOut + '):</strong> ' +
+        pend.map(o => '<span style="display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #fcd34d;padding:5px 10px;border-radius:8px;margin:3px">' +
+          '<b>' + (o.tableName||'Table') + '</b> ? ' + (o.customerName||'Guest') + ' (' + (o.customerPhone||'-') + ') ? <b>?' + (o.total||0) + '</b> ' +
+          '<button onclick="viewQrOrd(\'' + o.id + '\')" style="background:#e0f2fe;color:#0369a1;border:0;border-radius:6px;padding:4px 8px;cursor:pointer;font-weight:700">?? View</button>' +
+          '<button onclick="actQrOrd(\'' + o.id + '\',\'approve\')" style="background:#0f766e;color:#fff;border:0;border-radius:6px;padding:4px 8px;cursor:pointer;font-weight:700">? Accept ? KDS &amp; Sale</button>' +
+          '<button onclick="actQrOrd(\'' + o.id + '\',\'reject\')" style="background:#fee2e2;color:#b91c1c;border:0;border-radius:6px;padding:4px 8px;cursor:pointer;font-weight:700">? Reject</button>' +
+        '</span>').join('');
+    } catch(_) {}
+  }
+
+  window.viewQrOrd = function(id) {
+    const o = window._qrCache[id]; if (!o) return;
+    document.getElementById('rpQrModalBody').innerHTML =
+      '<b>Outlet:</b> ' + (o.outlet||'-') + '<br><b>Table:</b> ' + (o.tableName||'-') +
+      '<br><b>Customer:</b> ' + (o.customerName||'-') + ' (<b>?? ' + (o.customerPhone||'N/A') + '</b>)' +
+      '<br><b>Payment:</b> ' + (o.paymentMode||'Cash') + (o.customerNote ? '<br><b>Note:</b> ' + o.customerNote : '') +
+      '<hr style="border:0;border-top:1px solid #e2e8f0;margin:8px 0">' +
+      (o.items||[]).map(i => '<div style="display:flex;justify-content:space-between"><span>' + i.name + ' ? ' + i.qty + '</span><b>?' + (i.price*i.qty) + '</b></div>').join('') +
+      '<hr style="border:0;border-top:1px solid #e2e8f0;margin:8px 0"><div style="text-align:right;font-size:15px"><b>Total: ?' + (o.total||0) + '</b></div>';
+    document.getElementById('rpQrModalBtns').innerHTML =
+      '<button onclick="document.getElementById(\'rpQrViewModal\').style.display=\'none\'" style="padding:7px 12px;border:1px solid #cbd5e1;background:#fff;border-radius:7px;cursor:pointer">Close</button>' +
+      '<button onclick="actQrOrd(\'' + id + '\',\'reject\')" style="padding:7px 12px;border:0;background:#fee2e2;color:#b91c1c;border-radius:7px;font-weight:700;cursor:pointer">? Reject</button>' +
+      '<button onclick="actQrOrd(\'' + id + '\',\'approve\')" style="padding:7px 12px;border:0;background:#0f766e;color:#fff;border-radius:7px;font-weight:700;cursor:pointer">? Accept ? KDS &amp; Sale</button>';
+    modal.style.display = 'flex';
+  };
+
+  window.actQrOrd = async function(id, type) {
+    modal.style.display = 'none';
+    const url = type === 'approve' ? '/api/orders/' + id + '/approve-qr' : '/api/orders/' + id + '/reject-qr';
+    const r = await fetch(url, { method: 'POST' });
+    if (r.ok && type === 'approve') {
+      const data = await r.json(); const o = data.order;
+      if (o) {
+        const outKey = 'rpBills::' + (o.outlet || getCurOutlet());
+        [ 'rpBills', outKey ].forEach(k => {
+          const bills = JSON.parse(localStorage.getItem(k) || '[]');
+          bills.unshift({ billNo: 'QR-' + Date.now(), date: new Date().toISOString(), outlet: o.outlet, table: o.tableName, customerName: o.customerName, customerPhone: o.customerPhone, items: o.items, total: o.total, paymentMode: o.paymentMode || 'Cash', status: 'Paid' });
+          localStorage.setItem(k, JSON.stringify(bills));
+        });
+      }
+      alert('? QR Order Accepted! Sent to Outlet KDS & Added to Outlet Sales.');
+      location.reload();
+    } else if (r.ok) {
+      alert('? QR Order Rejected.');
+      pollAllOutletsQr();
+    }
+  };
+  setInterval(pollAllOutletsQr, 2500);
+  pollAllOutletsQr();
+})();
 </script>
+
+
+
+<script id="rpAggregatorSidebarLinks">
+(function(){
+  const swLogo = '<span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:4px;background:#fc8019;color:#fff;font-weight:900;font-size:10px">S</span>';
+  const zmLogo = '<span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:4px;background:#e23744;color:#fff;font-weight:900;font-size:10px;font-style:italic">Z</span>';
+  const rpLogo = '<span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:4px;background:#0f766e;color:#fff;font-weight:900;font-size:9px">RP</span>';
+
+  setInterval(() => {
+    if (!document.getElementById('rpSwiggyNav')) {
+      const allOrd = Array.from(document.querySelectorAll('aside *, nav *')).find(el => el.children.length <= 2 && (el.innerText || '').trim().includes('All Orders'));
+      if (allOrd) {
+        const target = allOrd.closest('a, button, li, div') || allOrd;
+        const items = [
+          { id: 'rpSwiggyNav', html: swLogo + '<span>Swiggy Orders</span>', url: '/online-channels.html?channel=Swiggy' },
+          { id: 'rpZomatoNav', html: zmLogo + '<span>Zomato Orders</span>', url: '/online-channels.html?channel=Zomato' },
+          { id: 'rpWebNav', html: rpLogo + '<span>Web Orders</span>', url: '/online-channels.html?channel=Web' }
+        ];
+        let ref = target;
+        items.forEach(ch => {
+          const d = document.createElement('div'); d.id = ch.id; d.innerHTML = ch.html;
+          d.style.cssText = 'padding:8px 14px 8px 26px;font-size:13px;font-weight:700;color:#1e293b;cursor:pointer;border-radius:8px;margin:2px 8px;display:flex;align-items:center;gap:8px';
+          d.onclick = () => { location.href = ch.url; };
+          ref.parentNode.insertBefore(d, ref.nextSibling); ref = d;
+        });
+      }
+    }
+    const isHO = (localStorage.getItem('rpSelectedOutlet') || '') === 'Head Office';
+    let hoBtn = document.getElementById('rpHoWebMenuBtn');
+    if (!isHO) { if (hoBtn) hoBtn.style.display = 'none'; return; }
+    if (hoBtn) { hoBtn.style.display = 'flex'; return; }
+    const anchor = document.getElementById('rpWebNav'); if (!anchor) return;
+    hoBtn = document.createElement('div'); hoBtn.id = 'rpHoWebMenuBtn';
+    hoBtn.innerHTML = '<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:#d9261c;color:#fff;font-weight:900;font-size:9px">RP</span><span>RestaurantPro Web &#8599;</span>';
+    hoBtn.style.cssText = 'padding:9px 14px;font-size:13px;font-weight:700;color:#d9261c;background:#fff7ed;border:1px solid #fed7aa;cursor:pointer;border-radius:8px;margin:6px 8px;display:flex;align-items:center;gap:8px';
+    hoBtn.onclick = () => window.open('/website.html', '_blank');
+    anchor.parentNode.insertBefore(hoBtn, anchor.nextSibling);
+  }, 300);
+})();
 </script>
+
+
+<script id="rpFiveEnterpriseBoxes">
+setInterval(() => {
+  if (document.getElementById('rp5BoxRow')) return;
+  const docCard = Array.from(document.querySelectorAll('div, button, a'))
+    .find(el => el.children.length <= 2 && (el.innerText || '').includes('Document Tracker'));
+  if (!docCard) return;
+
+  // Find the 3-card container row (Cash Audit, Document Tracker, Purchase Management)
+  let row3 = docCard.parentElement;
+  while (row3 && row3.parentElement && !(row3.innerText || '').includes('Cash Audit Sheet')) {
+    row3 = row3.parentElement;
+  }
+  if (!row3 || !row3.parentElement) return;
+
+  const row5 = document.createElement('div');
+  row5.id = 'rp5BoxRow';
+  row5.style.cssText = 'display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:14px;width:100%';
+
+  const boxes = [
+    { title: 'Auto Purchase (AI Bill)', sub: 'Upload Bill -> Auto Stock & PDF', color: '#0f766e', url: '/auto-purchase.html' },
+    { title: 'Tally Integration', sub: 'Connect Tally Prime & GST', color: '#1d4ed8', url: '/integrations-hub.html?tab=tally' },
+    { title: 'Swiggy Integration', sub: 'RID, GST & Live Order Sync', color: '#ea580c', url: '/integrations-hub.html?tab=swiggy' },
+    { title: 'Zomato Integration', sub: 'Outlet ID, GST & Menu Sync', color: '#dc2626', url: '/integrations-hub.html?tab=zomato' },
+    { title: 'Vendor Payment Lineup', sub: 'Due Schedule & Payouts', color: '#7c3aed', url: '/vendor-payments.html' }
+  ];
+
+  row5.innerHTML = boxes.map(b =>
+    '<div onclick="window.location.href=\'' + b.url + '\'" style="background:#fff;border:1px solid #dbe5e2;border-left:4px solid ' + b.color + ';border-radius:12px;padding:13px 14px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,.04)">' +
+      '<div style="font-weight:800;font-size:13px;color:' + b.color + '">' + b.title + '</div>' +
+      '<div style="font-size:11px;color:#64748b;margin-top:3px">' + b.sub + '</div>' +
+    '</div>'
+  ).join('');
+
+  row3.parentElement.insertBefore(row5, row3.nextSibling);
+}, 300);
 </script>
+<script id="rpPoAndProductionNav">
+(function(){
+  setInterval(() => {
+    if (!document.getElementById('rpProdMgmtGroup')) {
+      const qrEl = Array.from(document.querySelectorAll('aside *, nav *'))
+        .find(el => el.children.length <= 2 && ((el.innerText || '').trim().includes('Scan & Order') || (el.innerText || '').trim().includes('Scan QR') || (el.innerText || '').trim().includes('Auto Mail Management')));
+      if (qrEl) {
+        const target = qrEl.closest('a, button, li, div') || qrEl;
+        const box = document.createElement('div');
+        box.id = 'rpProdMgmtGroup';
+        box.style.cssText = 'margin:4px 8px';
+        box.innerHTML =
+          '<div id="rpProdToggle" style="padding:9px 14px;font-size:13px;font-weight:700;color:#0f766e;background:#eef6f4;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
+            '<span>Production Management</span><span>&#9662;</span>' +
+          '</div>' +
+          '<div id="rpProdSub" style="padding-left:14px;margin-top:3px;display:flex;flex-direction:column;gap:2px">' +
+            '<div onclick="location.href=\'/production.html?tab=execution\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">1. Production Execution</div>' +
+            '<div onclick="location.href=\'/production.html?tab=master\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">2. Production Master</div>' +
+            '<div onclick="location.href=\'/production.html?tab=preparation\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">3. Production Preparation</div>' + '<div onclick="location.href=\'/production.html?tab=consumption\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#0f766e;cursor:pointer;border-radius:7px">4. Orderwise Consumption</div>' +
+          '</div>';
+        target.parentNode.insertBefore(box, target.nextSibling);
+        document.getElementById('rpProdToggle').onclick = () => {
+          const s = document.getElementById('rpProdSub');
+          s.style.display = s.style.display === 'none' ? 'flex' : 'none';
+        };
+      }
+    }
+
+    if (!document.getElementById('rpGenPoBtn')) {
+      const invBtn = Array.from(document.querySelectorAll('button, a'))
+        .find(el => {
+          const t = (el.innerText || '').trim();
+          return (t === '4. Purchase' || t === 'Purchase' || t.includes('Closing Stock')) && el.offsetParent !== null;
+        });
+      if (invBtn && invBtn.parentNode) {
+        const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+        const pos = JSON.parse(localStorage.getItem('rpOutletPOs') || '[]');
+        const pendCnt = pos.filter(p => (p.toOutlet === curOut && p.status === 'Pending Supply') || (p.fromOutlet === curOut && p.status === 'Dispatched - Ticket Pending')).length;
+        const btn = document.createElement('button');
+        btn.id = 'rpGenPoBtn';
+        btn.type = 'button';
+        btn.innerHTML = 'Generate PO / Transfer' + (pendCnt ? ' <span style="background:#dc2626;color:#fff;padding:1px 6px;border-radius:10px;font-size:11px">' + pendCnt + '</span>' : '');
+        btn.style.cssText = 'background:#0f766e;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;font-size:12.5px;cursor:pointer;margin-left:8px';
+        btn.onclick = () => { location.href = '/po-transfer.html'; };
+        invBtn.parentNode.insertBefore(btn, invBtn.nextSibling);
+      }
+    }
+  }, 350);
+})();
+</script>
+<script id="rpLogisticsAndMgmtNav">
+setInterval(() => {
+  // 1. Add "Manage Logistics" right below "Production Management"
+  if (!document.getElementById('rpLogiMgmtGroup')) {
+    const prodBox = document.getElementById('rpProdMgmtGroup');
+    if (prodBox && prodBox.parentNode) {
+      const box = document.createElement('div');
+      box.id = 'rpLogiMgmtGroup';
+      box.style.cssText = 'margin:4px 8px';
+      box.innerHTML =
+        '<div id="rpLogiToggle" style="padding:9px 14px;font-size:13px;font-weight:700;color:#1d4ed8;background:#eff6ff;border-radius:8px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">' +
+          '<span>Manage Logistics</span><span>&#9662;</span>' +
+        '</div>' +
+        '<div id="rpLogiSub" style="padding-left:14px;margin-top:3px;display:none;flex-direction:column;gap:2px">' +
+          '<div onclick="location.href=\'/logistics.html?tab=create\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">1. Create Logistic</div>' +
+          '<div onclick="location.href=\'/logistics.html?tab=assign\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">2. Assign Logistic</div>' +
+          '<div onclick="location.href=\'/logistics.html?tab=report\'" style="padding:7px 12px;font-size:12.5px;font-weight:600;color:#1e293b;cursor:pointer;border-radius:7px">3. Logistic Report</div>' +
+        '</div>';
+      prodBox.parentNode.insertBefore(box, prodBox.nextSibling);
+      document.getElementById('rpLogiToggle').onclick = () => {
+        const s = document.getElementById('rpLogiSub');
+        s.style.display = s.style.display === 'none' ? 'flex' : 'none';
+      };
+    }
+  }
+
+  // 2. Make "Management" in sidebar expand sub-options just like Production Management
+  if (!document.getElementById('rpMgmtSubMenu')) {
+    const mgmtEl = Array.from(document.querySelectorAll('aside *, nav *'))
+      .find(el => el.children.length <= 2 && (el.innerText || '').trim() === 'Management');
+    if (mgmtEl) {
+      const target = mgmtEl.closest('a, button, li, div') || mgmtEl;
+      const sub = document.createElement('div');
+      sub.id = 'rpMgmtSubMenu';
+      sub.style.cssText = 'padding-left:18px;margin:2px 8px;display:none;flex-direction:column;gap:2px';
+      sub.innerHTML =
+        '<div onclick="target.click()" style="padding:6px 10px;font-size:12px;font-weight:600;color:#334155;cursor:pointer">1. Expense Management</div>' +
+        '<div onclick="target.click()" style="padding:6px 10px;font-size:12px;font-weight:600;color:#334155;cursor:pointer">2. Item Recipes</div>' +
+        '<div onclick="target.click()" style="padding:6px 10px;font-size:12px;font-weight:600;color:#334155;cursor:pointer">3. Purchase Return</div>' +
+        '<div onclick="target.click()" style="padding:6px 10px;font-size:12px;font-weight:600;color:#334155;cursor:pointer">4. Customer &amp; Vendor</div>';
+      target.parentNode.insertBefore(sub, target.nextSibling);
+      target.addEventListener('click', () => {
+        sub.style.display = sub.style.display === 'none' ? 'flex' : 'none';
+      });
+    }
+  }
+}, 350);
+</script>
+
+
+
+
+<script id="rpMarketingAndFoodCostHook">
+setInterval(() => {
+  // 1. Sidebar button par capture-phase click lagayein
+  document.querySelectorAll('aside button, aside a, nav button, nav a').forEach(btn => {
+    if ((btn.innerText || '').trim().includes('Marketing Management') && !btn.dataset.mktExact) {
+      btn.dataset.mktExact = '1';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/marketing.html';
+      }, true);
+    }
+  });
+
+  // 2. Agar purana Marketing section khule bhi, to wahan seedha Marketing Dashboard button dikhayein
+  if (!document.getElementById('rpMktDirectBtn')) {
+    const mktHead = Array.from(document.querySelectorAll('h1,h2,h3')).find(x => (x.innerText || '').trim().includes('Marketing'));
+    if (mktHead && mktHead.parentNode) {
+      const mb = document.createElement('button');
+      mb.id = 'rpMktDirectBtn'; mb.type = 'button';
+      mb.textContent = 'Open Marketing Automation Dashboard (Petpooja View) ->';
+      mb.style.cssText = 'background:#0f766e;color:#fff;border:0;border-radius:8px;padding:10px 16px;font-weight:700;font-size:13px;cursor:pointer;margin:8px 0';
+      mb.onclick = () => { window.location.href = '/marketing.html'; };
+      mktHead.parentNode.insertBefore(mb, mktHead.nextSibling);
+    }
+  }
+
+  // 3. Reports section mein Food Costing Report button
+  if (!document.getElementById('rpFoodCostQuickBtn')) {
+    const repTitle = Array.from(document.querySelectorAll('h1,h2,h3')).find(x => (x.innerText || '').trim() === 'Reports');
+    if (repTitle && repTitle.parentNode) {
+      const b = document.createElement('button');
+      b.id = 'rpFoodCostQuickBtn'; b.type = 'button';
+      b.textContent = 'Open Food Costing Report (Petpooja Format)';
+      b.style.cssText = 'background:#0f766e;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;font-size:12.5px;cursor:pointer;margin:8px 0';
+      b.onclick = () => { window.location.href = '/food-costing.html'; };
+      repTitle.parentNode.insertBefore(b, repTitle.nextSibling);
+    }
+  }
+}, 300);
+</script>
+
+
+
+<script id="rpStaffMarketingLayout">
+setInterval(() => {
+  const hrTab = Array.from(document.querySelectorAll('button, a, div'))
+    .find(el => el.children.length === 0 && (el.innerText || '').trim() === 'HR Dashboard' && el.offsetParent !== null);
+  if (!hrTab) return;
+
+  const tabBar = hrTab.parentElement;
+  const mainCard = tabBar?.parentElement;
+  if (!tabBar || !mainCard || mainCard.dataset.mktExactLook) return;
+
+  mainCard.dataset.mktExactLook = '1';
+
+  // Hide old boxy top banner ("RestaurantPro / Staff & Payroll") so it looks clean like Marketing Automation
+  const prevBanner = mainCard.previousElementSibling;
+  if (prevBanner && (prevBanner.innerText || '').includes('Staff & Payroll')) {
+    prevBanner.style.display = 'none';
+  }
+
+  // Full-bleed clean Marketing Automation 2-column layout
+  mainCard.style.cssText = 'display:grid;grid-template-columns:230px 1fr;gap:22px;align-items:start;background:#f4f7f6;border:0;padding:0;margin:0;width:100%';
+
+  // Left Vertical Sidebar matching Marketing Automation
+  tabBar.style.cssText = 'display:flex;flex-direction:column;gap:4px;background:#ffffff;border-right:1px solid #dbe5e2;padding:16px 12px;min-height:86vh;position:sticky;top:0;border-radius:12px';
+
+  const sideTitle = document.createElement('div');
+  sideTitle.textContent = 'STAFF & PAYROLL';
+  sideTitle.style.cssText = 'font-weight:900;font-size:13px;color:#115e59;padding:4px 10px 12px;border-bottom:1px solid #eef2f0;margin-bottom:6px;letter-spacing:.3px';
+  tabBar.insertBefore(sideTitle, tabBar.firstChild);
+
+  Array.from(tabBar.querySelectorAll('button, a')).forEach(b => {
+    b.style.width = '100%';
+    b.style.textAlign = 'left';
+    b.style.justifyContent = 'flex-start';
+    b.style.padding = '9px 12px';
+    b.style.borderRadius = '8px';
+    b.style.fontSize = '13px';
+    b.style.fontWeight = '600';
+    b.style.border = '0';
+  });
+
+  // Add bottom "<- Back to Dashboard" button inside left sidebar just like "<- Back to Billing"
+  const backBtn = document.createElement('button');
+  backBtn.type = 'button';
+  backBtn.innerHTML = '&larr; Back to Dashboard';
+  backBtn.style.cssText = 'margin-top:auto;width:100%;padding:9px 12px;border-radius:8px;border:1px solid #dbe5e2;background:#fff;color:#0f766e;font-weight:700;font-size:12.5px;cursor:pointer;text-align:center';
+  backBtn.onclick = () => {
+    const dashBtn = Array.from(document.querySelectorAll('button, a')).find(x => (x.innerText || '').trim() === 'Dashboard' && !tabBar.contains(x));
+    if (dashBtn) dashBtn.click(); else location.reload();
+  };
+  tabBar.appendChild(backBtn);
+
+  // Clean unboxed right workspace (no outer box wrapper!)
+  const rightPanels = Array.from(mainCard.children).filter(ch => ch !== tabBar);
+  const rightWrap = document.createElement('div');
+  rightWrap.style.cssText = 'padding:6px 4px;min-width:0;overflow-x:auto';
+  mainCard.appendChild(rightWrap);
+  rightPanels.forEach(p => rightWrap.appendChild(p));
+
+  // Style KPI stat cards with colored top accent borders & bold numbers like Marketing Automation
+  const colors = ['#f59e0b', '#3b82f6', '#10b981', '#f97316', '#ef4444', '#ec4899'];
+  let cIdx = 0;
+  rightWrap.querySelectorAll('div').forEach(card => {
+    if (card.children.length >= 2 && card.children.length <= 4 && card.offsetHeight > 65 && card.offsetHeight < 135 && card.offsetWidth > 130 && card.offsetWidth < 340) {
+      card.style.background = '#ffffff';
+      card.style.border = '1px solid #dbe5e2';
+      card.style.borderTop = '4px solid ' + colors[cIdx++ % colors.length];
+      card.style.borderRadius = '12px';
+      card.style.padding = '14px 16px';
+    }
+  });
+}, 300);
+</script>
+
+<script id="rpStockTransferHook">
+setInterval(() => {
+  // Alag se bana extra button hata dein
+  const extra = document.getElementById('rpOpenTransferBtn');
+  if (extra) extra.remove();
+
+  // Seedhe Inventory ke "2. Transfer" tab par Petpooja-style Transfer Dashboard (/stock-transfer.html) lagayein
+  document.querySelectorAll('button, a').forEach(btn => {
+    const t = (btn.innerText || '').trim();
+    if ((t === '2. Transfer' || t === 'Transfer') && !btn.dataset.trBound) {
+      btn.dataset.trBound = '1';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/stock-transfer.html';
+      }, true);
+    }
+  });
+}, 300);
+</script>
+
+<script id="rpPosWhatsAppEbill">
+(function(){
+  // 1. Current Bill mein "Customer name" box ke theek neeche 10-digit Customer Mobile box add karein
+  setInterval(() => {
+    const custInp = Array.from(document.querySelectorAll('input')).find(i => (i.placeholder || '').trim() === 'Customer name');
+    if (custInp && !document.getElementById('rpPosCustPhone')) {
+      const wrap = custInp.parentElement;
+      if (wrap && wrap.parentElement) {
+        const phoneBox = document.createElement('div');
+        phoneBox.style.cssText = 'grid-column: 1 / -1; margin-top: 6px;';
+        phoneBox.innerHTML = '<label style="font-size:11.5px;font-weight:700;display:block;margin-bottom:3px;color:#0f766e">Customer Mobile (For Instant WhatsApp E-Bill &amp; Feedback Link)</label>' +
+          '<input id="rpPosCustPhone" type="tel" maxlength="10" placeholder="Enter 10-digit WhatsApp mobile number" style="width:100%;padding:8px 10px;border:1px solid #0f766e;border-radius:8px;font-size:13px">';
+        wrap.parentElement.insertBefore(phoneBox, wrap.nextSibling);
+      }
+    }
+  }, 300);
+
+  // 2. "Complete Bill" click par Paper Print ke saath WhatsApp E-Bill + Feedback Link bhejein
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const t = (btn.innerText || '').trim().toLowerCase();
+    if (!t.includes('complete bill')) return;
+
+    const custInp = Array.from(document.querySelectorAll('input')).find(i => (i.placeholder || '').trim() === 'Customer name');
+    const phoneInp = document.getElementById('rpPosCustPhone');
+    const custName = (custInp?.value || 'Valued Guest').trim();
+    const phone = (phoneInp?.value || '').replace(/\D/g, '').slice(-10);
+
+    setTimeout(() => {
+      const outlet = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+      const bills = JSON.parse(localStorage.getItem('rpBills') || '[]');
+      const lastBill = bills[0] || {};
+      const billNo = lastBill.billNo || ('INV-' + Math.floor(1000 + Math.random()*8999));
+      const total = lastBill.total || '0.00';
+      const itemsTxt = (lastBill.items || []).map(i => i.name + ' x' + i.qty).join(', ') || 'Restaurant Order';
+
+      if (phone.length === 10) {
+        const ebills = JSON.parse(localStorage.getItem('rpMarketingEbills') || '[]');
+        ebills.unshift({ billNo, custName, phone, total, outlet, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) });
+        localStorage.setItem('rpMarketingEbills', JSON.stringify(ebills.slice(0, 100)));
+
+        const feedbackUrl = 'https://onrender.com' + encodeURIComponent(billNo) + '&outlet=' + encodeURIComponent(outlet) + '&name=' + encodeURIComponent(custName);
+        const msg = 'Thank you ' + custName + '! Your Digital E-Bill from ' + outlet + ' (RestaurantPro)\n' +
+          'Bill No: #' + billNo + '\n' +
+          'Items: ' + itemsTxt + '\n' +
+          'Grand Total: Rs. ' + total + '\n\n' +
+          'Share your 5-Star Feedback & Claim Loyalty Points: ' + feedbackUrl;
+
+        window.open('https://wa.me/91' + phone + '?text=' + encodeURIComponent(msg), '_blank');
+        if (phoneInp) phoneInp.value = '';
+      }
+    }, 450);
+  }, true);
+})();
+</script>
+<script id="rpTaskHubHook">
+setInterval(() => {
+  document.querySelectorAll('aside button, aside a, nav button, nav a').forEach(btn => {
+    const t = (btn.innerText || '').trim();
+    if (t.includes('Task Management') && !btn.dataset.taskBound) {
+      btn.dataset.taskBound = '1';
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/tasks-hub.html';
+      }, true);
+    }
+  });
+}, 350);
+</script>
+
+
+
+
+<script id="rpSalesDateFilter">
+(function(){
+  let activeRange = null;
+
+  function parseIso(raw) {
+    const s = String(raw || '').trim();
+    if (!s) return new Date().toISOString().slice(0,10);
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+    const parts = s.split(' ')[0].split('/');
+    if (parts.length === 3 && parts[2].length === 4) return parts[2] + '-' + parts[1].padStart(2,'0') + '-' + parts[0].padStart(2,'0');
+    return new Date().toISOString().slice(0,10);
+  }
+
+  function enforceDateStats() {
+    const sel = Array.from(document.querySelectorAll('select')).find(s => (s.innerText || '').includes('Last 7 days'));
+    if (sel && !document.getElementById('rpSalesCustomRange')) {
+      const today = new Date().toISOString().slice(0,10);
+      const weekAgo = new Date(Date.now() - 6*86400000).toISOString().slice(0,10);
+      const box = document.createElement('div');
+      box.id = 'rpSalesCustomRange';
+      box.style.cssText = 'display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap';
+      box.innerHTML =
+        '<input type="date" id="rpSpFrom" value="' + weekAgo + '" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px">' +
+        '<span style="font-size:12px;color:#64748b">to</span>' +
+        '<input type="date" id="rpSpTo" value="' + today + '" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:7px;font-size:12px">' +
+        '<button type="button" id="rpSpApply" style="background:#0f766e;color:#fff;border:0;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">Filter</button>';
+      sel.parentNode.insertBefore(box, sel);
+      sel.style.display = 'none';
+
+      const trigger = () => {
+        activeRange = { f: document.getElementById('rpSpFrom').value, t: document.getElementById('rpSpTo').value };
+        enforceDateStats();
+      };
+      document.getElementById('rpSpApply').onclick = trigger;
+      document.getElementById('rpSpFrom').onchange = trigger;
+      document.getElementById('rpSpTo').onchange = trigger;
+    }
+
+    if (!activeRange) return;
+    const { f, t } = activeRange;
+    const out = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+    const today = new Date().toISOString().slice(0,10);
+
+    let allBills = JSON.parse(localStorage.getItem('rpBills') || '[]');
+    if (!allBills.length) {
+      allBills = [
+        { billNo: 'BP-34564098', date: today, outlet: out, total: 124.95, payment: 'Cash' },
+        { billNo: 'BP-43170626', date: today, outlet: out, total: 93.45, payment: 'Cash' },
+        { billNo: 'BP-43170620', date: today, outlet: out, total: 2066.40, payment: 'Cash' }
+      ];
+    }
+
+    const filtered = allBills.filter(b => {
+      const iso = parseIso(b.date);
+      const matchOut = out === 'Head Office' || !b.outlet || b.outlet === out;
+      return matchOut && (!f || iso >= f) && (!t || iso <= t);
+    });
+
+    const totSales = filtered.reduce((s, x) => s + Number(x.total || 0), 0);
+    const totOrders = filtered.length;
+    const avgVal = totOrders > 0 ? (totSales / totOrders) : 0;
+    const cashSales = filtered.filter(x => String(x.payment||'Cash').toLowerCase().includes('cash')).reduce((s,x)=>s+Number(x.total||0),0);
+    const upiSales = Math.max(0, totSales - cashSales);
+
+    // Override Top KPI Cards continuously so React/old script does not overwrite them
+    document.querySelectorAll('div').forEach(card => {
+      const txt = card.innerText || '';
+      if (card.offsetHeight > 65 && card.offsetHeight < 190 && card.offsetWidth > 140 && card.offsetWidth < 380) {
+        const numEl = Array.from(card.querySelectorAll('*')).find(el => el.children.length === 0 && /^[?0-9.,]+$/.test((el.innerText || '').trim()));
+        if (!numEl) return;
+        if (txt.includes('Total Sales')) numEl.textContent = '?' + totSales.toFixed(1);
+        else if (txt.includes('Total Orders')) numEl.textContent = String(totOrders);
+        else if (txt.includes('Average Order Value')) numEl.textContent = '?' + avgVal.toFixed(1);
+      }
+    });
+
+    // Override Daily Snapshot
+    const snapCard = Array.from(document.querySelectorAll('div')).find(d => (d.innerText || '').includes('Daily snapshot') && d.offsetWidth > 220 && d.offsetWidth < 460);
+    if (snapCard) {
+      Array.from(snapCard.querySelectorAll('*')).forEach(el => {
+        if (el.children.length === 0 && (el.innerText || '').trim().startsWith('?')) {
+          const pTxt = (el.parentElement?.innerText || '').toLowerCase();
+          if (pTxt.includes('cash')) el.textContent = '?' + cashSales.toFixed(1);
+          else if (pTxt.includes('upi') || pTxt.includes('card')) el.textContent = '?' + upiSales.toFixed(1);
+          else el.textContent = '?' + totSales.toFixed(1);
+        }
+      });
+    }
+
+    // Override Graph Total Badge
+    const graphBox = document.getElementById('rpSalesCustomRange')?.closest('div')?.parentElement?.parentElement;
+    if (graphBox) {
+      const badge = Array.from(graphBox.querySelectorAll('*')).find(el => el.children.length === 0 && (el.innerText || '').includes('total'));
+      if (badge) badge.textContent = '?' + totSales.toFixed(1) + ' (' + f + ' to ' + t + ')';
+    }
+
+    // Override Recent Bills
+    const recCard = Array.from(document.querySelectorAll('div')).find(d => (d.innerText || '').includes('Recent bills') && d.offsetHeight > 120 && d.offsetHeight < 420);
+    if (recCard) {
+      let listBox = recCard.querySelector('#rpDateFilteredBills');
+      if (!listBox) {
+        Array.from(recCard.children).slice(1).forEach(c => c.style.display = 'none');
+        listBox = document.createElement('div');
+        listBox.id = 'rpDateFilteredBills';
+        recCard.appendChild(listBox);
+      }
+      listBox.innerHTML = filtered.slice(0, 5).map(b =>
+        '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eef2f0;font-size:12.5px">' +
+          '<div><b>' + (b.billNo||'Bill') + '</b><br><small style="color:#64748b">' + parseIso(b.date) + ' | ' + (b.payment||'Cash') + '</small></div>' +
+          '<b style="color:#0f766e">?' + Number(b.total||0).toFixed(2) + '</b>' +
+        '</div>'
+      ).join('') || '<div style="padding:14px 0;font-size:12.5px;color:#64748b">No bills between ' + f + ' and ' + t + '.</div>';
+    }
+  }
+
+  setInterval(enforceDateStats, 300);
+})();
+</script>
+<script id="rpAiAssistantHook">
+setInterval(() => {
+  document.querySelectorAll('aside button, aside a, nav button, nav a, div').forEach(el => {
+    if (el.children.length <= 2 && (el.innerText || '').trim().includes('Ask Me Anything AI') && !el.dataset.aiBound) {
+      el.dataset.aiBound = '1';
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/ai-assistant.html';
+      }, true);
+    }
+  });
+}, 350);
+</script>
+<script id="rpAutoMailHook">
+setInterval(() => {
+  document.querySelectorAll('aside button, aside a, nav button, nav a, div').forEach(el => {
+    const t = (el.innerText || '').trim();
+    if (el.children.length <= 2 && (t.includes('Auto Mail') || t.includes('Auto-Mail')) && !el.dataset.mailBound) {
+      el.dataset.mailBound = '1';
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/automail-hub.html';
+      }, true);
+    }
+  });
+}, 350);
+</script>
+
+<script id="rpLivePnlHook">
+setInterval(() => {
+  document.querySelectorAll('aside button, aside a, nav button, nav a, div').forEach(el => {
+    const t = (el.innerText || '').trim();
+    if (el.children.length <= 2 && (t.includes('Live Profit') || t.includes('Profit & Loss')) && !el.dataset.pnlBound) {
+      el.dataset.pnlBound = '1';
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/live-pnl.html';
+      }, true);
+    }
+  });
+}, 350);
+</script>
+
+<script id="rpDocTrackerHook">
+(function(){
+  // 1. "+ Add Document" ya "Document Tracker" card par click hote hi seedha /document-tracker.html kholein
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button, a');
+    if (btn) {
+      const bt = (btn.innerText || '').trim();
+      if (bt.includes('Add Document') || bt === 'Document Tracker') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/document-tracker.html';
+        return;
+      }
+    }
+    const card = e.target.closest('div');
+    if (card && card.offsetHeight > 45 && card.offsetHeight < 160 && card.offsetWidth < 460) {
+      const ct = (card.innerText || '').trim();
+      if (ct.startsWith('Document Tracker')) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.location.href = '/document-tracker.html';
+      }
+    }
+  }, true);
+
+  // 2. Purane Document Tracker page ke andar bhi seedha button dikhayein
+  setInterval(() => {
+    const addDocBtn = Array.from(document.querySelectorAll('button, a')).find(b => (b.innerText || '').trim().includes('Add Document'));
+    if (addDocBtn && !addDocBtn.dataset.dtBound) {
+      addDocBtn.dataset.dtBound = '1';
+      addDocBtn.textContent = '+ Open Bills & Expense Dispatch Form';
+      addDocBtn.style.background = '#b91c1c';
+      addDocBtn.onclick = (ev) => { ev.preventDefault(); window.location.href = '/document-tracker.html'; };
+    }
+  }, 300);
+})();
+</script>
+<script id="rpMisReportNav">
+setInterval(() => {
+  if (document.getElementById('rpSidebarMisBtn')) return;
+  const pnlEl = Array.from(document.querySelectorAll('aside button, aside a, nav button, nav a, div'))
+    .find(el => el.children.length <= 2 && (el.innerText || '').trim().includes('Live Profit'));
+  if (!pnlEl || !pnlEl.parentNode) return;
+
+  const btn = document.createElement('div');
+  btn.id = 'rpSidebarMisBtn';
+  btn.innerHTML = '&#128202; MIS Report';
+  btn.style.cssText = 'padding:9px 14px;margin:4px 8px;font-size:14.5px;font-weight:700;color:#115e59;background:#eef6f4;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:8px';
+  btn.onclick = () => { window.location.href = '/mis-report.html'; };
+  pnlEl.parentNode.insertBefore(btn, pnlEl.nextSibling);
+}, 350);
+</script>
+<script id="rpPurchaseMgmtHook">
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('div, button, a, li');
+  if (!card) return;
+  const txt = (card.innerText || '').trim();
+  if ((txt.startsWith('Purchase Management') || txt === 'Purchase Management') && card.offsetHeight < 180) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    window.location.href = '/purchase-mgmt.html';
+  }
+}, true);
 </script>
 </body>
 </html>
