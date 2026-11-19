@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RestaurantPro | QR Phone Orders Approval</title>
+<style>
+*{box-sizing:border-box;font-family:Cambria,Georgia,serif}
+body{margin:0;background:#f4f7f6;color:#1e293b}
+header{background:#fff;border-bottom:1px solid #dbe5e2;padding:13px 22px;display:flex;justify-content:space-between;align-items:center}
+.wrap{max-width:1100px;margin:auto;padding:18px}
+.card{background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{background:#eef6f4;color:#115e59;padding:10px;text-align:left;border:1px solid #cbd5e1}
+td{border:1px solid #cbd5e1;padding:9px 10px}
+.btn{border:0;border-radius:8px;padding:7px 13px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:12.5px}
+.btn.d{background:#dc2626}.btn.light{background:#fff;color:#0f766e;border:1px solid #cbd5e1}
+</style></head>
+<body>
+<header>
+  <div><strong style="font-size:18px;color:#115e59">QR Phone Order Approval Queue</strong> | <small id="outSub"></small></div>
+  <div style="display:flex;gap:8px"><button class="btn light" onclick="loadQrOrders()">Refresh</button><a href="/index.html" class="btn light">&larr; Dashboard</a></div>
+</header>
+<div class="wrap">
+  <div class="card">
+    <p style="margin-top:0;font-size:13px;color:#475569">Phone se QR scan karke lagaye gaye sabhi orders pehle yahan <b>Pending Approval</b> mein aate hain. <b>Accept</b> karne ke baad hi KDS Kitchen aur Sale mein add hote hain.</p>
+    <table><thead><tr><th>Order No</th><th>Table</th><th>Outlet</th><th>Items</th><th>Total (&#8377;)</th><th>Status</th><th>Action</th></tr></thead><tbody id="qrBody"></tbody></table>
+  </div>
+</div>
+<script>
+const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+outSub.textContent = 'Outlet: ' + curOut;
+async function loadQrOrders() {
+  try {
+    const res = await fetch('/api/orders?outlet=' + encodeURIComponent(curOut));
+    const list = await res.json();
+    const qrList = list.filter(o => o.source === 'QR');
+    qrBody.innerHTML = qrList.map(o =>
+      '<tr><td><b>' + o.orderNo + '</b></td><td>Table ' + (o.tableName||'-') + '</td><td>' + o.outlet + '</td><td>' + (o.items||[]).map(i=>i.name+' x'+i.qty).join(', ') + '</td><td><b>&#8377;' + Number(o.total||0).toFixed(2) + '</b></td><td><b>' + o.status + '</b></td><td>' +
+      (o.status === 'Pending Approval' ? '<button class="btn" onclick="actQr(\''+o.id+'\',\'approve-qr\')">Accept &rarr; KDS &amp; Sale</button> <button class="btn d" onclick="actQr(\''+o.id+'\',\'reject-qr\')">Reject</button>' : 'Synced to KDS &amp; Sale') + '</td></tr>'
+    ).join('') || '<tr><td colspan="7">No QR phone orders pending for ' + curOut + '.</td></tr>';
+  } catch (e) { qrBody.innerHTML = '<tr><td colspan="7">Connecting to server...</td></tr>'; }
+}
+async function actQr(id, action) {
+  await fetch('/api/orders/' + id + '/' + action, { method: 'POST' });
+  loadQrOrders();
+}
+loadQrOrders(); setInterval(loadQrOrders, 4000);
+</script></body></html>
