@@ -39,3 +39,43 @@
   document.addEventListener('DOMContentLoaded',()=>{addControls();ensurePanel();loadCategories();loadRequests();loadApprovedMenu();installFormRequest();});
   window.rpRefreshMenuApprovals=loadRequests;
 })();
+
+
+/* RP_TAB_CAPTURE_FIX */
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('button, a, [role="tab"]');
+  if (!btn) return;
+  const t = (btn.innerText || '').trim();
+  if (t !== 'Items' && t !== 'Categories' && t !== 'Variants' && t !== 'Addons') return;
+
+  const formCard = document.getElementById('addMenuForm')?.closest('.panel, section, div');
+  const catP = document.getElementById('menuCategoriesPanel');
+  const varP = document.getElementById('menuVariationsPanel');
+  const itemsList = document.getElementById('manageMenuList')?.closest('.panel, section');
+  if (!catP && !varP) return;
+
+  e.preventDefault();
+  e.stopImmediatePropagation();
+
+  btn.parentElement?.querySelectorAll('button, a').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (window.rpRefreshAllTabs) window.rpRefreshAllTabs();
+
+  if (t === 'Items') {
+    if (formCard) formCard.style.display = '';
+    if (itemsList) itemsList.style.display = '';
+    if (catP) catP.style.display = 'none';
+    if (varP) varP.style.display = 'none';
+  } else if (t === 'Categories') {
+    if (formCard) formCard.style.display = 'none';
+    if (itemsList) itemsList.style.display = 'none';
+    if (catP) { catP.style.display = 'block'; catP.classList.remove('hidden'); }
+    if (varP) varP.style.display = 'none';
+  } else if (t === 'Variants' || t === 'Addons') {
+    if (formCard) formCard.style.display = 'none';
+    if (itemsList) itemsList.style.display = 'none';
+    if (catP) catP.style.display = 'none';
+    if (varP) { varP.style.display = 'block'; varP.classList.remove('hidden'); }
+  }
+}, true);
