@@ -1,133 +1,54 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RestaurantPro | Menu Master &amp; HO Approval</title>
-<style>
-*{box-sizing:border-box;font-family:Cambria,Georgia,serif}
-body{margin:0;background:#f4f7f6;color:#1e293b}
-header{background:#fff;border-bottom:1px solid #dbe5e2;padding:13px 22px;display:flex;justify-content:space-between;align-items:center}
-.wrap{max-width:1460px;margin:auto;padding:16px}
-.card{background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:16px;margin-bottom:14px;overflow-x:auto}
-.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;align-items:end}
-label{font-size:11.5px;font-weight:700;display:block;margin-bottom:3px}
-input,select{width:100%;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Menu Master</title>
+<style>*{box-sizing:border-box;font-family:Cambria,serif}body{margin:0;background:#f4f7f6}
+header{background:#fff;border-bottom:1px solid #dbe5e2;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.wrap{max-width:1400px;margin:auto;padding:15px}.card{background:#fff;border:1px solid #dbe5e2;border-radius:12px;padding:14px;margin-bottom:14px;overflow-x:auto}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px}
+input,select{width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px;font-size:13px}
 .btn{border:0;border-radius:8px;padding:8px 14px;background:#0f766e;color:#fff;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}
-.btn.light{background:#fff;color:#0f766e;border:1px solid #cbd5e1}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:4px 9px;font-size:11.5px}
-table{width:100%;border-collapse:collapse;font-size:12.5px;white-space:nowrap}
-th{background:#eef6f4;color:#115e59;padding:9px 10px;text-align:left;border:1px solid #cbd5e1}
-td{border:1px solid #cbd5e1;padding:8px 10px}
-.badge{padding:3px 8px;border-radius:8px;font-size:11px;font-weight:700;background:#dcfce7;color:#166534}
-.badge.pend{background:#fef3c7;color:#b45309}
+.btn.light{background:#fff;color:#0f766e;border:1px solid #cbd5e1}.btn.d{background:#fee2e2;color:#b91c1c}.btn.sm{padding:4px 8px;font-size:11.5px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}th{background:#eef6f4;padding:8px;text-align:left;border:1px solid #cbd5e1}td{border:1px solid #cbd5e1;padding:8px}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;align-items:center;justify-content:center}
-.out-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;max-height:220px;overflow-y:auto;border:1px solid #cbd5e1;padding:10px;border-radius:8px}
 </style></head><body>
-<header>
-  <div><strong style="font-size:18px;color:#115e59">Menu Master (4 Categories, Barcode &amp; Self-Recipe)</strong> | <small id="outLbl"></small></div>
-  <div style="display:flex;gap:8px"><button class="btn" onclick="openItemModal('ADD')">+ Add New Menu Item</button><a href="/index.html" class="btn light">&larr; Dashboard</a></div>
-</header>
-<div class="wrap">
-  <div class="card" style="border-left:5px solid #d97706">
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><strong style="color:#b45309">Pending Menu Approvals (Add / Edit / Delete)</strong><small id="apHint"></small></div>
-    <table><thead><tr><th>Req ID</th><th>Action</th><th>Item</th><th>4 Categories (Cat 1 / 2 / 3 / Vendor)</th><th>Code &amp; Barcode</th><th>Recipe</th><th>By</th><th>HO Action</th></tr></thead><tbody id="apBody"></tbody></table>
-  </div>
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;margin-bottom:10px"><strong style="color:#115e59">Approved Menu Items</strong><input id="mSearch" placeholder="Search item, code, barcode..." oninput="renderMenu()" style="width:260px"></div>
-    <table><thead><tr><th>Item Name</th><th>Category 1</th><th>Category 2</th><th>Category 3</th><th>Vendor / Supplier</th><th>Short Code</th><th>Barcode</th><th>Price</th><th>Recipe Stock Link</th><th>Actions</th></tr></thead><tbody id="menuBody"></tbody></table>
-  </div>
+<header><div><strong style="font-size:18px;color:#115e59">Menu Master (4 Categories, Barcode & Self-Recipe)</strong> | <small id="outLbl"></small></div>
+<div><button class="btn" onclick="openForm('ADD')">+ Add New Item</button> <a href="/index.html" class="btn light">&larr; Dashboard</a></div></header>
+<div class="wrap"><div class="card" style="border-left:5px solid #d97706"><strong style="color:#b45309">Pending Approvals</strong>
+<table><thead><tr><th>Req</th><th>Action</th><th>Item</th><th>4 Categories</th><th>Barcode</th><th>From</th><th>HO Action</th></tr></thead><tbody id="apBody"></tbody></table></div>
+<div class="card"><strong style="color:#115e59">Approved Menu Items</strong>
+<table><thead><tr><th>Name</th><th>Cat 1</th><th>Cat 2</th><th>Cat 3</th><th>Vendor</th><th>Code</th><th>Barcode</th><th>Price</th><th>Recipe</th><th>Actions</th></tr></thead><tbody id="menuBody"></tbody></table></div></div><div class="modal" id="fModal"><div style="background:#fff;border-radius:12px;padding:18px;width:95%;max-width:700px">
+<div style="display:flex;justify-content:space-between;margin-bottom:10px"><strong id="fTitle">Add Menu Item</strong><button class="btn light sm" onclick="fModal.style.display='none'">Close</button></div>
+<form id="mForm"><input type="hidden" id="eId"><input type="hidden" id="rAct" value="ADD">
+<div class="fgrid">
+<div><label>Name *</label><input id="fName" required oninput="autoBar()"></div>
+<div><label>Price *</label><input id="fPrice" type="number" required></div>
+<div><label>Short Code *</label><input id="fCode" required oninput="autoBar()"></div>
+<div><label>Barcode (Auto) *</label><input id="fBar" required></div>
+<div><label>1. Cat One *</label><select id="fC1"><option>Continental</option><option>South Indian</option><option>North Indian</option><option>Sweets</option><option selected>Retail</option></select></div>
+<div><label>2. Cat Two *</label><select id="fC2"><option>Restaurant</option><option selected>Retail</option><option>Sweet</option><option>Bakery</option><option>Namkeen</option></select></div>
+<div><label>3. Cat Three *</label><select id="fC3" onchange="togRec()"><option value="Self Creatable">Self Creatable</option><option value="Manual Creatable">Manual Creatable</option></select></div>
+<div><label>4. Vendor *</label><select id="fVen"><option>Arun Traders Vendor</option><option>Brij Mohan Dairy</option><option>Tamanna Traders</option></select></div>
 </div>
-<div class="modal" id="itemModal"><div style="background:#fff;border-radius:14px;padding:20px;width:95%;max-width:720px;max-height:90vh;overflow:auto">
-  <div style="display:flex;justify-content:space-between;margin-bottom:10px"><strong style="font-size:16px;color:#115e59" id="mFormTitle">Add Menu Item</strong><button class="btn light sm" onclick="itemModal.style.display='none'">Close</button></div>
-  <form id="menuItemForm">
-    <input type="hidden" id="editItemId"><input type="hidden" id="reqActionType" value="ADD">
-    <div class="fgrid">
-      <div><label>Item Name *</label><input id="fItemName" required oninput="autoGenBarcode()"></div>
-      <div><label>Selling Price (Rs.) *</label><input id="fPrice" type="number" step="0.01" required></div>
-      <div><label>Short Code *</label><input id="fShortCode" required oninput="autoGenBarcode()"></div>
-      <div><label>Barcode (Auto-Filled) *</label><input id="fBarcode" required></div>
-    </div>
-    <div class="fgrid" style="margin-top:8px">
-      <div><label>1. Category One *</label><input id="fCat1" required placeholder="Chocolate"></div>
-      <div><label>2. Category Two *</label><input id="fCat2" required placeholder="Retail Item"></div>
-      <div><label>3. Category Three *</label><input id="fCat3" required placeholder="Self Create Recipe"></div>
-      <div><label>4. Vendor / Supplier *</label><input id="fVendor" required placeholder="Arun Traders Vendor"></div>
-    </div>
-    <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:10px;border-radius:8px;margin-top:10px">
-      <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer"><input type="checkbox" id="chkSelfCreate" checked onchange="toggleRecipeMode()" style="width:auto"> <b>Self-Create Recipe (Auto-Create Same Raw Material &amp; Barcode)</b></label>
-      <div id="selfUnitWrap" style="margin-top:6px"><select id="fSelfUnit" style="width:140px"><option value="1 Pc">1 Pc</option><option value="1 Kg">1 Kg</option><option value="1 Litre">1 Litre</option><option value="1 Box">1 Box</option></select></div>
-      <div id="manualRecWrap" style="display:none;margin-top:8px"><button type="button" class="btn light sm" onclick="addManRow()">+ Add Raw Material</button><div id="manRowsBox" style="margin-top:6px"></div></div>
-    </div>
-    <div style="text-align:right;margin-top:12px"><button class="btn">Submit for Head Office Approval &rarr;</button></div>
-  </form>
-</div></div>
-<div class="modal" id="hoApproveModal"><div style="background:#fff;border-radius:14px;padding:20px;width:95%;max-width:650px">
-  <h3 style="margin-top:0;color:#115e59">Head Office Approval ? Select Outlets</h3><p id="hoReqSummary" style="font-size:13px"></p>
-  <label style="display:inline-flex;align-items:center;gap:6px;margin-bottom:8px"><input type="checkbox" checked onchange="document.querySelectorAll('.ho-out-chk').forEach(c=>c.checked=this.checked)" style="width:auto"> <b>Select All 31 Outlets</b></label>
-  <div class="out-grid" id="hoOutletsGrid"></div>
-  <div style="text-align:right;margin-top:12px"><button class="btn light" onclick="hoApproveModal.style.display='none'">Cancel</button> <button class="btn" id="confirmApproveBtn">Approve &amp; Push &#10003;</button></div>
-</div></div>
-<div class="modal" id="viewModal"><div style="background:#fff;border-radius:14px;padding:20px;width:90%;max-width:420px;text-align:center"><div id="viewBody"></div><button class="btn light" style="margin-top:10px" onclick="viewModal.style.display='none'">Close</button></div></div>
-<script>
-const OUTLETS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
-const curOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet', isHO = curOut === 'Head Office';
-outLbl.textContent = isHO ? 'Head Office Master Control' : 'Active Unit: ' + curOut;
-apHint.textContent = isHO ? 'Click Approve to select outlets' : 'Waiting for HO approval';
-
-function getApprovedMenu() {
-  let l = JSON.parse(localStorage.getItem('rpMasterMenuItems') || '[]');
-  if (!l.length) {
-    l = [{ id: 'itm-1', name: '5 Star Chocolate', price: 40, shortCode: '234', barcode: '8905STAR234', cat1: 'Chocolate', cat2: 'Retail Item', cat3: 'Self Create Recipe', vendor: 'Arun Traders Vendor', selfCreate: true, selfUnit: '1 Pc', manualRec: [], outlets: OUTLETS }];
-    localStorage.setItem('rpMasterMenuItems', JSON.stringify(l));
-  }
-  return l;
-}
-function getApprovals() { return JSON.parse(localStorage.getItem('rpMenuApprovalQueue') || '[]'); }
-function autoGenBarcode() { if (chkSelfCreate.checked) fBarcode.value = '890' + (fItemName.value||'ITEM').replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,6) + (fShortCode.value||'101'); }
-function toggleRecipeMode() { selfUnitWrap.style.display = chkSelfCreate.checked ? 'block' : 'none'; manualRecWrap.style.display = chkSelfCreate.checked ? 'none' : 'block'; if (chkSelfCreate.checked) autoGenBarcode(); }
-
-function addManRow(m='',q='0.25',u='KG') {
-  const d=document.createElement('div'); d.className='mr-row';
-  d.style.cssText='display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:6px;margin-bottom:4px';
-  d.innerHTML='<input class="mr-mat" placeholder="Raw Material" value="'+m+'"><input class="mr-qty" type="number" step="0.01" value="'+q+'"><select class="mr-unit"><option>KG</option><option>Pc</option></select><button type="button" class="btn d sm" onclick="this.parentElement.remove()">X</button>';
-  manRowsBox.appendChild(d);
-}
-function openItemModal(act, id='') {
-  reqActionType.value = act; editItemId.value = id; manRowsBox.innerHTML = '';
-  if (id) { const it = getApprovedMenu().find(x=>x.id===id); mFormTitle.textContent='Edit Item'; fItemName.value=it.name; fPrice.value=it.price; fShortCode.value=it.shortCode; fBarcode.value=it.barcode; fCat1.value=it.cat1; fCat2.value=it.cat2; fCat3.value=it.cat3; fVendor.value=it.vendor||''; chkSelfCreate.checked=!!it.selfCreate; fSelfUnit.value=it.selfUnit||'1 Pc'; (it.manualRec||[]).forEach(r=>addManRow(r.mat,r.qty,r.unit)); }
-  else { mFormTitle.textContent='Add New Menu Item'; menuItemForm.reset(); chkSelfCreate.checked=true; addManRow(); }
-  toggleRecipeMode(); itemModal.style.display='flex';
-}
-function requestDelete(id) {
-  const it = getApprovedMenu().find(x=>x.id===id); if (!it || !confirm('Send Delete Request to HO?')) return;
-  const q = getApprovals(); q.unshift({ reqId:'REQ-'+Math.floor(1000+Math.random()*8999), action:'DELETE', targetId:id, item:it, reqBy:curOut });
-  localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q)); renderMenu();
-}
-menuItemForm.onsubmit = function(e) {
-  e.preventDefault(); if (chkSelfCreate.checked && !fBarcode.value) autoGenBarcode();
-  const manualRec = Array.from(document.querySelectorAll('.mr-row')).map(r=>({mat:r.querySelector('.mr-mat').value.trim(),qty:Number(r.querySelector('.mr-qty').value||0),unit:r.querySelector('.mr-unit').value})).filter(x=>x.mat&&x.qty>0);
-  const itemObj = { id: editItemId.value||('itm-'+Date.now()), name:fItemName.value.trim(), price:Number(fPrice.value), shortCode:fShortCode.value.trim(), barcode:fBarcode.value.trim(), cat1:fCat1.value.trim(), cat2:fCat2.value.trim(), cat3:fCat3.value.trim(), vendor:fVendor.value.trim(), selfCreate:chkSelfCreate.checked, selfUnit:fSelfUnit.value, manualRec, outlets:[curOut] };
-  const q = getApprovals(); q.unshift({ reqId:'REQ-'+Math.floor(1000+Math.random()*8999), action:reqActionType.value, targetId:itemObj.id, item:itemObj, reqBy:curOut });
-  localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q)); itemModal.style.display='none'; renderMenu();
-};
-
-function openHoApprove(reqId) {
-  const req = getApprovals().find(x=>x.reqId===reqId); if (!req) return;
-  hoReqSummary.innerHTML = '<b>'+req.action+':</b> '+req.item.name+' | '+req.item.cat1+' / '+req.item.cat2+' / '+req.item.cat3+' / '+req.item.vendor;
-  hoOutletsGrid.innerHTML = OUTLETS.map(o=>'<label style="display:flex;align-items:center;gap:5px;font-size:12px"><input type="checkbox" class="ho-out-chk" value="'+o+'" checked style="width:auto">'+o+'</label>').join('');
-  confirmApproveBtn.onclick = function() {
-    const q = getApprovals(), idx = q.findIndex(x=>x.reqId===reqId), sel = Array.from(document.querySelectorAll('.ho-out-chk:checked')).map(c=>c.value);
-    let menu = getApprovedMenu();
-    if (req.action==='DELETE') menu = menu.filter(x=>x.id!==req.targetId);
-    else { req.item.outlets = sel; const mi = menu.findIndex(x=>x.id===req.targetId); if(mi>=0) menu[mi]=req.item; else menu.unshift(req.item); if(req.item.selfCreate) sel.forEach(o=>{ const k='rpInventoryStock::'+o, st=JSON.parse(localStorage.getItem(k)||'{}'); if(st[req.item.name]===undefined) st[req.item.name]=50; localStorage.setItem(k,JSON.stringify(st)); }); }
-    localStorage.setItem('rpMasterMenuItems', JSON.stringify(menu)); q.splice(idx,1); localStorage.setItem('rpMenuApprovalQueue', JSON.stringify(q)); hoApproveModal.style.display='none'; renderMenu();
-  };
-  hoApproveModal.style.display='flex';
-}
-function viewItem(id) { const it = getApprovedMenu().find(x=>x.id===id); if (!it) return; viewBody.innerHTML = '<h3>'+it.name+'</h3><div style="border:2px dashed #0f766e;padding:8px;font-family:monospace;font-size:18px">||| || ||| || |||<br><b>'+it.barcode+'</b></div><p style="font-size:13px">Code: <b>'+it.shortCode+'</b> | Vendor: <b>'+it.vendor+'</b><br>'+it.cat1+' / '+it.cat2+' / '+it.cat3+'</p>'; viewModal.style.display='flex'; }
-function renderMenu() {
-  const q = getApprovals();
-  apBody.innerHTML = q.map(r=>'<tr><td><b>'+r.reqId+'</b></td><td><span class="badge pend">'+r.action+'</span></td><td><b>'+r.item.name+'</b></td><td>'+r.item.cat1+' / '+r.item.cat2+' / '+r.item.cat3+' / '+r.item.vendor+'</td><td>'+r.item.shortCode+' / '+r.item.barcode+'</td><td>'+(r.item.selfCreate?'Self ('+r.item.selfUnit+')':'Manual')+'</td><td>'+r.reqBy+'</td><td>'+(isHO?'<button class="btn sm" onclick="openHoApprove(\''+r.reqId+'\')">Approve</button>':'<span class="badge pend">Pending HO</span>')+'</td></tr>').join('') || '<tr><td colspan="8">No pending requests.</td></tr>';
-  const s = (mSearch.value||'').toLowerCase();
-  const list = getApprovedMenu().filter(it=>(isHO||(it.outlets||[]).includes(curOut))&&(!s||it.name.toLowerCase().includes(s)||it.shortCode.includes(s)||it.barcode.toLowerCase().includes(s)));
-  menuBody.innerHTML = list.map(it=>'<tr><td><b>'+it.name+'</b></td><td>'+it.cat1+'</td><td>'+it.cat2+'</td><td>'+it.cat3+'</td><td><b>'+it.vendor+'</b></td><td><b>'+it.shortCode+'</b></td><td><b>'+it.barcode+'</b></td><td><b>Rs.'+it.price+'</b></td><td>'+(it.selfCreate?'<span class="badge">Self: -'+it.selfUnit+'</span>':'Manual')+'</td><td><button class="btn light sm" onclick="viewItem(\''+it.id+'\')">View</button> <button class="btn light sm" onclick="openItemModal(\'EDIT\',\''+it.id+'\')">Edit</button> <button class="btn d sm" onclick="requestDelete(\''+it.id+'\')">Delete</button></td></tr>').join('') || '<tr><td colspan="10">No items.</td></tr>';
-}
-renderMenu();
+<div style="background:#f0fdf4;padding:10px;border-radius:8px;margin-top:10px">
+<label><input type="checkbox" id="chkSelf" checked onchange="togRec()" style="width:auto"> <b>Create Self Item Recipe</b></label>
+<select id="fUnit" style="width:120px;margin-left:10px"><option>1 Pc</option><option>1 Kg</option><option>1 Pkt</option></select>
+</div>
+<div style="text-align:right;margin-top:10px"><button class="btn">Submit for HO Approval &rarr;</button></div>
+</form></div></div>
+<div class="modal" id="hoModal"><div style="background:#fff;border-radius:12px;padding:18px;width:95%;max-width:580px">
+<h3>Select Outlets for Access</h3><p id="hoInfo"></p>
+<div id="hoGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:200px;overflow:auto"></div>
+<div style="text-align:right;margin-top:10px"><button class="btn light" onclick="hoModal.style.display='none'">Cancel</button> <button class="btn" id="hoOkBtn">Approve & Sync</button></div>
+</div></div><script>
+const OUTS=['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
+const cur=localStorage.getItem('rpSelectedOutlet')||'Main Outlet', isHO=cur==='Head Office';
+outLbl.textContent=isHO?'Head Office Master':'Outlet: '+cur;
+const getM=()=>{let l=JSON.parse(localStorage.getItem('rpMasterMenuItems')||'[]');if(!l.length){l=[{id:'m1',name:'5 Star Chocolate',price:40,shortCode:'234',barcode:'8905STAR234',cat1:'Retail',cat2:'Retail',cat3:'Self Creatable',vendor:'Arun Traders Vendor',selfCreate:true,selfUnit:'1 Pc',outlets:OUTS}];localStorage.setItem('rpMasterMenuItems',JSON.stringify(l));}return l;};
+const getQ=()=>JSON.parse(localStorage.getItem('rpMenuApprovalQueue')||'[]');
+function autoBar(){if(chkSelf.checked)fBar.value='890'+(fName.value||'ITEM').replace(/[^a-zA-Z0-9]/g,'').toUpperCase().slice(0,6)+(fCode.value||'101');}
+function togRec(){const s=fC3.value==='Self Creatable';chkSelf.checked=s;fUnit.style.display=s?'inline-block':'none';if(s)autoBar();}
+function openForm(act,id=''){rAct.value=act;eId.value=id;if(id){const it=getM().find(x=>x.id===id);fTitle.textContent='Edit';fName.value=it.name;fPrice.value=it.price;fCode.value=it.shortCode;fBar.value=it.barcode;fC1.value=it.cat1;fC2.value=it.cat2;fC3.value=it.cat3;fVen.value=it.vendor;fUnit.value=it.selfUnit||'1 Pc';}else{fTitle.textContent='Add';mForm.reset();}togRec();fModal.style.display='flex';}
+function delReq(id){const it=getM().find(x=>x.id===id);if(!it||!confirm('Send Delete to HO?'))return;const q=getQ();q.unshift({reqId:'REQ-'+Date.now(),action:'DELETE',targetId:id,item:it,reqBy:cur});localStorage.setItem('rpMenuApprovalQueue',JSON.stringify(q));render();}
+mForm.onsubmit=e=>{e.preventDefault();if(chkSelf.checked&&!fBar.value)autoBar();const it={id:eId.value||('m-'+Date.now()),name:fName.value.trim(),price:Number(fPrice.value),shortCode:fCode.value.trim(),barcode:fBar.value.trim(),cat1:fC1.value,cat2:fC2.value,cat3:fC3.value,vendor:fVen.value,selfCreate:chkSelf.checked,selfUnit:fUnit.value,outlets:[cur]};const q=getQ();q.unshift({reqId:'REQ-'+Date.now(),action:rAct.value,targetId:it.id,item:it,reqBy:cur});localStorage.setItem('rpMenuApprovalQueue',JSON.stringify(q));fModal.style.display='none';render();alert('Sent to HO Approval!');};
+function openHo(reqId){const r=getQ().find(x=>x.reqId===reqId);if(!r)return;hoInfo.innerHTML='<b>'+r.action+':</b> '+r.item.name;hoGrid.innerHTML=OUTS.map(o=>'<label style="font-size:12px"><input type="checkbox" class="hc" value="'+o+'" checked style="width:auto"> '+o+'</label>').join('');hoOkBtn.onclick=()=>{const q=getQ(),i=q.findIndex(x=>x.reqId===reqId),sel=Array.from(document.querySelectorAll('.hc:checked')).map(c=>c.value);let m=getM();if(r.action==='DELETE')m=m.filter(x=>x.id!==r.targetId);else{r.item.outlets=sel;const mi=m.findIndex(x=>x.id===r.targetId);if(mi>=0)m[mi]=r.item;else m.unshift(r.item);if(r.item.selfCreate)sel.forEach(o=>{const k='rpInventoryStock::'+o,st=JSON.parse(localStorage.getItem(k)||'{}');if(st[r.item.name]===undefined)st[r.item.name]=50;localStorage.setItem(k,JSON.stringify(st));});}localStorage.setItem('rpMasterMenuItems',JSON.stringify(m));q.splice(i,1);localStorage.setItem('rpMenuApprovalQueue',JSON.stringify(q));hoModal.style.display='none';render();};hoModal.style.display='flex';}
+function render(){const q=getQ();apBody.innerHTML=q.map(r=>'<tr><td>'+r.reqId+'</td><td>'+r.action+'</td><td><b>'+r.item.name+'</b></td><td>'+r.item.cat1+'/'+r.item.cat2+'/'+r.item.cat3+'/'+r.item.vendor+'</td><td>'+r.item.barcode+'</td><td>'+r.reqBy+'</td><td>'+(isHO?'<button class="btn sm" onclick="openHo(''+r.reqId+'')">Approve</button>':'Pending HO')+'</td></tr>').join('')||'<tr><td colspan="7">No pending requests.</td></tr>';const l=getM().filter(it=>isHO||(it.outlets||[]).includes(cur));menuBody.innerHTML=l.map(it=>'<tr><td><b>'+it.name+'</b></td><td>'+it.cat1+'</td><td>'+it.cat2+'</td><td>'+it.cat3+'</td><td><b>'+it.vendor+'</b></td><td>'+it.shortCode+'</td><td><b>'+it.barcode+'</b></td><td>Rs.'+it.price+'</td><td>'+(it.selfCreate?'Self: -'+it.selfUnit:'Manual')+'</td><td><button class="btn light sm" onclick="alert('Barcode: '+it.barcode+'')">View</button> <button class="btn light sm" onclick="openForm('EDIT',''+it.id+'')">Edit</button> <button class="btn d sm" onclick="delReq(''+it.id+'')">Del</button></td></tr>').join('');}
+render();
 </script></body></html>
