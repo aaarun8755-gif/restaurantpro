@@ -82,3 +82,39 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', rpRefreshAllTabs);
   else rpRefreshAllTabs();
 })();
+
+setInterval(function() {
+  document.querySelectorAll('div,span,button').forEach(function(el) {
+    if ((el.innerText || '').includes('New QR Order (Head Office)')) {
+      const box = el.closest('div[style*="fixed"], div[style*="sticky"], div[style*="border"]') || el.parentElement;
+      if (box) box.style.display = 'none';
+    }
+  });
+  document.querySelectorAll('button, a, div, span').forEach(function(btn) {
+    const t = (btn.innerText || '').trim();
+    if (btn.children.length > 0 || btn.dataset.rpTabWired) return;
+    if (t === 'Items' || t === 'Categories' || t === 'Variants' || t === 'Addons') {
+      btn.dataset.rpTabWired = '1';
+      btn.style.cursor = 'pointer';
+      btn.addEventListener('click', function() {
+        const catP = document.getElementById('menuCategoriesPanel');
+        const varP = document.getElementById('menuVariationsPanel');
+        const formCard = document.getElementById('newItemName')?.closest('form')?.parentElement;
+        if (window.rpRefreshAllTabs) window.rpRefreshAllTabs();
+        if (t === 'Items') {
+          if (formCard) formCard.style.display = '';
+          if (catP) catP.style.display = 'none';
+          if (varP) varP.style.display = 'none';
+        } else if (t === 'Categories') {
+          if (formCard) formCard.style.display = 'none';
+          if (catP) { catP.style.display = 'block'; catP.scrollIntoView({behavior:'smooth'}); }
+          if (varP) varP.style.display = 'none';
+        } else if (t === 'Variants' || t === 'Addons') {
+          if (formCard) formCard.style.display = 'none';
+          if (catP) catP.style.display = 'none';
+          if (varP) { varP.style.display = 'block'; varP.scrollIntoView({behavior:'smooth'}); }
+        }
+      });
+    }
+  });
+}, 400);
