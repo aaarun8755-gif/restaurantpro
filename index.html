@@ -469,28 +469,11 @@ footer{color:#89978f;padding:24px;font-size:12px}
       <div class="menu-field menu-tax-field"><label for="newItemTaxes">Taxes</label><select id="newItemTaxes"><option value="">Select Taxes</option><option>GST 5%</option><option>GST 12%</option><option>GST 18%</option><option>GST 0%</option></select><small>Selected tax applies to this menu item in the demo.</small></div>
       <div class="menu-field menu-recipe-field"><label>Recipe</label><label class="checkline"><input type="checkbox" id="newItemRecipe"> Create Self Item Recipe</label><small>For purchased items that do not have a recipe.</small></div>
       
-<div id="rp4CatFieldsWrap" style="grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;background:#f0fdf4;padding:12px;border-radius:10px;border:1px solid #bbf7d0;margin:6px 0">
-  <div><label style="font-size:12px;font-weight:700">1. Category One *</label><select id="rpMenuCat1" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"><option>Continental</option><option>South Indian</option><option>North Indian</option><option>Chinese</option><option>Sweets</option><option selected>Retail &amp; Chocolates</option></select></div>
-  <div><label style="font-size:12px;font-weight:700">2. Category Two *</label><select id="rpMenuCat2" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"><option>Restaurant</option><option selected>Retail</option><option>Sweet</option><option>Bakery</option><option>Namkeen</option></select></div>
-  <div><label style="font-size:12px;font-weight:700">3. Category Three *</label><select id="rpMenuCat3" onchange="window.rpSyncSelfMode&&rpSyncSelfMode()" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"><option value="Self Creatable">Self Creatable</option><option value="Manual Creatable">Manual Creatable</option></select></div>
-  <div><label style="font-size:12px;font-weight:700">4. Vendor Category *</label><select id="rpMenuVendor" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"><option>Arun Traders Vendor</option><option>Brij Mohan Dairy</option><option>Tamanna Traders</option><option>Ajay Kumar Dryfruits</option><option>Metro Packaging</option></select></div>
-  <div><label style="font-size:12px;font-weight:700">Barcode (Auto-Filled) *</label><input id="rpMenuBarcode" placeholder="Auto-generated barcode" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"></div>
-  <div id="rpSelfUnitCol"><label style="font-size:12px;font-weight:700">Self-Recipe Unit *</label><select id="rpMenuSelfUnit" style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"><option value="1 Pc">1 Pc</option><option value="1 Kg">1 Kg</option><option value="1 Pkt">1 Pkt</option></select></div>
-  <div id="rpManRecCol" style="display:none;grid-column:1/-1"><label style="font-size:12px;font-weight:700">Manual Recipe Raw Materials (e.g. Maida 0.2kg, Cheese 0.1kg)</label><input id="rpMenuManRec" placeholder="Enter ingredients & qty deducted on billing..." style="width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:8px"></div>
-</div>
-
 <div class="menu-field menu-inline-check"><label>Availability</label><label class="checkline"><input type="checkbox" id="newItemAllAreas" checked> Active in All Areas</label></div>
     </form>
     <p id="menuFeedback" class="notice hidden"></p>
   </section>
   
-<section id="rpHoMenuApprovalBox" class="panel menu-list-panel" style="border-left:5px solid #d97706;margin-top:12px">
-  <div class="panel-head"><h2 style="color:#b45309">Head Office Menu Approval Queue &amp; 4-Category Master</h2><span id="rpHoApStat" style="font-size:12.5px;color:#64748b"></span></div>
-  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px"><thead><tr style="background:#fef3c7"><th style="padding:8px;border:1px solid #cbd5e1">Action</th><th style="padding:8px;border:1px solid #cbd5e1">Item</th><th style="padding:8px;border:1px solid #cbd5e1">4 Categories (1/2/3/Vendor)</th><th style="padding:8px;border:1px solid #cbd5e1">Barcode</th><th style="padding:8px;border:1px solid #cbd5e1">Recipe</th><th style="padding:8px;border:1px solid #cbd5e1">Outlet</th><th style="padding:8px;border:1px solid #cbd5e1">HO Approval</th></tr></thead><tbody id="rpHoApBody"></tbody></table></div>
-  <div style="overflow-x:auto;margin-top:12px"><table style="width:100%;border-collapse:collapse;font-size:12.5px"><thead><tr style="background:#eef6f4"><th style="padding:8px;border:1px solid #cbd5e1">Item Name</th><th style="padding:8px;border:1px solid #cbd5e1">Cat 1</th><th style="padding:8px;border:1px solid #cbd5e1">Cat 2</th><th style="padding:8px;border:1px solid #cbd5e1">Cat 3</th><th style="padding:8px;border:1px solid #cbd5e1">Vendor</th><th style="padding:8px;border:1px solid #cbd5e1">Barcode</th><th style="padding:8px;border:1px solid #cbd5e1">Price</th><th style="padding:8px;border:1px solid #cbd5e1">Actions (View / Edit / Del)</th></tr></thead><tbody id="rpApproved4CatBody"></tbody></table></div>
-  <div id="rpHoOutModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center"></div>
-</section>
-
 <section id="menuCategoriesPanel" class="panel menu-list-panel"><div class="panel-head"><h2>Menu Items</h2><span id="manageMenuCount" style="color:var(--muted);font-size:13px"></span></div><div id="manageMenuList"></div></section>
   <section id="menuVariationsPanel" class="menu-small-note"><strong>Variations &amp; Addons</strong><span>Item-level options are saved with each menu item. Detailed variation/addon pricing can be added in a later update.</span></section>
 </main>
@@ -599,7 +582,6 @@ function invPrintPdf(title,headers,rows){const w=window.open("","_blank");if(!w)
 
 
 
-<script src="/menu-enhancer.js"></script>
 </body></html>`);w.document.close()}
 function invExportButtons(prefix){return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px"><button class="btn" id="${prefix}Excel">Download Excel (CSV)</button><button class="btn light" id="${prefix}Pdf">Download PDF / Print</button></div>`}
 function invUploadButtons(){return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px"><button type="button" class="btn light" id="invUploadTrigger">Upload Sheet (CSV)</button><input type="file" id="invUploadFile" accept=".csv,.txt,text/csv" style="display:none"><span style="align-self:center;color:var(--muted);font-size:12px">Excel file ko pehle CSV UTF-8 format mein Save As karein.</span></div>`}
