@@ -79,3 +79,87 @@ document.addEventListener('click', function(e) {
     if (varP) { varP.style.display = 'block'; varP.classList.remove('hidden'); }
   }
 }, true);
+
+
+/* RP_TABS_ADDON */
+(function(){
+  const OUTS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
+  const getOut = () => localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+  const isHO = () => getOut() === 'Head Office';
+  const getCats = () => JSON.parse(localStorage.getItem('rpGroupedCats') || '[{"id":"gc1","cat1":"Ghee Sweet","cat2":"Sweet","cat3":"Self Creatable","vendor":"Central Warehouse","status":"Active"},{"id":"gc2","cat1":"Chena Sweet","cat2":"Sweet","cat3":"Self Creatable","vendor":"Central Warehouse","status":"Active"},{"id":"gc3","cat1":"Khoya Sweet","cat2":"Sweet","cat3":"Self Creatable","vendor":"Central Warehouse","status":"Active"},{"id":"gc4","cat1":"South Indian","cat2":"Restaurant","cat3":"Manual Creatable","vendor":"Arun Traders Vendor","status":"Active"}]');
+  const getVars = () => JSON.parse(localStorage.getItem('rpTabVars') || '[{"id":"v1","name":"100gm","dept":"Quantity","status":"Active"},{"id":"v2","name":"250gm","dept":"Quantity","status":"Active"},{"id":"v3","name":"500gm","dept":"Quantity","status":"Active"},{"id":"v4","name":"1 Kg","dept":"Quantity","status":"Active"}]');
+  const getAddons = () => JSON.parse(localStorage.getItem('rpTabAddons') || '[{"id":"a1","dept":"Choice Of Breads","display":"Choice Of Breads","price":30,"status":"Active"},{"id":"a2","dept":"Extra Chutney","display":"Extra Chutney","price":15,"status":"Active"},{"id":"a3","dept":"Extra Cheese","display":"Extra Cheese","price":40,"status":"Active"}]');
+  const getReqs = () => JSON.parse(localStorage.getItem('rpCvaApprovalQueue') || '[]');
+
+  window.rpSendCvaReq = (type, action, item) => {
+    const q = getReqs(); q.unshift({ reqId: 'CVA-' + Date.now(), type, action, item, reqBy: getOut() });
+    localStorage.setItem('rpCvaApprovalQueue', JSON.stringify(q));
+    alert(action + ' request sent to Head Office Approval!');
+    window.rpRefreshAllTabs();
+  };
+  window.rpOpenCvaHo = (reqId) => {
+    const req = getReqs().find(x => x.reqId === reqId); if (!req) return;
+    let m = document.getElementById('rpCvaHoModal');
+    if (!m) { m = document.createElement('div'); m.id = 'rpCvaHoModal'; m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99999;display:flex;align-items:center;justify-content:center'; document.body.appendChild(m); }
+    m.style.display = 'flex';
+    m.innerHTML = '<div style="background:#fff;padding:18px;border-radius:12px;max-width:560px;width:92%"><h3>HO Approval (' + req.type + '): ' + (req.item.cat1 || req.item.name || req.item.dept) + '</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;max-height:220px;overflow:auto;margin:10px 0">' + OUTS.map(o => '<label style="font-size:12px"><input type="checkbox" class="cva-ochk" value="' + o + '"> ' + o + '</label>').join('') + '</div><button type="button" data-r="' + reqId + '" onclick="rpExecCvaHo(this.dataset.r)" style="background:#0f766e;color:#fff;border:0;padding:8px 14px;border-radius:8px;font-weight:700">Approve &amp; Sync</button> <button type="button" onclick="rpCvaHoModal.style.display=\'none\'" style="padding:8px 12px">Cancel</button></div>';
+  };
+  window.rpExecCvaHo = (reqId) => {
+    const q = getReqs(), idx = q.findIndex(x => x.reqId === reqId), req = q[idx];
+    const sel = Array.from(document.querySelectorAll('.cva-ochk:checked')).map(c => c.value);
+    const key = req.type === 'CATEGORY' ? 'rpGroupedCats' : (req.type === 'VARIANT' ? 'rpTabVars' : 'rpTabAddons');
+    let list = req.type === 'CATEGORY' ? getCats() : (req.type === 'VARIANT' ? getVars() : getAddons());
+    if (req.action === 'DELETE') list = list.filter(x => x.id !== req.item.id);
+    else { req.item.outlets = sel; const i = list.findIndex(x => x.id === req.item.id); if (i >= 0) list[i] = req.item; else list.push(req.item); }
+    localStorage.setItem(key, JSON.stringify(list)); q.splice(idx, 1); localStorage.setItem('rpCvaApprovalQueue', JSON.stringify(q));
+    document.getElementById('rpCvaHoModal').style.display = 'none'; window.rpRefreshAllTabs();
+  };
+  window.rpExportCvaExcel = (type) => {
+    const rows = type === 'CATEGORY' ? [['Vendor','Recipe Mode','Group','Cat 1'], ...getCats().map(c=>[c.vendor,c.cat3,c.cat2,c.cat1])] : type === 'VARIANT' ? [['Variant','Dept'], ...getVars().map(v=>[v.name,v.dept])] : [['Dept','Display','Price'], ...getAddons().map(a=>[a.dept,a.display,a.price])];
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = type + '.csv'; a.click();
+  };
+
+  window.rpRefreshAllTabs = () => {
+    const q = getReqs();
+    const apHtml = '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px;margin-bottom:12px"><strong style="color:#b45309">Head Office Approval Requests: ' + q.length + '</strong>' + (q.length ? '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:6px"><tr style="background:#fef3c7"><th style="padding:5px;border:1px solid #cbd5e1">Tab</th><th style="padding:5px;border:1px solid #cbd5e1">Action</th><th style="padding:5px;border:1px solid #cbd5e1">Details</th><th style="padding:5px;border:1px solid #cbd5e1">By</th><th style="padding:5px;border:1px solid #cbd5e1">HO Action</th></tr>' + q.map(r=>'<tr><td style="padding:5px;border:1px solid #cbd5e1">'+r.type+'</td><td style="padding:5px;border:1px solid #cbd5e1">'+r.action+'</td><td style="padding:5px;border:1px solid #cbd5e1"><b>'+(r.item.cat1 ? (r.item.vendor+' > '+r.item.cat3+' > '+r.item.cat2+' > '+r.item.cat1) : (r.item.name||r.item.dept))+'</b></td><td style="padding:5px;border:1px solid #cbd5e1">'+r.reqBy+'</td><td style="padding:5px;border:1px solid #cbd5e1">'+(isHO()?'<button type="button" data-r="'+r.reqId+'" onclick="rpOpenCvaHo(this.dataset.r)" style="background:#0f766e;color:#fff;border:0;padding:4px 8px;border-radius:5px">Approve</button>':'Pending HO')+'</td></tr>').join('') + '</table>' : '') + '</div>';
+    const filt = l => l.filter(x => isHO() || !x.outlets || !x.outlets.length || x.outlets.includes(getOut()));
+    const catP = document.getElementById('menuCategoriesPanel'), varP = document.getElementById('menuVariationsPanel');
+
+    if (catP) {
+      const cs = filt(getCats());
+      catP.innerHTML = apHtml +
+        '<div class="panel-head"><h2>Category Grouping (Vendor &gt; Self Create &gt; Group Cat 2 &gt; Cat 1)</h2><button type="button" onclick="rpExportCvaExcel(\'CATEGORY\')">Excel</button></div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;background:#f0fdf4;padding:10px;border-radius:8px;margin-bottom:10px">' +
+          '<input id="gCat1" placeholder="1. Cat 1 (e.g. Ghee Sweet)" style="padding:6px">' +
+          '<select id="gCat2" style="padding:6px"><option value="Sweet">2. Sweet</option><option value="Restaurant">2. Restaurant</option><option value="Retail">2. Retail</option></select>' +
+          '<select id="gCat3" style="padding:6px"><option value="Self Creatable">3. Self Creatable</option><option value="Manual Creatable">3. Manual Creatable</option></select>' +
+          '<select id="gVen" style="padding:6px"><option value="Central Warehouse">4. Central Warehouse</option><option value="Arun Traders Vendor">4. Arun Traders Vendor</option></select>' +
+          '<button type="button" onclick="if(gCat1.value.trim())rpSendCvaReq(\'CATEGORY\',\'CREATE\',{id:\'gc-\'+Date.now(),cat1:gCat1.value.trim(),cat2:gCat2.value,cat3:gCat3.value,vendor:gVen.value})" style="background:#0f766e;color:#fff;border:0;padding:7px;border-radius:7px;font-weight:700">+ Create (HO)</button>' +
+        '</div>' +
+        '<table style="width:100%;border-collapse:collapse;font-size:12.5px"><thead><tr style="background:#eef6f4"><th style="padding:6px;border:1px solid #cbd5e1">Grouping Hierarchy</th><th style="padding:6px;border:1px solid #cbd5e1">Actions</th></tr></thead><tbody>' +
+        cs.map(c=>'<tr><td style="padding:6px;border:1px solid #cbd5e1;color:#0f766e"><b>'+c.vendor+' &gt; '+c.cat3+' &gt; '+c.cat2+' &gt; '+c.cat1+'</b></td><td style="padding:6px;border:1px solid #cbd5e1"><button type="button" onclick="alert(\''+c.vendor+' > '+c.cat3+' > '+c.cat2+' > '+c.cat1+'\')">View</button> <button type="button" onclick="const nn=prompt(\'Edit Cat 1:\',\''+c.cat1+'\');if(nn)rpSendCvaReq(\'CATEGORY\',\'EDIT\',{id:\''+c.id+'\',cat1:nn,cat2:\''+c.cat2+'\',cat3:\''+c.cat3+'\',vendor:\''+c.vendor+'\'})">Edit</button> <button type="button" style="color:#dc2626" onclick="rpSendCvaReq(\'CATEGORY\',\'DELETE\',{id:\''+c.id+'\',cat1:\''+c.cat1+'\'})">Delete</button></td></tr>').join('') + '</tbody></table>';
+    }
+    if (varP) {
+      const vs = filt(getVars()), ads = filt(getAddons());
+      varP.innerHTML = apHtml +
+        '<div class="panel-head"><h2>Variants &amp; Addons (Create New -> HO Approval)</h2><div><button type="button" onclick="rpExportCvaExcel(\'VARIANT\')">Var Excel</button> <button type="button" onclick="rpExportCvaExcel(\'ADDON\')">Addon Excel</button></div></div>' +
+        '<div style="display:flex;gap:8px;margin-bottom:8px"><input id="nVarN" placeholder="Variant (e.g. 250gm)"><button type="button" onclick="if(nVarN.value.trim())rpSendCvaReq(\'VARIANT\',\'CREATE\',{id:\'v-\'+Date.now(),name:nVarN.value.trim(),dept:\'Quantity\'})" style="background:#0f766e;color:#fff;border:0;padding:6px 12px;border-radius:6px">+ Variant</button></div>' +
+        '<table style="width:100%;border-collapse:collapse;font-size:12.5px;margin-bottom:12px"><tbody>' + vs.map(v=>'<tr><td style="padding:6px;border:1px solid #cbd5e1"><b>'+v.name+'</b></td><td style="padding:6px;border:1px solid #cbd5e1"><button type="button" onclick="alert(\''+v.name+'\')">View</button> <button type="button" onclick="const nn=prompt(\'Edit:\',\''+v.name+'\');if(nn)rpSendCvaReq(\'VARIANT\',\'EDIT\',{id:\''+v.id+'\',name:nn,dept:\'Quantity\'})">Edit</button> <button type="button" style="color:#dc2626" onclick="rpSendCvaReq(\'VARIANT\',\'DELETE\',{id:\''+v.id+'\',name:\''+v.name+'\'})">Del</button></td></tr>').join('') + '</tbody></table>' +
+        '<div style="display:flex;gap:8px;margin-bottom:8px"><input id="nAdD" placeholder="Addon Name"><input id="nAdP" type="number" placeholder="Price" style="width:90px"><button type="button" onclick="if(nAdD.value.trim())rpSendCvaReq(\'ADDON\',\'CREATE\',{id:\'a-\'+Date.now(),dept:nAdD.value.trim(),display:nAdD.value.trim(),price:Number(nAdP.value||0)})" style="background:#0f766e;color:#fff;border:0;padding:6px 12px;border-radius:6px">+ Addon</button></div>' +
+        '<table style="width:100%;border-collapse:collapse;font-size:12.5px"><tbody>' + ads.map(a=>'<tr><td style="padding:6px;border:1px solid #cbd5e1"><b>'+a.dept+'</b> (Rs.'+a.price+')</td><td style="padding:6px;border:1px solid #cbd5e1"><button type="button" onclick="alert(\''+a.dept+'\')">View</button> <button type="button" onclick="const np=prompt(\'Price:\',\''+a.price+'\');if(np)rpSendCvaReq(\'ADDON\',\'EDIT\',{id:\''+a.id+'\',dept:\''+a.dept+'\',display:\''+a.display+'\',price:Number(np)})">Edit</button> <button type="button" style="color:#dc2626" onclick="rpSendCvaReq(\'ADDON\',\'DELETE\',{id:\''+a.id+'\',dept:\''+a.dept+'\'})">Del</button></td></tr>').join('') + '</tbody></table>';
+    }
+  };
+  setInterval(() => { document.querySelectorAll('div,span,p').forEach(el => { if ((el.innerText || '').includes('New QR Order')) { const b = el.closest('div[style*="fixed"],div[style*="sticky"],div[style*="border"]') || el.parentElement; if (b) b.remove(); } }); }, 300);
+  document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button, a, [role="tab"]'); if (!btn) return;
+    const t = (btn.innerText || '').trim();
+    if (t !== 'Items' && t !== 'Categories' && t !== 'Variants' && t !== 'Addons') return;
+    const catP = document.getElementById('menuCategoriesPanel'), varP = document.getElementById('menuVariationsPanel'), fC = document.getElementById('addMenuForm')?.closest('.panel, section, div'), iL = document.getElementById('manageMenuList')?.closest('.panel, section');
+    if (!catP && !varP) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    window.rpRefreshAllTabs();
+    if (t === 'Items') { if(fC) fC.style.display=''; if(iL) iL.style.display=''; if(catP) catP.style.display='none'; if(varP) varP.style.display='none'; }
+    else if (t === 'Categories') { if(fC) fC.style.display='none'; if(iL) iL.style.display='none'; if(catP) { catP.style.display='block'; catP.classList.remove('hidden'); } if(varP) varP.style.display='none'; }
+    else { if(fC) fC.style.display='none'; if(iL) iL.style.display='none'; if(catP) catP.style.display='none'; if(varP) { varP.style.display='block'; varP.classList.remove('hidden'); } }
+  }, true);
+})();
