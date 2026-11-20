@@ -1,0 +1,50 @@
+RestaurantPro ZIP Update - 20 Nov 2026
+=====================================
+
+WHAT WAS UPDATED
+----------------
+1) Menu workflow
+- Added Category Two (Department), Category Three (Self/Manual Recipe Mode), Vendor Category, auto barcode field and self-recipe unit selector to the main Menu Management form.
+- Category One custom categories are persisted through the server menu category API.
+- New menu additions and edit/delete requests are staged in the server-side Head Office approval queue. They do not immediately replace the outlet menu.
+- HO approval supports explicit outlet selection; no outlets are preselected by default.
+- Approved menu items are returned by outlet through /api/menu. Self-creatable items create a same-name raw-material record and a one-unit recipe in the server data store; barcode records are stored in the barcode ledger.
+- The existing manual Recipe editor remains the place to add manual ingredients and quantities.
+- The menu approval queue and barcode ledger are visible in the main Menu Management page.
+
+2) Favicon
+- Replaced the malformed shield SVG with a valid SVG namespace.
+- Added /favicon.ico and /favicon.svg server routes before static-file serving.
+- Standardized all HTML pages to use /favicon.svg.
+
+3) Ask Me Anything AI
+- Removed fabricated fallback stock numbers from the assistant.
+- Added outlet-scoped browser data reading for the existing localStorage inventory and bill keys.
+- Added answers for stock, today's sales, cash, UPI, pending purchase orders, menu approvals and tasks when matching data exists.
+- The assistant now says when a record is not available instead of inventing a quantity.
+
+4) QR order approval
+- QR orders are no longer treated as direct POS orders.
+- A QR order must reference an active table belonging to the submitted outlet and is saved as Pending Approval without creating a KOT.
+- Only the QR approval endpoint can accept a pending QR order; it creates one KOT and rejects duplicate approval attempts.
+- Reject is limited to pending QR orders.
+- QR approval mirrors the approved order into the selected outlet's browser sales ledger without forwarding it as a second POS/KOT order.
+- Customer confirmation now correctly says the order is pending outlet manager approval.
+
+VALIDATION PERFORMED
+--------------------
+- `node --check server.js`: passed.
+- `node --check menu-workflow.js`: passed.
+- Inline JavaScript syntax check across all HTML pages: 75 scripts checked, 0 syntax failures.
+- Favicon presence checked across all 35 HTML files.
+- ZIP archive integrity checked after packaging.
+
+IMPORTANT LIMITATIONS - READ BEFORE LIVE DEPLOYMENT
+--------------------------------------------------
+- This project still uses the existing client-side demo OTP and browser localStorage for substantial parts of POS sales, inventory, and tasks. It does not yet have authenticated server sessions/role enforcement for every API. Outlet query filtering is not a security boundary: a technically capable user could alter an outlet parameter. Therefore strict outlet privacy is NOT production-secure yet.
+- The self-created server recipe/stock records and the existing browser-local inventory ledger are not yet one fully centralized inventory system. The existing local POS recipe consumption remains in place; cross-device inventory consistency still requires a later backend migration.
+- The existing manual recipe editor is retained; manual recipe records are not yet centrally synchronized to the server recipe database.
+- Full runtime/API/browser testing could not be completed in this environment because npm dependency installation did not finish. Static syntax checks passed, but install dependencies and test the ZIP locally before deployment.
+- Do not publish `.env` or `tunnel.log` to a public GitHub repository. `.gitignore` already excludes them; keep that protection enabled.
+
+This ZIP is intended for local validation/staging first, not a claim of production certification.

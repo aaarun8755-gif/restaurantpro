@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RestaurantPro | Premium Restaurant Management</title>
@@ -475,7 +477,7 @@ footer{color:#89978f;padding:24px;font-size:12px}
   </section>
   
 <section id="menuCategoriesPanel" class="panel menu-list-panel"><div class="panel-head"><h2>Menu Items</h2><span id="manageMenuCount" style="color:var(--muted);font-size:13px"></span></div><div id="manageMenuList"></div></section>
-  <section id="menuVariationsPanel" class="menu-small-note"><strong>Variations &amp; Addons</strong><span>Item-level options are saved with each menu item. Detailed variation/addon pricing can be added in a later update.</span></section>
+  <section id="menuVariationsPanel" class="menu-small-note"><strong>Variations &amp; Addons</strong><span>Existing variation/addon controls are retained. Item-level options can be configured without changing existing POS events.</span></section>
 
 
 
@@ -980,9 +982,9 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-staff-tab]
 
 function categories(){return ["All",...new Set(menuItems.map(x=>x.category))]}
 function renderCategories(){$("categoryList").innerHTML=categories().map(c=>`<button class="category ${activeCategory===c?"active":""}" data-cat="${c}">${c}</button>`).join("");document.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{activeCategory=b.dataset.cat;renderMenu()})}
-function renderMenu(){renderCategories();const q=$("menuSearch").value.trim().toLowerCase();const items=menuItems.filter(x=>(activeCategory==="All"||x.category===activeCategory)&&x.name.toLowerCase().includes(q));$("menuCount").textContent=items.length+" items";$("menuGrid").innerHTML=items.map(x=>`<button class="menu-item" data-item="${x.id}"><small>${x.category}</small><strong>${x.name}</strong><span class="price">₹${x.price.toFixed(2)}</span><small style="display:block;margin-top:8px">+ Add to bill</small></button>`).join("")||'<div class="empty">No dishes found.</div>';document.querySelectorAll("[data-item]").forEach(b=>b.onclick=()=>addToCart(Number(b.dataset.item)))}
+function renderMenu(){renderCategories();const q=$("menuSearch").value.trim().toLowerCase();const items=menuItems.filter(x=>(activeCategory==="All"||x.category===activeCategory)&&x.name.toLowerCase().includes(q));$("menuCount").textContent=items.length+" items";$("menuGrid").innerHTML=items.map(x=>`<button class="menu-item" data-item="${x.id}"><small>${x.category}</small><strong>${x.name}</strong><span class="price">₹${x.price.toFixed(2)}</span><small style="display:block;margin-top:8px">+ Add to bill</small></button>`).join("")||'<div class="empty">No dishes found.</div>';document.querySelectorAll("[data-item]").forEach(b=>b.onclick=()=>addToCart(b.dataset.item))}
 $("menuSearch").addEventListener("input",renderMenu);
-function addToCart(id){const item=menuItems.find(x=>x.id===id);if(!item)return;const found=cart.find(x=>x.id===id);if(found)found.qty++;else cart.push({...item,qty:1});renderCart()}
+function addToCart(id){const item=menuItems.find(x=>String(x.id)===String(id));if(!item)return;const found=cart.find(x=>x.id===id);if(found)found.qty++;else cart.push({...item,qty:1});renderCart()}
 function addCustom(){const name=prompt("Item ka naam likhein:");if(!name||!name.trim())return;const priceRaw=prompt("Item ka price (₹) likhein:","0");const price=Number(priceRaw);if(!Number.isFinite(price)||price<0){alert("Valid price enter karein.");return}const id=Date.now();cart.push({id,name:name.trim(),category:"Custom",price,qty:1});renderCart()}
 $("addCustomButton").addEventListener("click",addCustom);
 
@@ -990,9 +992,10 @@ $("menuToPos").addEventListener("click",()=>{showPage("posPage");renderMenu();re
 $("menuToDash").addEventListener("click",()=>showPage("dashboard"));
 function saveMenu(){localStorage.setItem("rpMenuItems",JSON.stringify(menuItems))}
 function renderManageMenu(){
-  $("manageMenuCount").textContent=menuItems.length+" items";
-  $("manageMenuList").innerHTML=`<div style="overflow:auto"><table class="history-table"><thead><tr><th>Item Name</th><th>Category</th><th>Price</th><th>Action</th></tr></thead><tbody>${menuItems.map(x=>`<tr><td>${escapeHtml(x.name)}</td><td>${escapeHtml(x.category)}</td><td>${money(x.price)}</td><td><button class="btn danger small" data-delete-menu="${x.id}">Delete</button></td></tr>`).join("")}</tbody></table></div>`;
-  document.querySelectorAll("[data-delete-menu]").forEach(b=>b.onclick=()=>{const id=Number(b.dataset.deleteMenu);if(!confirm("Is menu item ko delete karein?"))return;const idx=menuItems.findIndex(x=>x.id===id);if(idx>=0){menuItems.splice(idx,1);cart=cart.filter(x=>x.id!==id);saveMenu();renderManageMenu();renderMenu();renderCart()}});
+  $("manageMenuCount").textContent=menuItems.length+" approved / local items";
+  $("manageMenuList").innerHTML=`<div style="overflow:auto"><table class="history-table"><thead><tr><th>Item Name</th><th>Category</th><th>Price</th><th>Barcode</th><th>Action</th></tr></thead><tbody>${menuItems.map(x=>`<tr><td>${escapeHtml(x.name)}</td><td>${escapeHtml(x.category)}</td><td>${money(x.price)}</td><td>${escapeHtml(x.barcode||'—')}</td><td><button class="btn light small" data-edit-menu="${escapeHtml(x.id)}">Edit</button> <button class="btn danger small" data-delete-menu="${escapeHtml(x.id)}">Delete</button></td></tr>`).join("")}</tbody></table></div>`;
+  document.querySelectorAll("[data-delete-menu]").forEach(b=>b.onclick=()=>{const item=menuItems.find(x=>String(x.id)===String(b.dataset.deleteMenu));if(!item||!confirm("Delete request Head Office approval ke liye bhejein?"))return;document.dispatchEvent(new CustomEvent('rp:menu-change-request',{detail:{action:'DELETE',item}}));alert('Delete request Head Office approval ke liye bhej di gayi. Approval se pehle item active rahega.');});
+  document.querySelectorAll("[data-edit-menu]").forEach(b=>b.onclick=()=>{const item=menuItems.find(x=>String(x.id)===String(b.dataset.editMenu));if(!item)return;const name=prompt('Menu item name:',item.name);if(name===null)return;const price=prompt('Selling price (₹):',item.price);if(price===null)return;const n=Number(price);if(!name.trim()||!Number.isFinite(n)||n<0){alert('Valid name aur price enter karein.');return}const updated={...item,name:name.trim(),price:n};document.dispatchEvent(new CustomEvent('rp:menu-change-request',{detail:{action:'EDIT',item:updated}}));alert('Edit request Head Office approval ke liye bhej di gayi. Approval se pehle live item change nahi hoga.');});
 }
 $("newItemCategory").addEventListener("change",()=>{$("newItemCategoryOther").classList.toggle("hidden",$("newItemCategory").value!=="__other");if($("newItemCategory").value==="__other")$("newItemCategoryOther").focus()});
 $("addMenuForm").addEventListener("submit",e=>{
@@ -1002,9 +1005,9 @@ $("addMenuForm").addEventListener("submit",e=>{
   const shortCode=$("newItemShortCode").value.trim();
   if(!name||!shortCode||!category||!Number.isFinite(price)||price<=0){$("menuFeedback").textContent="Name, Short Code, Category aur valid Price fill karein.";$("menuFeedback").classList.remove("hidden");return}
   if(menuItems.some(x=>x.name.toLowerCase()===name.toLowerCase())){$("menuFeedback").textContent="Is naam ka item pehle se menu mein hai.";$("menuFeedback").classList.remove("hidden");return}
-  const item={id:Date.now(),name,category,price,shortCode,displayName:$("newItemDisplayName").value.trim(),description:$("newItemDescription").value.trim(),dietary:$("newItemDietary").value,gstType:$("newItemGst").value,orderTypes:{delivery:$("orderDelivery").checked,pickup:$("orderPickup").checked,dineIn:$("orderDineIn").checked,online:$("orderOnline").checked},variation:$("newItemVariation").checked,addon:$("newItemAddon").checked,taxes:$("newItemTaxes").value,createRecipe:$("newItemRecipe").checked,activeAllAreas:$("newItemAllAreas").checked};
-  menuItems.push(item);saveMenu();renderManageMenu();renderMenu();
-  $("menuFeedback").textContent=name+" menu mein successfully add ho gaya.";$("menuFeedback").classList.remove("hidden");
+  const item={id:Date.now(),name,category,price,shortCode,barcode:document.getElementById('rpMenuBarcode')?.value||'',displayName:$("newItemDisplayName").value.trim(),description:$("newItemDescription").value.trim(),dietary:$("newItemDietary").value,gstType:$("newItemGst").value,orderTypes:{delivery:$("orderDelivery").checked,pickup:$("orderPickup").checked,dineIn:$("orderDineIn").checked,online:$("orderOnline").checked},variation:$("newItemVariation").checked,addon:$("newItemAddon").checked,taxes:$("newItemTaxes").value,createRecipe:$("newItemRecipe").checked,recipeMode:document.getElementById('rpMenuRecipeMode')?.value||($("newItemRecipe").checked?'Self Creatable':'Manual Creatable'),selfUnit:document.getElementById('rpMenuSelfUnit')?.value||'1 Pc',department:document.getElementById('rpMenuDepartment')?.value||'Restaurant',vendor:document.getElementById('rpMenuVendor')?.value||'',activeAllAreas:$("newItemAllAreas").checked};
+  document.dispatchEvent(new CustomEvent('rp:menu-submit-request',{detail:item}));
+  $("menuFeedback").textContent=name+" Head Office approval ke liye submit ho raha hai.";$("menuFeedback").classList.remove("hidden");
   if(mode==="exit"){showPage("dashboard");renderDashboard();return}
   e.target.reset();$("newItemDietary").value="Veg";$("newItemGst").value="Services";$("newItemAllAreas").checked=true;$("newItemCategoryOther").classList.add("hidden");$("orderDelivery").checked=$("orderPickup").checked=$("orderDineIn").checked=$("orderOnline").checked=true;
 });
@@ -1692,6 +1695,7 @@ setInterval(async function() {
     if (!Array.isArray(arr) || !arr.length) return;
     [arr[0], arr[arr.length - 1]].forEach(b => {
       if (!b || !Array.isArray(b.items) || !b.items.length) return;
+      if (String(b.billNo || '').startsWith('QR-') || b.source === 'QR' || b.channel === 'QR') return;
       const keyId = String(b.billNo || b.id || b.createdAt || '') + '_' + b.items.length + '_' + (b.total || b.grandTotal || 0);
       if (!keyId || window._rpSentBillNos[keyId]) return;
       window._rpSentBillNos[keyId] = true;
@@ -1751,10 +1755,10 @@ setInterval(async function() {
 
   async function pollAllOutletsQr() {
     try {
-      const r = await fetch('/api/orders');
+      const curOut = getCurOutlet();
+      const r = await fetch('/api/orders?outlet=' + encodeURIComponent(curOut));
       if (!r.ok) return;
       const all = await r.json();
-      const curOut = getCurOutlet();
       const pend = all.filter(o =>
         (o.source === 'QR' || o.status === 'Pending') &&
         !['Accepted','Completed','Cancelled'].includes(o.status) &&
@@ -1804,12 +1808,13 @@ setInterval(async function() {
     if (r.ok && type === 'approve') {
       const data = await r.json(); const o = data.order;
       if (o) {
-        const outKey = 'rpBills::' + (o.outlet || getCurOutlet());
-        [ 'rpBills', outKey ].forEach(k => {
-          const bills = JSON.parse(localStorage.getItem(k) || '[]');
-          bills.unshift({ billNo: 'QR-' + Date.now(), date: new Date().toISOString(), outlet: o.outlet, table: o.tableName, customerName: o.customerName, customerPhone: o.customerPhone, items: o.items, total: o.total, paymentMode: o.paymentMode || 'Cash', status: 'Paid' });
-          localStorage.setItem(k, JSON.stringify(bills));
-        });
+        const outKey = 'rpBills::outlet:' + encodeURIComponent(o.outlet || getCurOutlet());
+        const bills = JSON.parse((window.__rpRawGetItem ? window.__rpRawGetItem(outKey) : localStorage.getItem(outKey)) || '[]');
+        if (!bills.some(b => String(b.billNo || '') === String(o.billNo || ''))) {
+          bills.unshift({ id:o.billNo, billNo: o.billNo || ('QR-' + Date.now()), date: new Date().toISOString(), outlet: o.outlet, table: o.tableName, customerName: o.customerName, customerPhone: o.customerPhone, items: o.items, total: o.total, paymentMethod: o.paymentMode || 'Cash', paymentMode: o.paymentMode || 'Cash', status: 'Paid', source:'QR' });
+          if (window.__rpRawSetItem) window.__rpRawSetItem(outKey, JSON.stringify(bills)); else localStorage.setItem(outKey, JSON.stringify(bills));
+          if ((o.outlet || '') === getCurOutlet()) localStorage.setItem('rpBills', JSON.stringify(bills));
+        }
       }
       alert('? QR Order Accepted! Sent to Outlet KDS & Added to Outlet Sales.');
       location.reload();
@@ -2447,5 +2452,6 @@ document.addEventListener('click', function(e) {
   }
 }, true);
 </script>
+<script src="/menu-workflow.js"></script>
 </body>
 </html>

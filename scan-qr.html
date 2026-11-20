@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://w3.org%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2731%27 fill=%27%23b91c1c%27/%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2724.5%27 fill=%27%23ffffff%27/%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2718%27 fill=%27%23dc2626%27/%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2711.5%27 fill=%27%231d4ed8%27/%3E%3Cpolygon points=%2732,21.5 34.8,29.2 43,29.2 36.4,34 38.9,41.8 32,37 25.1,41.8 27.6,34 21,29.2 29.2,29.2%27 fill=%27%23ffffff%27/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RestaurantPro | QR & Staff Access Hub</title>
 <style>
@@ -123,7 +124,7 @@ function reqDelUser(userId, roleType, name, phone, outName) { if (!confirm('Requ
 tf.onsubmit = async e => { e.preventDefault(); await fetch('/api/tables',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({outlet:outlet.value,name:tname.value})}); tname.value=''; loadAll(); };
 async function editT(id, old){ const name=prompt('New Table Name:', old); if(name){ await fetch('/api/tables/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({name})}); loadAll(); } }
 async function delT(id){ if(confirm('Delete Table?')){ await fetch('/api/tables/'+id,{method:'DELETE'}); loadAll(); } }
-async function syncMenu() { let items = JSON.parse(localStorage.getItem('rpMenuItems') || '[]'); if (!items.length) items = [{id:1,name:'Masala Dosa',category:'South Indian',price:120},{id:2,name:'Paneer Butter Masala',category:'North Indian',price:240},{id:3,name:'Veg Burger',category:'Fast Food',price:99}]; const d = await (await fetch('/api/menu/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({outlet:outlet.value,items})})).json(); m2.textContent = '? ' + d.count + ' items synced!'; }
+async function syncMenu() { let items = JSON.parse(localStorage.getItem('rpMenuItems') || '[]'); if (!items.length) items = [{id:1,name:'Masala Dosa',category:'South Indian',price:120},{id:2,name:'Paneer Butter Masala',category:'North Indian',price:240},{id:3,name:'Veg Burger',category:'Fast Food',price:99}]; const d = await (await fetch('/api/menu/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({outlet:outlet.value,items})})).json(); m2.textContent = '? ' + (d.staged||0) + ' menu changes sent for HO approval'; }
 function exportUsersExcel() { const rows = [['Outlet','Role','Name','Mobile','Pass/PIN','Status']]; document.querySelectorAll('#allUsersBody tr').forEach(tr => { const cols = Array.from(tr.querySelectorAll('td')).slice(0,6).map(td => '"' + td.innerText.replace(/"/g,'') + '"'); if (cols.length) rows.push(cols); }); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.map(r=>r.join(',')).join('\n')], {type:'text/csv'})); a.download = 'RestaurantPro_Users_List.csv'; a.click(); }
 loadAll();
 </script>

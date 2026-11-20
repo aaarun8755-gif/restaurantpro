@@ -55,6 +55,13 @@
       "type": "Dine In",
       "active": true,
       "createdAt": "2026-11-11T19:39:09.369Z"
+    },
+    {
+      "id": "37fdca27-9360-443c-811b-282771ed658f",
+      "name": "1",
+      "outlet": "Main Outlet",
+      "type": "Dine In",
+      "active": true
     }
   ],
   "menu": [
@@ -165,9 +172,276 @@
       "outlet": "Head Office",
       "activeAllAreas": true,
       "available": true
+    },
+    {
+      "id": "1795194049098",
+      "name": "arun croun",
+      "category": "Fast Food",
+      "price": 100000,
+      "shortCode": "1",
+      "barcode": "890ARUNCRO1",
+      "displayName": "arun croun",
+      "description": "",
+      "dietary": "Veg",
+      "gstType": "Goods",
+      "orderTypes": {
+        "delivery": true,
+        "pickup": true,
+        "dineIn": true,
+        "online": true
+      },
+      "variation": false,
+      "addon": false,
+      "taxes": "GST 5%",
+      "createRecipe": true,
+      "recipeMode": "Self Creatable",
+      "selfUnit": "1 Pc",
+      "department": "Restaurant",
+      "vendor": "",
+      "activeAllAreas": false,
+      "approvedAt": "2026-11-20T17:01:19.463Z",
+      "outlets": [
+        "RestaurantPro - Noida",
+        "RestaurantPro - Rajasthan",
+        "RestaurantPro - Telangana",
+        "RestaurantPro - Uttarakhand"
+      ],
+      "outlet": "RestaurantPro - Noida",
+      "available": true
+    },
+    {
+      "id": "1795194049098",
+      "name": "arun croun",
+      "category": "Fast Food",
+      "price": 100000,
+      "shortCode": "1",
+      "barcode": "890ARUNCRO1",
+      "displayName": "arun croun",
+      "description": "",
+      "dietary": "Veg",
+      "gstType": "Goods",
+      "orderTypes": {
+        "delivery": true,
+        "pickup": true,
+        "dineIn": true,
+        "online": true
+      },
+      "variation": false,
+      "addon": false,
+      "taxes": "GST 5%",
+      "createRecipe": true,
+      "recipeMode": "Self Creatable",
+      "selfUnit": "1 Pc",
+      "department": "Restaurant",
+      "vendor": "",
+      "activeAllAreas": false,
+      "approvedAt": "2026-11-20T17:01:19.463Z",
+      "outlets": [
+        "RestaurantPro - Noida",
+        "RestaurantPro - Rajasthan",
+        "RestaurantPro - Telangana",
+        "RestaurantPro - Uttarakhand"
+      ],
+      "outlet": "RestaurantPro - Rajasthan",
+      "available": true
+    },
+    {
+      "id": "1795194049098",
+      "name": "arun croun",
+      "category": "Fast Food",
+      "price": 100000,
+      "shortCode": "1",
+      "barcode": "890ARUNCRO1",
+      "displayName": "arun croun",
+      "description": "",
+      "dietary": "Veg",
+      "gstType": "Goods",
+      "orderTypes": {
+        "delivery": true,
+        "pickup": true,
+        "dineIn": true,
+        "online": true
+      },
+      "variation": false,
+      "addon": false,
+      "taxes": "GST 5%",
+      "createRecipe": true,
+      "recipeMode": "Self Creatable",
+      "selfUnit": "1 Pc",
+      "department": "Restaurant",
+      "vendor": "",
+      "activeAllAreas": false,
+      "approvedAt": "2026-11-20T17:01:19.463Z",
+      "outlets": [
+        "RestaurantPro - Noida",
+        "RestaurantPro - Rajasthan",
+        "RestaurantPro - Telangana",
+        "RestaurantPro - Uttarakhand"
+      ],
+      "outlet": "RestaurantPro - Telangana",
+      "available": true
+    },
+    {
+      "id": "1795194049098",
+      "name": "arun croun",
+      "category": "Fast Food",
+      "price": 100000,
+      "shortCode": "1",
+      "barcode": "890ARUNCRO1",
+      "displayName": "arun croun",
+      "description": "",
+      "dietary": "Veg",
+      "gstType": "Goods",
+      "orderTypes": {
+        "delivery": true,
+        "pickup": true,
+        "dineIn": true,
+        "online": true
+      },
+      "variation": false,
+      "addon": false,
+      "taxes": "GST 5%",
+      "createRecipe": true,
+      "recipeMode": "Self Creatable",
+      "selfUnit": "1 Pc",
+      "department": "Restaurant",
+      "vendor": "",
+      "activeAllAreas": false,
+      "approvedAt": "2026-11-20T17:01:19.463Z",
+      "outlets": [
+        "RestaurantPro - Noida",
+        "RestaurantPro - Rajasthan",
+        "RestaurantPro - Telangana",
+        "RestaurantPro - Uttarakhand"
+      ],
+      "outlet": "RestaurantPro - Uttarakhand",
+      "available": true
     }
   ],
   "orders": [
+    {
+      "id": "fc1cca37-0a1e-419a-89e2-15905ca4ec34",
+      "externalBillId": "",
+      "orderNo": "ORD-4279784",
+      "source": "POS",
+      "waiterName": "POS ()",
+      "type": "Dine In",
+      "tableId": "",
+      "tableName": "—",
+      "outlet": "RestaurantPro - Telangana",
+      "items": [
+        {
+          "itemId": "1795194049098",
+          "name": "arun croun",
+          "qty": 1,
+          "price": 100000
+        }
+      ],
+      "subtotal": 100000,
+      "gst": 5000,
+      "total": 105000,
+      "paymentMethod": "Cash",
+      "paymentStatus": "Billed",
+      "status": "Accepted",
+      "paymentMode": "Cash",
+      "customerName": "arun kaysap",
+      "customerPhone": "",
+      "createdAt": "2026-11-20T17:04:39.784Z",
+      "customerNote": "",
+      "kotNo": "KOT-279784",
+      "billNo": "RP-94279784",
+      "stockConsumption": [
+        {
+          "item": "arun croun",
+          "qty": 1,
+          "unit": "1 Pc",
+          "at": "2026-11-20T17:04:39.784Z"
+        }
+      ],
+      "stockConsumedAt": "2026-11-20T17:04:39.784Z"
+    },
+    {
+      "id": "9b4a2a94-2cbf-4525-a90a-666976b69d21",
+      "externalBillId": "",
+      "orderNo": "ORD-4264383",
+      "source": "POS",
+      "waiterName": "POS ()",
+      "type": "Dine In",
+      "tableId": "",
+      "tableName": "—",
+      "outlet": "RestaurantPro - Telangana",
+      "items": [
+        {
+          "itemId": "1795194049098",
+          "name": "arun croun",
+          "qty": 5,
+          "price": 100000
+        }
+      ],
+      "subtotal": 500000,
+      "gst": 25000,
+      "total": 525000,
+      "paymentMethod": "Cash",
+      "paymentStatus": "Billed",
+      "status": "Completed",
+      "paymentMode": "Cash",
+      "customerName": "Walk-in",
+      "customerPhone": "",
+      "createdAt": "2026-11-20T17:04:24.383Z",
+      "customerNote": "",
+      "kotNo": "KOT-264383",
+      "billNo": "RP-94264383",
+      "stockConsumption": [
+        {
+          "item": "arun croun",
+          "qty": 5,
+          "unit": "1 Pc",
+          "at": "2026-11-20T17:04:24.383Z"
+        }
+      ],
+      "stockConsumedAt": "2026-11-20T17:04:24.383Z"
+    },
+    {
+      "id": "97cf3b96-1ea6-4332-b2e9-4e15cdd45266",
+      "externalBillId": "",
+      "orderNo": "ORD-4144001",
+      "source": "POS",
+      "waiterName": "POS ()",
+      "type": "Dine In",
+      "tableId": "",
+      "tableName": "—",
+      "outlet": "RestaurantPro - Telangana",
+      "items": [
+        {
+          "itemId": "1795194049098",
+          "name": "arun croun",
+          "qty": 1,
+          "price": 100000
+        }
+      ],
+      "subtotal": 100000,
+      "gst": 5000,
+      "total": 105000,
+      "paymentMethod": "Cash",
+      "paymentStatus": "Billed",
+      "status": "Completed",
+      "paymentMode": "Cash",
+      "customerName": "Walk-in",
+      "customerPhone": "",
+      "createdAt": "2026-11-20T17:02:24.001Z",
+      "customerNote": "",
+      "kotNo": "KOT-144001",
+      "billNo": "RP-94144001",
+      "stockConsumption": [
+        {
+          "item": "arun croun",
+          "qty": 1,
+          "unit": "1 Pc",
+          "at": "2026-11-20T17:02:24.001Z"
+        }
+      ],
+      "stockConsumedAt": "2026-11-20T17:02:24.001Z"
+    },
     {
       "id": "b95f21e4-4616-4b28-8c3b-d0be4afcfe5a",
       "orderNo": "QR-7895550",
@@ -378,6 +652,72 @@
   ],
   "kot": [
     {
+      "id": "1999b945-e67b-4ed2-8739-b9b25034e00d",
+      "kotNo": "KOT-279784",
+      "billNo": "RP-94279784",
+      "orderId": "fc1cca37-0a1e-419a-89e2-15905ca4ec34",
+      "orderNo": "ORD-4279784",
+      "tableName": "—",
+      "orderType": "Dine In (POS)",
+      "outlet": "RestaurantPro - Telangana",
+      "items": [
+        {
+          "itemId": "1795194049098",
+          "name": "arun croun",
+          "qty": 1,
+          "price": 100000
+        }
+      ],
+      "customerNote": "",
+      "total": 105000,
+      "status": "New",
+      "createdAt": "2026-11-20T17:04:39.784Z"
+    },
+    {
+      "id": "80939b30-5077-4e74-97a9-f3e0fb20ff6f",
+      "kotNo": "KOT-264383",
+      "billNo": "RP-94264383",
+      "orderId": "9b4a2a94-2cbf-4525-a90a-666976b69d21",
+      "orderNo": "ORD-4264383",
+      "tableName": "—",
+      "orderType": "Dine In (POS)",
+      "outlet": "RestaurantPro - Telangana",
+      "items": [
+        {
+          "itemId": "1795194049098",
+          "name": "arun croun",
+          "qty": 5,
+          "price": 100000
+        }
+      ],
+      "customerNote": "",
+      "total": 525000,
+      "status": "Completed",
+      "createdAt": "2026-11-20T17:04:24.383Z"
+    },
+    {
+      "id": "e3f80ec3-6402-4343-aa6e-9e1aab05d0e5",
+      "kotNo": "KOT-144001",
+      "billNo": "RP-94144001",
+      "orderId": "97cf3b96-1ea6-4332-b2e9-4e15cdd45266",
+      "orderNo": "ORD-4144001",
+      "tableName": "—",
+      "orderType": "Dine In (POS)",
+      "outlet": "RestaurantPro - Telangana",
+      "items": [
+        {
+          "itemId": "1795194049098",
+          "name": "arun croun",
+          "qty": 1,
+          "price": 100000
+        }
+      ],
+      "customerNote": "",
+      "total": 105000,
+      "status": "Completed",
+      "createdAt": "2026-11-20T17:02:24.001Z"
+    },
+    {
       "id": "479df4e9-eb31-42a7-8866-bc2241cc763b",
       "kotNo": "KOT-930561",
       "billNo": "RP-87930561",
@@ -563,6 +903,102 @@
       "password": "1234",
       "outlet": "RestaurantPro - Arunachal Pradesh"
     }
+  ],
+  "menuApprovalRequests": [
+    {
+      "reqId": "9d4d9565-4ed2-4327-8bb3-ed85ebf3a388",
+      "action": "ADD",
+      "item": {
+        "id": "1795194049098",
+        "name": "arun croun",
+        "category": "Fast Food",
+        "price": 100000,
+        "shortCode": "1",
+        "barcode": "890ARUNCRO1",
+        "displayName": "arun croun",
+        "description": "",
+        "dietary": "Veg",
+        "gstType": "Goods",
+        "orderTypes": {
+          "delivery": true,
+          "pickup": true,
+          "dineIn": true,
+          "online": true
+        },
+        "variation": false,
+        "addon": false,
+        "taxes": "GST 5%",
+        "createRecipe": true,
+        "recipeMode": "Self Creatable",
+        "selfUnit": "1 Pc",
+        "department": "Restaurant",
+        "vendor": "",
+        "activeAllAreas": true
+      },
+      "requestedBy": "Head Office",
+      "requestedAt": "2026-11-20T17:00:49.118Z",
+      "status": "Approved",
+      "approvedAt": "2026-11-20T17:01:19.463Z",
+      "approvedOutlets": [
+        "RestaurantPro - Noida",
+        "RestaurantPro - Rajasthan",
+        "RestaurantPro - Telangana",
+        "RestaurantPro - Uttarakhand"
+      ]
+    }
+  ],
+  "menuDeletions": [],
+  "inventory": [
+    {
+      "id": "3467c013-ad2d-4a16-a718-ef73f3b103f6",
+      "name": "arun croun",
+      "outlet": "RestaurantPro - Noida",
+      "unit": "1 Pc",
+      "stock": 0,
+      "source": "Menu Self Recipe"
+    },
+    {
+      "id": "893046fc-1208-4ec3-8b79-602b854d7685",
+      "name": "arun croun",
+      "outlet": "RestaurantPro - Rajasthan",
+      "unit": "1 Pc",
+      "stock": 0,
+      "source": "Menu Self Recipe"
+    },
+    {
+      "id": "2f79934d-cf21-4a02-8371-0d5bc94aafd1",
+      "name": "arun croun",
+      "outlet": "RestaurantPro - Telangana",
+      "unit": "1 Pc",
+      "stock": 0,
+      "source": "Menu Self Recipe"
+    },
+    {
+      "id": "b35d151f-a8fb-47fe-9dfb-c20be0d78555",
+      "name": "arun croun",
+      "outlet": "RestaurantPro - Uttarakhand",
+      "unit": "1 Pc",
+      "stock": 0,
+      "source": "Menu Self Recipe"
+    }
+  ],
+  "generatedBarcodes": [
+    {
+      "id": "b14bdc9a-e7c5-4738-aa75-3203da753f33",
+      "name": "arun croun",
+      "shortCode": "1",
+      "barcode": "890ARUNCRO1",
+      "price": 100000,
+      "createdAt": "2026-11-20T17:01:19.463Z"
+    }
+  ],
+  "menuCategories": [
+    "Continental",
+    "South Indian",
+    "North Indian",
+    "Chinese",
+    "Sweets",
+    "Fast Food"
   ],
   "sops": [
     {
@@ -1449,6 +1885,70 @@
           "ans": 1
         }
       ]
+    },
+    {
+      "id": "5fd67ee3-4c5e-4bf0-98de-11db8651c7f7",
+      "menuItemId": "1795194049098",
+      "menuItemName": "arun croun",
+      "outlet": "RestaurantPro - Noida",
+      "yieldQty": 1,
+      "yieldUnit": "1 Pc",
+      "ingredients": [
+        {
+          "item": "arun croun",
+          "qty": 1,
+          "unit": "1 Pc"
+        }
+      ],
+      "mode": "Self Creatable"
+    },
+    {
+      "id": "5c2ced86-c6da-446c-a6d9-196f54091e6a",
+      "menuItemId": "1795194049098",
+      "menuItemName": "arun croun",
+      "outlet": "RestaurantPro - Rajasthan",
+      "yieldQty": 1,
+      "yieldUnit": "1 Pc",
+      "ingredients": [
+        {
+          "item": "arun croun",
+          "qty": 1,
+          "unit": "1 Pc"
+        }
+      ],
+      "mode": "Self Creatable"
+    },
+    {
+      "id": "3117c1fb-7195-4845-97f6-53a93fe3eacb",
+      "menuItemId": "1795194049098",
+      "menuItemName": "arun croun",
+      "outlet": "RestaurantPro - Telangana",
+      "yieldQty": 1,
+      "yieldUnit": "1 Pc",
+      "ingredients": [
+        {
+          "item": "arun croun",
+          "qty": 1,
+          "unit": "1 Pc"
+        }
+      ],
+      "mode": "Self Creatable"
+    },
+    {
+      "id": "6306b02d-3b9a-4be6-a881-8f5a95f6d132",
+      "menuItemId": "1795194049098",
+      "menuItemName": "arun croun",
+      "outlet": "RestaurantPro - Uttarakhand",
+      "yieldQty": 1,
+      "yieldUnit": "1 Pc",
+      "ingredients": [
+        {
+          "item": "arun croun",
+          "qty": 1,
+          "unit": "1 Pc"
+        }
+      ],
+      "mode": "Self Creatable"
     }
   ],
   "trainingStaff": [

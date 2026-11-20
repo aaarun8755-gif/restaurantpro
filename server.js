@@ -9,10 +9,11 @@ const QRCode = require('qrcode');
 
 const app = express();
 app.get(['/favicon.ico', '/favicon.svg'], (req, res) => {
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 'no-store, must-revalidate');
-  return res.status(200).send('<svg xmlns="http://w3.org" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="#b91c1c"/><circle cx="32" cy="32" r="24.5" fill="#ffffff"/><circle cx="32" cy="32" r="18" fill="#dc2626"/><circle cx="32" cy="32" r="11.5" fill="#1d4ed8"/><polygon points="32,21.5 34.8,29.2 43,29.2 36.4,34 38.9,41.8 32,37 25.1,41.8 27.6,34 21,29.2 29.2,29.2" fill="#ffffff"/></svg>');
+  res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.sendFile(path.join(__dirname, 'favicon.svg'));
 });
+
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: true } });
@@ -22,22 +23,19 @@ const DB_FILE = path.join(__dirname, 'data.json');
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(__dirname));
 
-let db = { tables: [], menu: [], orders: [], kot: [], staffUsers: [], posUsers: [] };
+let db = { tables: [], menu: [], orders: [], kot: [], staffUsers: [], posUsers: [], menuApprovalRequests: [], menuDeletions: [], inventory: [], generatedBarcodes: [], menuCategories: ['Continental','South Indian','North Indian','Chinese','Sweets'] };
 try {
   if (fs.existsSync(DB_FILE)) db = { ...db, ...JSON.parse(fs.readFileSync(DB_FILE, 'utf8')) };
   if (!Array.isArray(db.staffUsers)) db.staffUsers = [];
   if (!Array.isArray(db.posUsers)) db.posUsers = [];
+  for (const k of ['menuApprovalRequests','menuDeletions','inventory','generatedBarcodes']) if (!Array.isArray(db[k])) db[k] = [];
+  if (!Array.isArray(db.menuCategories)) db.menuCategories = ['Continental','South Indian','North Indian','Chinese','Sweets'];
 } catch (_) {}
 
 const persist = () => fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
 const byOutlet = (arr, out) => (out && out !== 'Head Office') ? arr.filter(x => x.outlet === out) : arr;
 
 
-app.get(['/favicon.ico', '/favicon.svg'], (req, res) => {
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.setHeader('Cache-Control', 'no-store');
-  res.send('<svg xmlns="http://w3.org" viewBox="0 0 64 64"><circle cx="32" cy="32" r="31" fill="#b91c1c"/><circle cx="32" cy="32" r="24.5" fill="#ffffff"/><circle cx="32" cy="32" r="18" fill="#dc2626"/><circle cx="32" cy="32" r="11.5" fill="#1d4ed8"/><polygon points="32,21.5 34.8,29.2 43,29.2 36.4,34 38.9,41.8 32,37 25.1,41.8 27.6,34 21,29.2 29.2,29.2" fill="#ffffff"/></svg>');
-});
 
 app.get('/api/network-info', (req, res) => { const proto = req.headers['x-forwarded-proto'] || req.protocol; const host = req.headers['x-forwarded-host'] || req.get('host'); if (host && !host.includes('127.0.0.1') && !host.includes('localhost')) return res.json({ publicUrl: proto + '://' + host, localIp: host, port: '' });
   let tunnelUrl = '', ip = '127.0.0.1';
@@ -115,40 +113,64 @@ app.patch('/api/tables/:id', (req, res) => {
   persist(); io.emit('tables:changed', t); res.json(t);
 });
 
-app.get('/api/menu', (req, res) => { const list = byOutlet(db.menu, String(req.query.outlet || '').trim()); if (!list.length && db.menu.length) return res.json(db.menu); if (!db.menu.length) return res.json([{id:'m1',name:'Masala Dosa',category:'South Indian',price:120,available:true},{id:'m2',name:'Idli Sambar (2 Pcs)',category:'South Indian',price:80,available:true},{id:'m3',name:'Paneer Butter Masala',category:'North Indian',price:240,available:true},{id:'m4',name:'Veg Biryani',category:'Rice',price:180,available:true},{id:'m5',name:'Cold Coffee',category:'Beverages',price:90,available:true}]);
+app.get('/api/menu', (req, res) => {
   const out = String(req.query.outlet || '').trim();
-  res.json(out && out !== 'Head Office' ? db.menu.filter(m => !m.outlet || m.outlet === out || m.activeAllAreas) : db.menu);
+  const list = out && out !== 'Head Office' ? db.menu.filter(m => m.outlet === out || (m.outlets || []).includes(out)) : db.menu;
+  res.json(list.filter(m => m.available !== false));
 });
 app.post('/api/menu/sync', (req, res) => {
-  const outlet = String(req.body.outlet || 'Main Outlet').trim();
-  const inc = (req.body.items || []).map((x, i) => ({ id: String(x.id ?? `${outlet}-${i+1}`), name: String(x.name || x.itemName || '').trim(), category: String(x.category || 'Other'), price: Number(x.price ?? x.sellingPrice ?? 0), outlet, activeAllAreas: true, available: true })).filter(x => x.name);
-  db.menu = db.menu.filter(m => m.outlet !== outlet).concat(inc); persist(); io.emit('menu:changed', { outlet }); res.json({ ok: true, count: inc.length });
+  const outlet=String(req.body.outlet||'').trim(); if(!outlet) return res.status(400).json({error:'Outlet required'});
+  const items=Array.isArray(req.body.items)?req.body.items:[]; let staged=0;
+  for(const raw of items){ const name=String(raw.name||raw.itemName||'').trim(); if(!name) continue; const id=String(raw.id||crypto.randomUUID()); const existing=db.menu.find(m=>String(m.id)===id&&m.outlet===outlet); const action=existing?'EDIT':'ADD';
+    if(existing && Number(existing.price||0)===Number(raw.price||0) && existing.name===name && existing.category===String(raw.category||'Other')) continue;
+    db.menuApprovalRequests.unshift({reqId:crypto.randomUUID(),action,item:{...raw,id,name,price:Number(raw.price||0)},requestedBy:outlet,requestedAt:new Date().toISOString(),status:'Pending'}); staged++;
+  }
+  persist(); res.json({ok:true,count:items.length,staged,message:'Menu changes sent to Head Office approval queue'});
 });
 
-app.get('/api/orders', (req, res) => res.json(byOutlet(db.orders, String(req.query.outlet || '').trim())));
+app.get('/api/orders', (req, res) => { const outlet=String(req.query.outlet||'').trim(); if(!outlet) return res.status(400).json({error:'Outlet context required'}); res.json(byOutlet(db.orders,outlet)); });
 app.post('/api/orders', (req, res) => {
   const b = req.body || {};
-  const isDirect = ['Waiter', 'Captain', 'Manager', 'POS', 'QR', 'Web'].includes(b.source);
+  const outletName = String(b.outlet || 'Main Outlet').trim();
+  const externalBillId = String(b.billNo || b.id || '').trim();
+  if (b.source === 'POS' && externalBillId) { const prior=db.orders.find(x=>x.source==='POS'&&x.outlet===outletName&&x.externalBillId===externalBillId); if(prior) return res.status(200).json({ ...prior, duplicate:true }); }
+  const isDirect = ['Waiter', 'Captain', 'Manager', 'POS', 'Web'].includes(b.source);
   const table = b.tableId ? db.tables.find(t => t.id === b.tableId) : null;
-  if (!isDirect && !table) return res.status(400).json({ error: 'Table inactive' });
+  if (!isDirect && (!table || table.active === false || (b.outlet && table.outlet !== String(b.outlet).trim()))) return res.status(400).json({ error: 'Table inactive or outlet mismatch' });
   const items = (b.items || []).map(i => ({ itemId: String(i.itemId), name: String(i.name), qty: Math.max(1, Number(i.qty) || 1), price: Number(i.price) || 0 }));
   if (!items.length) return res.status(400).json({ error: 'Empty cart' });
   const subtotal = items.reduce((s, i) => s + i.qty * i.price, 0);
   const gst = Number((subtotal * 0.05).toFixed(2));
   const total = Number((subtotal + gst).toFixed(2));
   const order = {
-    id: crypto.randomUUID(), orderNo: (isDirect ? 'ORD-' : 'QR-') + String(Date.now()).slice(-7),
+    id: crypto.randomUUID(), externalBillId, orderNo: (isDirect ? 'ORD-' : 'QR-') + String(Date.now()).slice(-7),
     source: isDirect ? b.source : 'QR', waiterName: isDirect ? `${b.source} (${b.waiterPhone || ''})` : '',
     type: b.orderType || (table ? table.type : 'Dine In'), tableId: table ? table.id : '',
     tableName: String(b.tableName || (table ? table.name : 'Counter')), outlet: String(b.outlet || (table ? table.outlet : 'Main Outlet')),
     items, subtotal, gst, total, paymentMethod: b.paymentMethod || 'Cash',
     paymentStatus: isDirect ? 'Billed' : 'Pending', status: isDirect ? 'Accepted' : 'Pending Approval',
+    paymentMode: String(b.paymentMode || b.paymentMethod || 'Cash'), customerName: String(b.customerName || ''), customerPhone: String(b.customerPhone || ''),
     createdAt: new Date().toISOString(), customerNote: String(b.customerNote || '')
   };
   if (isDirect) {
     order.kotNo = 'KOT-' + String(Date.now()).slice(-6); order.billNo = 'RP-' + String(Date.now()).slice(-8);
     const tkt = { id: crypto.randomUUID(), kotNo: order.kotNo, billNo: order.billNo, orderId: order.id, orderNo: order.orderNo, tableName: order.tableName, orderType: `${order.type} (${order.source})`, outlet: order.outlet, items: order.items, customerNote: order.customerNote, total: order.total, status: 'New', createdAt: order.createdAt };
     db.kot.unshift(tkt); io.emit('kot:changed', tkt);
+  }
+  if (b.source === 'POS' && Array.isArray(db.recipes) && Array.isArray(db.inventory)) {
+    const ledger=[];
+    for (const sold of order.items) {
+      const recipe=db.recipes.find(r=>r.outlet===order.outlet && (String(r.menuItemId)===String(sold.itemId) || String(r.menuItemName||r.name||'').toLowerCase()===sold.name.toLowerCase()));
+      if (!recipe || !Array.isArray(recipe.ingredients)) continue;
+      for (const ing of recipe.ingredients) {
+        const stock=db.inventory.find(x=>x.outlet===order.outlet && String(x.name).toLowerCase()===String(ing.item||ing.name||'').toLowerCase());
+        if (!stock) continue;
+        const used=Math.max(0,Number(ing.qty)||0)*sold.qty;
+        stock.stock=Math.max(0,Number(stock.stock||0)-used);
+        ledger.push({item:stock.name,qty:used,unit:stock.unit||ing.unit||'',at:new Date().toISOString()});
+      }
+    }
+    if (ledger.length) { order.stockConsumption=ledger; order.stockConsumedAt=new Date().toISOString(); }
   }
   db.orders.unshift(order); persist(); io.emit('orders:changed', order);
   if (!isDirect) io.emit('orders:new_qr', order);
@@ -157,6 +179,7 @@ app.post('/api/orders', (req, res) => {
 
 app.patch('/api/orders/:id', (req, res) => {
   const o = db.orders.find(x => x.id === req.params.id); if (!o) return res.status(404).end();
+  if (o.source === 'QR' && o.status === 'Pending Approval' && String(req.body.status || '') === 'Accepted') return res.status(403).json({ error: 'QR orders must be accepted through outlet approval' });
   o.status = String(req.body.status || o.status);
   if (o.status === 'Accepted' && !o.kotNo) {
     o.kotNo = 'KOT-' + String(Date.now()).slice(-6); o.billNo = 'RP-' + String(Date.now()).slice(-8);
@@ -169,29 +192,33 @@ app.patch('/api/orders/:id', (req, res) => {
 });
 
 
-  app.post('/api/orders/:id/approve-qr', (req, res) => {
-    const o = db.orders.find(x => x.id === req.params.id);
-    if (!o) return res.status(404).json({ error: 'Order not found' });
-    o.status = 'Accepted';
-    const kotItem = { id: 'kot-' + Date.now(), orderId: o.id, outlet: o.outlet, tableName: o.tableName || 'QR Table', items: o.items, customerNote: o.customerNote || '', status: 'New', createdAt: new Date().toISOString() };
-    db.kot.unshift(kotItem);
-    persist();
-    io.emit('orders:changed', o);
-    io.emit('kot:changed', kotItem);
-    res.json({ ok: true, order: o });
-  });
-  
+app.post('/api/orders/:id/approve-qr', (req, res) => {
+  const o = db.orders.find(x => x.id === req.params.id);
+  if (!o) return res.status(404).json({ error: 'Order not found' });
+  if (o.source !== 'QR') return res.status(400).json({ error: 'Only QR orders can be approved here' });
+  if (o.status !== 'Pending Approval') return res.status(409).json({ error: 'Order is no longer pending', status: o.status });
+  o.status = 'Accepted'; o.approvedAt = new Date().toISOString();
+  if (!o.kotNo) {
+    o.kotNo = 'KOT-' + String(Date.now()).slice(-6);
+    o.billNo = 'RP-' + String(Date.now()).slice(-8);
+    const kotItem = { id: crypto.randomUUID(), kotNo: o.kotNo, billNo: o.billNo, orderId: o.id, orderNo: o.orderNo, outlet: o.outlet, tableName: o.tableName || 'QR Table', orderType: o.type, items: o.items, customerNote: o.customerNote || '', total: o.total, status: 'New', createdAt: new Date().toISOString() };
+    db.kot.unshift(kotItem); io.emit('kot:changed', kotItem);
+  }
+  persist(); io.emit('orders:changed', o);
+  res.json({ ok: true, order: o });
+});
 
   app.post('/api/orders/:id/reject-qr', (req, res) => {
     const o = db.orders.find(x => x.id === req.params.id);
     if (!o) return res.status(404).json({ error: 'Order not found' });
-    o.status = 'Cancelled';
+    if (o.source !== 'QR' || o.status !== 'Pending Approval') return res.status(409).json({ error: 'Only pending QR orders can be rejected' });
+    o.status = 'Cancelled'; o.rejectedAt = new Date().toISOString();
     persist();
     io.emit('orders:changed', o);
     res.json({ ok: true });
   });
   
-app.get('/api/kot', (req, res) => res.json(byOutlet(db.kot, String(req.query.outlet || '').trim())));
+app.get('/api/kot', (req, res) => { const outlet=String(req.query.outlet||'').trim(); if(!outlet) return res.status(400).json({error:'Outlet context required'}); res.json(byOutlet(db.kot,outlet)); });
 app.patch('/api/kot/:id', (req, res) => {
   const k = db.kot.find(x => x.id === req.params.id); if (!k) return res.status(404).end();
   k.status = String(req.body.status || 'New');
@@ -199,7 +226,22 @@ app.patch('/api/kot/:id', (req, res) => {
   persist(); io.emit('kot:changed', k); if (o) io.emit('orders:changed', o); res.json(k);
 });
 
-app.get('*', (_req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+// Menu governance APIs: outlet changes are staged until Head Office approval.
+const RP_OUTLETS = ['Main Outlet','RestaurantPro - Andhra Pradesh','RestaurantPro - Arunachal Pradesh','RestaurantPro - Assam','RestaurantPro - Bihar','RestaurantPro - Chhattisgarh','RestaurantPro - Goa','RestaurantPro - Gujarat','RestaurantPro - Haryana','RestaurantPro - Himachal Pradesh','RestaurantPro - Jharkhand','RestaurantPro - Karnataka','RestaurantPro - Kerala','RestaurantPro - Madhya Pradesh','RestaurantPro - Maharashtra','RestaurantPro - Manipur','RestaurantPro - Meghalaya','RestaurantPro - Mizoram','RestaurantPro - Nagaland','RestaurantPro - Noida','RestaurantPro - Odisha','RestaurantPro - Punjab','RestaurantPro - Rajasthan','RestaurantPro - Sikkim','RestaurantPro - Tamil Nadu','RestaurantPro - Telangana','RestaurantPro - Tripura','RestaurantPro - Uttar Pradesh','RestaurantPro - Uttarakhand','RestaurantPro - West Bengal','RestaurantPro - Delhi'];
+app.get('/api/menu/categories', (_req,res) => res.json(db.menuCategories));
+app.get('/api/menu/barcodes', (_req,res) => res.json(db.generatedBarcodes));
+app.post('/api/menu/categories', (req,res) => { const name=String(req.body.name||'').trim(); if(!name) return res.status(400).json({error:'Category required'}); if(!db.menuCategories.some(x=>x.toLowerCase()===name.toLowerCase())) db.menuCategories.push(name); persist(); res.json(db.menuCategories); });
+app.get('/api/menu/approval-requests', (req,res) => { const outlet=String(req.query.outlet||'').trim(); res.json(db.menuApprovalRequests.filter(r=>outlet==='Head Office' || r.requestedBy===outlet || (r.approvedOutlets||[]).includes(outlet))); });
+app.get('/api/menu/deletions', (req,res) => { const outlet=String(req.query.outlet||'').trim(); res.json(db.menuDeletions.filter(x=>x.outlet===outlet)); });
+app.post('/api/menu/approval-requests', (req,res) => { const b=req.body||{}, outlet=String(b.requestedBy||'').trim(), action=String(b.action||'ADD').toUpperCase(); if(!outlet || !['ADD','EDIT','DELETE'].includes(action) || !b.item) return res.status(400).json({error:'Outlet, action and item are required'}); const item={...b.item,id:String(b.item.id||crypto.randomUUID()),name:String(b.item.name||'').trim(),price:Number(b.item.price||0)}; if(!item.name || !Number.isFinite(item.price) || item.price<0) return res.status(400).json({error:'Valid item name and price required'}); const row={reqId:crypto.randomUUID(),action,item,requestedBy:outlet,requestedAt:new Date().toISOString(),status:'Pending'}; db.menuApprovalRequests.unshift(row); persist(); io.emit('menu:approval:new',row); res.status(201).json(row); });
+app.post('/api/menu/approval-requests/:id/approve', (req,res) => { const r=db.menuApprovalRequests.find(x=>x.reqId===req.params.id); if(!r) return res.status(404).json({error:'Request not found'}); if(r.status!=='Pending') return res.status(409).json({error:'Request already processed'}); const outlets=Array.isArray(req.body.outlets)?req.body.outlets.filter(x=>RP_OUTLETS.includes(x)):[]; if(!outlets.length) return res.status(400).json({error:'Select at least one outlet'}); const item={...r.item,approvedAt:new Date().toISOString(),outlets}; if(r.action==='DELETE'){ for(const outlet of outlets){db.menu=db.menu.filter(m=>!(String(m.id)===String(item.id)&&m.outlet===outlet));db.menuDeletions.unshift({id:String(item.id),outlet,at:new Date().toISOString(),requestId:r.reqId});} }
+else { for(const outlet of outlets){ const row={...item,outlet,available:true,activeAllAreas:false}; const ix=db.menu.findIndex(m=>String(m.id)===String(item.id)&&m.outlet===outlet); if(ix>=0) db.menu[ix]=row; else db.menu.push(row); if(item.recipeMode==='Self Creatable' || item.selfCreate){ const unit=String(item.selfUnit||'1 Pc'); const invName=item.name; let stock=db.inventory.find(x=>x.outlet===outlet&&x.name.toLowerCase()===invName.toLowerCase()); if(!stock){ stock={id:crypto.randomUUID(),name:invName,outlet,unit,stock:0,source:'Menu Self Recipe'}; db.inventory.push(stock); } const recipe={id:crypto.randomUUID(),menuItemId:item.id,menuItemName:item.name,outlet,yieldQty:1,yieldUnit:unit,ingredients:[{item:invName,qty:1,unit}],mode:'Self Creatable'}; db.recipes=db.recipes.filter(x=>!(x.menuItemId===item.id&&x.outlet===outlet)); db.recipes.push(recipe); } }
+ if(item.barcode){ db.generatedBarcodes.unshift({id:crypto.randomUUID(),name:item.name,shortCode:item.shortCode||'',barcode:item.barcode,price:item.price,createdAt:new Date().toISOString()}); }
+}
+r.status='Approved'; r.approvedAt=new Date().toISOString(); r.approvedOutlets=outlets; persist(); io.emit('menu:changed',{outlets}); res.json({ok:true,request:r,outlets}); });
+app.post('/api/menu/approval-requests/:id/reject', (req,res) => { const r=db.menuApprovalRequests.find(x=>x.reqId===req.params.id); if(!r) return res.status(404).json({error:'Request not found'}); if(r.status!=='Pending') return res.status(409).json({error:'Request already processed'}); r.status='Rejected'; r.rejectedAt=new Date().toISOString(); r.reason=String(req.body.reason||''); persist(); res.json({ok:true,request:r}); });
+app.get('/api/inventory/stock', (req,res) => { const outlet=String(req.query.outlet||'').trim(); res.json(db.inventory.filter(x=>outlet==='Head Office'||x.outlet===outlet)); });
+app.get('/api/recipes', (req,res) => { const outlet=String(req.query.outlet||'').trim(); res.json(db.recipes.filter(x=>outlet==='Head Office'||x.outlet===outlet)); });
 // ================= TRAINING ACADEMY PART 1: 13 ROLE SOPs =================
 if (!Array.isArray(db.sops)) db.sops = [
   { id: 'sop-1', role: 'Unit Manager', title: 'Daily Outlet Opening & Closing Audit', time: '08:30 AM - 10:30 PM', steps: ['Check kitchen hygiene & chiller temperatures (below 4°C)', 'Verify POS cash float & staff grooming checklist', 'Review daily sales target & KDS speed with Shift Manager'], mcqs: [{ q: 'Chiller ka ideal temperature kya hona chahiye?', opts: ['15°C', '4°C se kam', '25°C', '10°C'], ans: 1 }] },
@@ -301,4 +343,5 @@ app.post('/api/training/submit-test', (req, res) => {
   const entry = { id: crypto.randomUUID(), empId: String(b.empId), name: String(b.name), role: String(b.role), outlet: String(b.outlet || ''), moduleTitle: String(b.moduleTitle || ''), scorePct, stars, promoStatus, submittedAt: new Date().toISOString() };
   db.trainingResults.unshift(entry); persist(); res.status(201).json(entry);
 });
+app.get('*', (_req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 server.listen(PORT, '0.0.0.0', () => console.log('RestaurantPro Server LIVE on port ' + PORT));

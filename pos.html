@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://w3.org%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2731%27 fill=%27%23b91c1c%27/%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2724.5%27 fill=%27%23ffffff%27/%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2718%27 fill=%27%23dc2626%27/%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2711.5%27 fill=%27%231d4ed8%27/%3E%3Cpolygon points=%2732,21.5 34.8,29.2 43,29.2 36.4,34 38.9,41.8 32,37 25.1,41.8 27.6,34 21,29.2 29.2,29.2%27 fill=%27%23ffffff%27/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RestaurantPro | QR Orders Approval</title>
 <script src="/socket.io/socket.io.js"></script>
@@ -46,14 +47,15 @@ s.on('orders:new_qr', () => { beep(); ld(); });
 s.on('orders:changed', ld);
 async function act(id, status){ await fetch('/api/orders/'+id,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})}); ld(); }
 async function ld(){
-  const list = await (await fetch('/api/orders')).json();
+  const outlet = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+  const list = await (await fetch('/api/orders?outlet=' + encodeURIComponent(outlet))).json();
   tb.innerHTML = list.map(o => `<tr>
     <td><strong>${o.orderNo}</strong></td>
     <td><strong>${o.tableName}</strong> (${o.outlet})</td>
     <td>${(o.items||[]).map(i=>`${i.name} × ${i.qty}`).join(', ')}</td>
     <td><strong>₹${Number(o.total).toFixed(2)}</strong></td>
     <td><strong>${o.status}</strong></td>
-    <td>${o.status==='Pending Approval' ? `<button class="btn" onclick="act('${o.id}','Accepted')">✓ Accept &amp; KOT</button> <button class="btn d" onclick="act('${o.id}','Rejected')">✕</button>` : (o.kotNo || o.status)}</td>
+    <td>${o.status==='Pending Approval' ? `<a class="btn" href="/qr-approval.html">Review in QR Approval</a>` : (o.kotNo || o.status)}</td>
   </tr>`).join('') || '<tr><td colspan="6">Abhi koi QR order pending nahi hai.</td></tr>';
 }
 ld();
@@ -75,6 +77,8 @@ ld();
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
+                source: 'POS',
+                id: latest.id || latest.billNo || '',
                 outlet: latest.outlet || localStorage.getItem('rpSelectedOutlet') || 'Main Outlet',
                 table: latest.table || latest.tableNo || 'POS-Counter',
                 orderType: latest.orderType || 'Dine-In',
@@ -109,10 +113,10 @@ ld();
   window._qrCache = {};
   async function pollQr() {
     try {
-      const r = await fetch('/api/orders');
+      const selOut = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
+      const r = await fetch('/api/orders?outlet=' + encodeURIComponent(selOut));
       if (!r.ok) return;
       const all = await r.json();
-      const selOut = localStorage.getItem('rpSelectedOutlet') || '';
       const pend = all.filter(o => (o.source === 'QR' || o.status === 'Pending') && !['Accepted','Completed','Cancelled'].includes(o.status) && (!selOut || selOut === 'Head Office' || o.outlet === selOut));
       if (!pend.length) { bar.style.display = 'none'; return; }
       pend.forEach(o => window._qrCache[o.id] = o);

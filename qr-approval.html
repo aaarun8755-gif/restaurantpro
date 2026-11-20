@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RestaurantPro | QR Phone Orders Approval</title>
 <style>
 *{box-sizing:border-box;font-family:Cambria,Georgia,serif}
@@ -31,7 +33,7 @@ async function loadQrOrders() {
   try {
     const res = await fetch('/api/orders?outlet=' + encodeURIComponent(curOut));
     const list = await res.json();
-    const qrList = list.filter(o => o.source === 'QR');
+    const qrList = list.filter(o => o.source === 'QR' && ['Pending Approval','Accepted','Cancelled'].includes(o.status));
     qrBody.innerHTML = qrList.map(o =>
       '<tr><td><b>' + o.orderNo + '</b></td><td>Table ' + (o.tableName||'-') + '</td><td>' + o.outlet + '</td><td>' + (o.items||[]).map(i=>i.name+' x'+i.qty).join(', ') + '</td><td><b>&#8377;' + Number(o.total||0).toFixed(2) + '</b></td><td><b>' + o.status + '</b></td><td>' +
       (o.status === 'Pending Approval' ? '<button class="btn" onclick="actQr(\''+o.id+'\',\'approve-qr\')">Accept &rarr; KDS &amp; Sale</button> <button class="btn d" onclick="actQr(\''+o.id+'\',\'reject-qr\')">Reject</button>' : 'Synced to KDS &amp; Sale') + '</td></tr>'
@@ -39,7 +41,13 @@ async function loadQrOrders() {
   } catch (e) { qrBody.innerHTML = '<tr><td colspan="7">Connecting to server...</td></tr>'; }
 }
 async function actQr(id, action) {
-  await fetch('/api/orders/' + id + '/' + action, { method: 'POST' });
+  const res = await fetch('/api/orders/' + id + '/' + action, { method: 'POST' });
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok) { alert(data.error || 'Action complete nahi hui.'); return; }
+  if (action === 'approve-qr' && data.order) {
+    const o=data.order, key='rpBills::outlet:'+encodeURIComponent(curOut), bills=(()=>{try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(_){return []}})();
+    if (!bills.some(b=>String(b.billNo||'')===String(o.billNo||''))) { bills.unshift({id:o.billNo,billNo:o.billNo,date:new Date().toISOString(),outlet:o.outlet,orderType:o.type||'Dine In',tableNo:o.tableName,customerName:o.customerName||'QR Guest',customerPhone:o.customerPhone||'',items:o.items||[],subtotal:o.subtotal||0,gst:o.gst||0,total:o.total||0,paymentMethod:o.paymentMode||'Cash',status:'Paid',source:'QR'}); localStorage.setItem(key,JSON.stringify(bills)); }
+  }
   loadQrOrders();
 }
 loadQrOrders(); setInterval(loadQrOrders, 4000);

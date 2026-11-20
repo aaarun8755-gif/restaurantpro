@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns=%27http://w3.org%27 viewBox=%270 0 64 64%27%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2731%27 fill=%27%23b91c1c%27/%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2724.5%27 fill=%27%23ffffff%27/%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2718%27 fill=%27%23dc2626%27/%3E%3Ccircle cx=%2732%27 cy=%2732%27 r=%2711.5%27 fill=%27%231d4ed8%27/%3E%3Cpolygon points=%2732,21.5 34.8,29.2 43,29.2 36.4,34 38.9,41.8 32,37 25.1,41.8 27.6,34 21,29.2 29.2,29.2%27 fill=%27%23ffffff%27/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RestaurantPro | Digital Table Menu</title>
 <style>
@@ -72,7 +73,6 @@ async function loadMenu() {
     const r = await fetch('/api/menu?outlet=' + encodeURIComponent(outletName));
     if (r.ok) menu = await r.json();
   } catch(_) {}
-  if (!menu.length) menu = [{id:'m1',name:'Masala Dosa',category:'South Indian',price:120},{id:'m2',name:'Idli Sambar',category:'South Indian',price:80},{id:'m3',name:'Paneer Butter Masala',category:'North Indian',price:240}];
   renderMenu();
 }
 
@@ -104,7 +104,7 @@ async function placeOrder() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ source: 'QR', tableId, tableName, outlet: outletName, customerName: custName.value.trim(), customerPhone: custPhone.value.trim(), customerNote: custNote.value, paymentMode: payMode.value, items, total: Number(total.toFixed(2)) })
   });
-  if (res.ok) { cart = {}; renderMenu(); alert('? Order Received! Sent to POS Counter for Approval.'); }
+  if (res.ok) { cart = {}; renderMenu(); alert('? Order Received! Your order is pending outlet manager approval.'); }
   else alert('Order failed, please try again.');
 }
 loadMenu();

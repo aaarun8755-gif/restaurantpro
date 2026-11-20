@@ -1,52 +1,20 @@
-<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RestaurantPro | Ask Me Anything AI</title>
-<style>
-*{box-sizing:border-box;font-family:Cambria,Georgia,serif}
-body{margin:0;background:#f4f7f6;color:#1e293b;display:flex;flex-direction:column;height:100vh}
-header{background:#fff;border-bottom:1px solid #dbe5e2;padding:12px 22px;display:flex;justify-content:space-between;align-items:center}
-.chat{flex:1;max-width:960px;width:100%;margin:auto;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
-.msg{max-width:82%;padding:12px 16px;border-radius:14px;font-size:14.5px;line-height:1.5;background:#fff;border:1px solid #dbe5e2}
-.msg.u{background:#0f766e;color:#fff;align-self:flex-end;border:0}
-.bar{background:#fff;border-top:1px solid #dbe5e2;padding:12px 16px;display:flex;gap:8px;justify-content:center}
-input{flex:1;max-width:760px;padding:10px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px}
-button,a.btn{background:#0f766e;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}
-a.btn{background:#fff;color:#0f766e;border:1px solid #dbe5e2}
-</style></head>
-<body>
-<header>
-  <div><strong style="font-size:17px;color:#115e59">RestaurantPro AI Copilot</strong> | <small id="oLbl"></small></div>
-  <a href="/index.html" class="btn">&larr; Dashboard</a>
-</header>
-<div class="chat" id="feed">
-  <div class="msg"><b>Namaste!</b> Main aapke outlet ke live Sales, Stock, PO, Menu aur Tasks se juda hoon. Kuch bhi poochein (jaise: <i>Maida stock</i>, <i>Aaj ki sale</i>, <i>Pending PO</i>).</div>
-</div>
-<div class="bar">
-  <input id="qBox" placeholder="Type your question here..." onkeydown="if(event.key==='Enter')askNow()">
-  <button onclick="askNow()">Ask AI &rarr;</button>
-</div>
-<script>
-const out = localStorage.getItem('rpSelectedOutlet') || 'Main Outlet';
-oLbl.textContent = 'Outlet: ' + out;
-function add(t, cls) { const d = document.createElement('div'); d.className = 'msg ' + (cls||''); d.innerHTML = t; feed.appendChild(d); feed.scrollTop = feed.scrollHeight; }
-function askNow() {
-  const q = qBox.value.trim(); if (!q) return; qBox.value = ''; add(q, 'u');
-  const low = q.toLowerCase();
-  const st = { 'Maida (kg)': 80, 'Khoya (kg)': 45, 'Desi Ghee (kg)': 32, 'Sugar (kg)': 60, 'Paneer (kg)': 25, ...JSON.parse(localStorage.getItem('rpInventoryStock::' + out) || '{}') };
-  const bills = JSON.parse(localStorage.getItem('rpBills') || '[]').filter(b => out === 'Head Office' || !b.outlet || b.outlet === out);
-  const pos = JSON.parse(localStorage.getItem('rpLockedPurchasePOs') || '[]').filter(p => out === 'Head Office' || p.outlet === out);
-  const menu = JSON.parse(localStorage.getItem('rpMasterMenuItems') || '[]');
-
-  if (low.includes('maida') || low.includes('mailda')) { add('<b>Maida Stock (' + out + '):</b> ' + (st['Maida (kg)'] ?? 80) + ' kg Available'); return; }
-  if (low.includes('khoya')) { add('<b>Khoya Stock (' + out + '):</b> ' + (st['Khoya (kg)'] ?? 45) + ' kg Available'); return; }
-  if (low.includes('ghee')) { add('<b>Desi Ghee Stock (' + out + '):</b> ' + (st['Desi Ghee (kg)'] ?? 32) + ' kg Available'); return; }
-  if (low.includes('stock') || low.includes('inventory')) { add('<b>Live Stock (' + out + '):</b><br>' + Object.entries(st).map(([k,v]) => k + ': <b>' + v + '</b>').join('<br>')); return; }
-  if (low.includes('sale') || low.includes('cash') || low.includes('order') || low.includes('bill')) {
-    const tot = bills.reduce((s,x) => s + Number(x.total||0), 0);
-    add('<b>Sales Summary (' + out + '):</b><br>Total Sales: <b>Rs. ' + tot.toFixed(2) + '</b> (' + bills.length + ' Bills)'); return;
-  }
-  if (low.includes('po') || low.includes('purchase')) { add('<b>Purchase Orders (' + out + '):</b> ' + pos.length + ' Audit-Locked POs'); return; }
-  if (low.includes('menu') || low.includes('barcode')) { add('<b>Menu Master:</b> ' + menu.length + ' Approved Items'); return; }
-  add('<b>' + out + ' Live Status:</b><br>Bills: <b>' + bills.length + '</b> | Tracked Stock Items: <b>' + Object.keys(st).length + '</b> | POs: <b>' + pos.length + '</b>');
-}
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>RestaurantPro | Ask Me Anything AI</title><style>*{box-sizing:border-box;font-family:Cambria,Georgia,serif}body{margin:0;background:#f4f7f6;color:#1e293b;display:flex;flex-direction:column;height:100vh}header{background:#fff;border-bottom:1px solid #dbe5e2;padding:12px 22px;display:flex;justify-content:space-between;align-items:center}.chat{flex:1;max-width:960px;width:100%;margin:auto;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}.msg{max-width:86%;padding:12px 16px;border-radius:14px;font-size:14.5px;line-height:1.5;background:#fff;border:1px solid #dbe5e2;white-space:pre-wrap}.msg.u{background:#0f766e;color:#fff;align-self:flex-end;border:0}.bar{background:#fff;border-top:1px solid #dbe5e2;padding:12px 16px;display:flex;gap:8px;justify-content:center}input{flex:1;max-width:760px;padding:10px 14px;border:1px solid #cbd5e1;border-radius:10px;font-size:14px}button,a.btn{background:#0f766e;color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;text-decoration:none;font-size:13px}a.btn{background:#fff;color:#0f766e;border:1px solid #dbe5e2}.hint{color:#64748b;font-size:12px;max-width:960px;margin:0 auto 8px;padding:0 16px}</style></head><body><header><div><strong style="font-size:17px;color:#115e59">RestaurantPro AI Copilot</strong> | <small id="oLbl"></small></div><a href="/index.html" class="btn">← Dashboard</a></header><div class="chat" id="feed"><div class="msg"><b>Namaste!</b> Main is browser mein available outlet data ko search karke jawab dunga. Stock, aaj ki sale, cash/UPI, pending PO, menu approvals aur tasks pooch sakte hain. Jis data ka record nahi milega, main number guess nahi karunga.</div></div><div class="hint">Note: Is module ka data current browser ke saved records par based hai. Server-side outlet authentication abhi alag se configure karna zaroori hai; sirf outlet selector strict security boundary nahi hai.</div><div class="bar"><input id="qBox" placeholder="Jaise: 5 Star Chocolate stock, aaj UPI sale, pending PO..." onkeydown="if(event.key==='Enter')askNow()"><button id="askBtn" onclick="askNow()">Ask AI →</button></div><script>
+const out=localStorage.getItem('rpSelectedOutlet')||'Main Outlet';document.getElementById('oLbl').textContent='Outlet: '+out;
+const read=(k,def=[])=>{try{return JSON.parse(localStorage.getItem(k)||JSON.stringify(def))}catch{return def}};
+function readScoped(key){const suffix='::outlet:'+encodeURIComponent(out);if(out!=='Head Office')return read(key+suffix,read(key,[]));const all=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k===key||k.startsWith(key+'::outlet:')){const v=read(k,[]);if(Array.isArray(v))all.push(...v)}}return all}
+function scoped(key){let a=readScoped(key);if(!Array.isArray(a))return[];return a.filter(x=>out==='Head Office'||!x.outlet||x.outlet===out)}
+function add(t,cls){const d=document.createElement('div');d.className='msg '+(cls||'');d.textContent=t;feed.appendChild(d);feed.scrollTop=feed.scrollHeight}
+const fmt=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+function today(x){const d=new Date(x||0);const n=new Date();return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate()}
+async function answer(q){const low=q.toLowerCase();const inv=readScoped('rpInventory');let inventory=Array.isArray(inv)?inv:Object.entries(inv).map(([name,v])=>({name,stock:typeof v==='object'?v.stock??v.qty:v,unit:typeof v==='object'?v.unit:''}));inventory=inventory.filter(x=>out==='Head Office'||!x.outlet||x.outlet===out);try{const sr=await fetch('/api/inventory/stock?outlet='+encodeURIComponent(out));if(sr.ok){const serverRows=await sr.json();for(const row of serverRows){const ix=inventory.findIndex(x=>String(x.name).toLowerCase()===String(row.name).toLowerCase());if(ix<0)inventory.push(row)}}}catch(_){}
+const bills=scoped('rpBills').filter(b=>today(b.date||b.createdAt));const pos=scoped('rpOutletPOs').filter(p=>!['Received','Completed','Closed','Rejected'].includes(String(p.status||'').toLowerCase()));const reqs=read('rpMenuApprovalQueue',[]).filter(r=>out==='Head Office'||r.reqBy===out||r.requestedBy===out);const tasks=read('rpTasks',read('rpTaskHub',[])).filter(t=>out==='Head Office'||!t.outlet||t.outlet===out);
+const cash=bills.filter(b=>/cash/i.test(b.paymentMethod||b.paymentMode||'')).reduce((s,b)=>s+Number(b.total||0),0),upi=bills.filter(b=>/upi/i.test(b.paymentMethod||b.paymentMode||'')).reduce((s,b)=>s+Number(b.total||0),0),sales=bills.reduce((s,b)=>s+Number(b.total||0),0);
+const named=inventory.filter(x=>low.includes(String(x.name||'').toLowerCase())||String(x.name||'').toLowerCase().split(/\s+/).some(w=>w.length>3&&low.includes(w)));
+if(/\b(stock|inventory|maida|khoya|ghee|paneer|chocolate)\b/.test(low)){if(named.length)return named.map(x=>`${x.name}: ${x.stock??x.qty??'Quantity unavailable'} ${x.unit||''} (Outlet: ${x.outlet||out})`).join('\n');return `Is browser ke ${out} inventory records mein is item ka stock record nahi mila. Main default ya kalpanik stock nahi bataunga.`}
+if(/\b(upi|cash|sale|sales|bikri|revenue|collection)\b/.test(low)){if(/upi/.test(low))return `Aaj ki UPI Sale (${out}): ${fmt(upi)} | Bills: ${bills.filter(b=>/upi/i.test(b.paymentMethod||b.paymentMode||'')).length}`;if(/cash/.test(low))return `Aaj ki Cash Sale (${out}): ${fmt(cash)} | Bills: ${bills.filter(b=>/cash/i.test(b.paymentMethod||b.paymentMode||'')).length}`;return `Aaj ki Sale (${out}): ${fmt(sales)} | Bills: ${bills.length} | Cash: ${fmt(cash)} | UPI: ${fmt(upi)}`}
+if(/\b(po|purchase order|pending purchase)\b/.test(low))return `Pending Purchase Orders (${out}): ${pos.length}\n`+(pos.length?pos.map(p=>`${p.poNo||p.id||'PO'} — ${p.vendor||p.supplier||'Vendor'} — ${p.status||'Pending'} — ${fmt(p.total||p.amount||0)}`).join('\n'):'Koi pending PO record nahi mila.');
+if(/\b(menu|approval|barcode)\b/.test(low)){let live=reqs;try{const r=await fetch('/api/menu/approval-requests?outlet='+encodeURIComponent(out));if(r.ok)live=await r.json()}catch(_){}return `Menu Approval Requests (${out}): ${live.length}\n`+(live.length?live.map(r=>`${r.action||'Request'} — ${r.item?.name||'Item'} — ${r.status||'Pending'}`).join('\n'):'Koi matching menu approval request nahi mili.');}
+if(/\b(task|kaam|pending work)\b/.test(low))return `Tasks (${out}): ${tasks.length}\n`+(tasks.length?tasks.map(t=>`${t.title||t.name||'Task'} — ${t.status||'Open'}`).join('\n'):'Koi task record nahi mila.');
+return `Maine ${out} ke available local records check kiye. Aap item ka exact naam ya query ko thoda specific karein, jaise “Maida stock”, “aaj cash sale”, “pending PO” ya “menu approval”.`}
+async function askNow(){const box=document.getElementById('qBox'),q=box.value.trim();if(!q)return;box.value='';add(q,'u');try{add(await answer(q))}catch(e){add('Data read karte waqt error aaya: '+e.message)}}
 </script></body></html>
